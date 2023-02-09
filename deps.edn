@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
- :deps  {org.clojure/clojure        {:mvn/version "1.10.3"}
-         com.fulcrologic/guardrails {:mvn/version "1.1.5"}
+ :deps  {org.clojure/clojure        {:mvn/version "1.11.1"}
+         com.fulcrologic/guardrails {:mvn/version "1.1.11"}
          net.sekao/odoyle-rules     {:mvn/version "1.0.0"}}
 
  :aliases
