@@ -1,0 +1,31 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure        {:mvn/version "1.10.3"}
+         com.fulcrologic/guardrails {:mvn/version "1.1.5"}
+         net.sekao/odoyle-rules     {:mvn/version "1.0.0"}}
+
+ :aliases
+ {:dev       {:extra-paths ["dev" "resources" "notebooks"]
+              :jvm-opts    ["-Dguardrails.enabled=true"]
+              :extra-deps  {
+                            ; move into separate analysis module
+                            io.github.nextjournal/clerk {:mvn/version "0.12.707"}
+                            ;com.lambdaisland/classpath  {:mvn/version "0.4.44"}
+                            ;aerial.hanami/aerial.hanami {:mvn/version "0.17.0"}
+                            ;com.github.jpmonettas/flow-storm-inst    {:mvn/version "3.0.236"}
+                            ;com.github.jpmonettas/flow-storm-dbg     {:mvn/version "3.0.236"}
+                            djblue/portal               {:mvn/version "0.35.1"}}}
+  :run-m     {:main-opts ["-m" "genek.simulator-couch-paint"]}
+  :run-x     {:ns-default genek.simulator-couch-paint
+              :exec-fn    greet
+              :exec-args  {:name "Clojure"}}
+  :build     {:deps       {io.github.seancorfield/build-clj
+                           {:git/tag "v0.4.0" :git/sha "54e39ae"}}
+              :ns-default build}
+  :test      {:extra-paths ["test"]
+              :extra-deps  {org.clojure/test.check {:mvn/version "1.1.0"}
+                            io.github.cognitect-labs/test-runner
+                            {:git/tag "v0.5.0" :git/sha "48c3c67"}}}
+  :run-tests {:main-opts  ["-m" "kaocha.runner"]
+              :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}}}}
+
+

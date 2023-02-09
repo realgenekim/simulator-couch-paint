@@ -1,0 +1,28 @@
+#kaocha/v1
+        {:plugins [:kaocha.plugin/notifier]
+         :kaocha.watch/hawk-opts {:watcher :polling
+                                  :sensitivity :medium}
+
+         ;; Configuring a command is optional. Since CI does not have desktop
+         ;; notifications we pipe to a file instead.
+         ;:kaocha.plugin.notifier/command
+         ;         "sh -c 'echo \"%{title}\n%{message}\n%{failed?}\n%{count}\n%{urgency}\" > /tmp/kaocha.txt'"
+
+
+         ;; Fallbacks:
+
+         ;; :kaocha.plugin.notifier/command
+         ;; "notify-send -a Kaocha %{title} %{message} -i %{icon} -u %{urgency}"
+
+         ;; :kaocha.plugin.notifier/command
+         ;; "terminal-notifier -message %{message} -title %{title} -appIcon %{icon}"
+
+         :tests [{:id         :unit}]}
+;:ns-patterns [".*"]}]}
+; :test-paths ["test/pubsub"]}
+;{:id         :db
+; :test-paths ["test/db"]}]}
+
+;:test-paths ["test/tweets"]}]}
+;{:id         :features
+; :test-paths ["test/features"]}]}
