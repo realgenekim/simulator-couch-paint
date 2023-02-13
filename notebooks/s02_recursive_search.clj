@@ -20,3 +20,13 @@
 ;; ## Painters
 
 (clerk/table sim/painters)
+
+;; ## State
+
+(clerk/table @sim/*state)
+
+;; increment turn
+
+(sim/next-turn! sim/*state)
+(println sim/next-turn!)
+@sim/*state
