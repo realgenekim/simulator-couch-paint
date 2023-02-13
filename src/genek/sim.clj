@@ -55,7 +55,7 @@
 
 (defn add-movers
   []
-  (let [eavs (for [i (range 10)]
+  (let [eavs (for [i (range 3)]
                [(+ 10 i) {::role :mover
                           ::name (format "mover-%d" i)
                           ::x    100
@@ -73,7 +73,7 @@
 
 (defn add-painters
   []
-  (let [eavs (for [i (range 10)]
+  (let [eavs (for [i (range 3)]
                [(+ 20 i) {::role :painter
                           ::name (format "painter-%d" i)
                           ::x    100
@@ -91,4 +91,9 @@
 
 (add-movers)
 (add-painters)
+
+(defn q
+  []
+  (o/query-all @*session ::actor))
+
 
