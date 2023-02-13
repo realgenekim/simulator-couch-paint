@@ -49,6 +49,11 @@
       (is (= 4
             (count needs-movers)))))
 
+  (testing "available movers"
+    (let [available-movers (sim/available-movers (-> @*state last :movers))]
+      (is (= 1
+            (count available-movers)))))
+
 
   (testing "next-turn-fn!"
     (sim/next-turn-fn! *state sim/increment-state)

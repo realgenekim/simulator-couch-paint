@@ -119,8 +119,14 @@
 (s/def ::s-rooms
   (s/coll-of ::s-room))
 
+(s/def ::s-mover
+  (s/keys :req-un [::id ::role ::at-room]))
+(s/def ::s-movers
+  (s/coll-of ::s-mover))
+
 (>defn rooms-needing-movers
-  " "
+  " input: all rooms
+    output: all rooms that need movers"
   [rooms] [::s-rooms => ::s-rooms]
   (->> rooms
        (filter (fn [r]
@@ -129,6 +135,19 @@
 
 (comment
   (rooms-needing-movers (-> @*state last :rooms))
+  0)
+
+(>defn available-movers
+  " input: all movers
+    output: all movers that are available "
+  [movers] [::s-movers => ::s-movers]
+  (->> movers
+    (filter (fn [m]
+              (nil? (:at-room m))))))
+
+
+(comment
+  (available-movers (-> @*state last :movers))
   0)
 
 
