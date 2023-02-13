@@ -78,11 +78,26 @@
   (atom? nil)
   0)
 
+
+
 (>defn next-turn!
+  " updates state atom "
   [*states] [atom? => sequential?]
   (swap! *states conj
     (let [state (last @*states)]
       (assoc state :turn (inc (:turn state))))))
+
+(>defn increment-state
+  " identity, but just increment turn "
+  [state] [map? => map?]
+  (assoc state :turn (inc (:turn state))))
+
+(>defn next-turn-fn!
+  " updates state atom, using f to update turn "
+  [*states f] [atom? fn? => sequential?]
+  (swap! *states conj
+    (let [state (last @*states)]
+      (f state))))
 
 (comment
   (next-turn! *state)
