@@ -17,18 +17,20 @@
 
 (deftest states
   (def *state (atom [(sim/create-state sim/rooms sim/movers sim/painters)]))
-  (is (= 1 (count @*state)))
+  (testing "next-turn with identity"
+    (is (= 1 (count @*state)))
 
-  (sim/next-turn! *state)
-  (is (= 2 (count @*state)))
+    (sim/next-turn! *state)
+    (is (= 2 (count @*state))))
 
-  (sim/next-turn-fn! *state sim/increment-state)
-  (is (= 3 (count @*state)))
-  (is (= 2 (->> @*state last :turn)))
+  (testing "next-turn-fn!"
+    (sim/next-turn-fn! *state sim/increment-state)
+    (is (= 3 (count @*state)))
+    (is (= 2 (->> @*state last :turn)))
 
-  (sim/next-turn-fn! *state sim/increment-state)
-  (is (= 4 (count @*state)))
-  (is (= 3 (->> @*state last :turn)))
+    (sim/next-turn-fn! *state sim/increment-state)
+    (is (= 4 (count @*state)))
+    (is (= 3 (->> @*state last :turn))))
 
 
   0)
