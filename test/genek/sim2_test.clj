@@ -15,3 +15,13 @@
     (let [newturn (sim/create-state {:turn 1}  [] [] [])]
       (is (= 2 (:turn newturn))))))
 
+(deftest states
+  (def *state (atom [(sim/create-state sim/rooms sim/movers sim/painters)]))
+  (is (= 1 (count @*state)))
+
+  (sim/next-turn! *state)
+  (is (= 2 (count @*state)))
+
+
+  0)
+

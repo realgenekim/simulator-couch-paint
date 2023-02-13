@@ -79,7 +79,7 @@
   0)
 
 (>defn next-turn!
-  [*states] [atom? => map?]
+  [*states] [atom? => sequential?]
   (swap! *states conj
     (let [state (last @*states)]
       (assoc state :turn (inc (:turn state))))))
