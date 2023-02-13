@@ -113,6 +113,9 @@
   (swap! *state next-turn)
   0)
 
+(s/def ::s-state
+  (s/keys :req-un [::turn ::rooms ::movers ::painters]))
+
 (s/def ::s-room
   (s/keys :req-un [::role ::state ::id ::painting-time-remaining
                    ::moving1-time-remaining ::moving2-time-remaining]))
@@ -121,6 +124,7 @@
 
 (s/def ::s-mover
   (s/keys :req-un [::id ::role ::at-room]))
+
 (s/def ::s-movers
   (s/coll-of ::s-mover))
 
@@ -151,9 +155,15 @@
   0)
 
 
-(>defn nt-assign-avail-resources
+(>defn assign-available-movers
   " for every room that needs mover/painter, assign one that is available
   "
-  [state] [map? => map?])
+  [state] [::s-state => ::s-state]
+  (let [needs-movers (rooms-needing-movers (-> state :rooms))
+        movers (available-movers (-> state :movers))]
+    (println :assign-available-movers :needs-movers needs-movers)
+    (println :assign-available-movers :movers movers)
+    {}))
+
 
 

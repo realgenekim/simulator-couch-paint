@@ -49,6 +49,14 @@
       (is (= 4
             (count needs-movers)))))
 
+  (testing "assign movers to rooms"
+    (let [new-state (sim/assign-available-movers (-> @*state last))
+          rooms-still-needs-movers (sim/rooms-needing-movers
+                                     (-> new-state :rooms))]
+      (is (= 3
+            (count rooms-still-needs-movers)))))
+
+
   (testing "available movers"
     (let [available-movers (sim/available-movers (-> @*state last :movers))]
       (is (= 1
