@@ -33,6 +33,20 @@
     (is (= 3 (->> @*state last :turn))))
   0)
 
+(deftest update-records
+  (testing "update-by-id"
+    (let [ms [{:id 1 :val 123}
+              {:id 2 :val 456}]
+          newms (sim/update-by-id ms {:id 1 :val 999})
+          newms2 (sim/update-by-id ms {:id 2 :val 997})
+          newms3 (sim/update-by-id ms {:id 3 :val 997})]
+      (is (= 999
+            (-> newms first :val)))
+      (is (= 997
+            (-> newms2 second :val)))
+      (is (= newms3 newms)))
+    0))
+
 (deftest match-resource
   (def *state (atom [(sim/create-state sim/rooms sim/movers sim/painters)]))
 

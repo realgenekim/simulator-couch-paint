@@ -113,6 +113,7 @@
   (swap! *state next-turn)
   0)
 
+
 (s/def ::s-state
   (s/keys :req-un [::turn ::rooms ::movers ::painters]))
 
@@ -121,6 +122,12 @@
                    ::moving1-time-remaining ::moving2-time-remaining]))
 (s/def ::s-rooms
   (s/coll-of ::s-room))
+
+; mover or painter record
+(s/def ::s-record
+  (s/keys :req-un [::id]))
+(s/def ::s-records
+  (s/coll-of ::s-record))
 
 (s/def ::s-mover
   (s/keys :req-un [::id ::role ::at-room]))
@@ -164,11 +171,22 @@
   (println :assign-room :room room)
   (println :assign-room :mover mover)
   (if (and room mover)
-    (do
+    (let [newroom (assoc room :state :removing-furniture
+                              :moving1-time-remaining (dec (-> room :moving1-time-remaining)))
+          newmover (assoc mover :at-room (-> room :id))]
       (println :assign-room "**** assign!")
-      {:room {}
-       :mover {}})))
+      {:room newroom
+       :mover newmover})))
 
+(>defn update-by-id
+  " input: sequence of maps, and new record with {:id } to replace record
+    output: seq of maps, with replace record "
+  [ms newmap] [::s-records map? => ::s-records]
+  (->> ms
+    (map (fn [m]
+           (if (= (:id m) (:id newmap))
+             newmap
+             m)))))
 
 (>defn assign-available-movers
   " for every room that needs mover/painter, assign one that is available
@@ -184,6 +202,8 @@
                            doall)
         newrooms     {}
         newmovers    {}]
+    (println :assign-available-movers :new-room-movers
+      (with-out-str (clojure.pprint/pprint new-rooms-movers)))
     (assoc state :rooms newrooms
                  :movers newmovers)))
 
