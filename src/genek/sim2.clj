@@ -29,7 +29,8 @@
   [id] [integer? => map?]
   {:id id
    :role :room
-   :state (first room-states)
+   ; start with :waiting-for-movers1
+   :state (second room-states)
    :moving1-time-remaining MOVING1-OP-TURNS
    :painting-time-remaining PAINTING-OP-TURNS
    :moving2-time-remaining MOVING2-OP-TURNS})
@@ -118,13 +119,17 @@
 (s/def ::s-rooms
   (s/coll-of ::s-room))
 
-(>defn room-needs-mover?
+(>defn rooms-needing-movers
   " "
   [rooms] [::s-rooms => ::s-rooms]
   (->> rooms
        (filter (fn [r]
                  (let [state (-> r :state)]
                    (get state-needs-mover? state))))))
+
+(comment
+  (rooms-needing-movers (-> @*state last :rooms))
+  0)
 
 
 (>defn nt-assign-avail-resources

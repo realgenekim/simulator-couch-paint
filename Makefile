@@ -1,2 +1,2 @@
 runtests:
-	bin/kaocha --plugin notifier --watch
+	bin/kaocha -J-Dguardrails.enabled=true  --plugin notifier --watch

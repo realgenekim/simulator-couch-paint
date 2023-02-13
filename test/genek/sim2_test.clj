@@ -44,6 +44,12 @@
     (is (= true
           (get sim/state-needs-mover? :waiting-for-movers2))))
 
+  (testing "room needs movers"
+    (let [needs-movers (sim/rooms-needing-movers (-> @*state last :rooms))]
+      (is (= 4
+            (count needs-movers)))))
+
+
   (testing "next-turn-fn!"
     (sim/next-turn-fn! *state sim/increment-state)
     (is (= 2 (count @*state)))
