@@ -154,16 +154,38 @@
   (available-movers (-> @*state last :movers))
   0)
 
+(>defn assign-room
+  [[room mover]] [vector? => map?]
+  ; case 1: no movers
+  ; case 2: more movers than rooms
+  ; case 3: mover rooms than mover
+  ;
+  ; put them into one vector
+  (println :assign-room :room room)
+  (println :assign-room :mover mover)
+  (if (and room mover)
+    (do
+      (println :assign-room "**** assign!")
+      {:room {}
+       :mover {}})))
+
 
 (>defn assign-available-movers
   " for every room that needs mover/painter, assign one that is available
   "
   [state] [::s-state => ::s-state]
   (let [needs-movers (rooms-needing-movers (-> state :rooms))
-        movers (available-movers (-> state :movers))]
-    (println :assign-available-movers :needs-movers needs-movers)
-    (println :assign-available-movers :movers movers)
-    {}))
+        movers       (available-movers (-> state :movers))
+        _            (println :assign-available-movers :needs-movers needs-movers)
+        _            (println :assign-available-movers :movers movers)
+        room-movers  (map vector needs-movers movers)
+        new-rooms-movers (->> room-movers
+                           (map assign-room)
+                           doall)
+        newrooms     {}
+        newmovers    {}]
+    (assoc state :rooms newrooms
+                 :movers newmovers)))
 
 
 
