@@ -46,72 +46,21 @@
 
 (def painters (for [r (range 1)]
                 (create-painter r)))
-;(defn insert-entity!
-;  [sess a v]
-;  (let [id @*latest-id]
-;    (swap! *latest-id inc)
-;    (println :insert-entity id a v)
-;
-;    (swap! *session
-;      (fn [session]
-;        (-> session
-;          (o/insert id
-;            {::role :supervisor
-;             ::name v
-;             ::x 100
-;             ::y 100})
-;          (o/fire-rules))))))
-;
-;(defn add-supervisors
-;  " add steve and gene"
-;  []
-;  (insert-entity! *session nil "steve")
-;  (insert-entity! *session nil "gene"))
-;
-;(add-supervisors)
-;
-;(defn add-movers
-;  []
-;  (let [eavs (for [i (range 3)]
-;               [(+ 10 i) {::role :mover
-;                          ::name (format "mover-%d" i)
-;                          ::x    100
-;                          ::y    100}])]
-;    (doall
-;      (for [[i eav] eavs]
-;        (do
-;          (println i eav)
-;          (swap! *session
-;            (fn [session]
-;              (-> session
-;                (o/insert i eav)
-;                (o/fire-rules))))))))
-;  0)
-;
-;(defn add-painters
-;  []
-;  (let [eavs (for [i (range 3)]
-;               [(+ 20 i) {::role :painter
-;                          ::name (format "painter-%d" i)
-;                          ::x    100
-;                          ::y    100}])]
-;    (doall
-;      (for [[i eav] eavs]
-;        (do
-;          (println i eav)
-;          (swap! *session
-;            (fn [session]
-;              (-> session
-;                (o/insert i eav)
-;                (o/fire-rules))))))))
-;  0)
-;
-;(add-movers)
-;(add-painters)
-;
-;(defn q
-;  []
-;  (o/query-all @*session ::actor))
-;
-;
-;
+
+(>defn create-state
+  ([rooms movers painters]
+   [vector? vector? vector? => map?]
+   {:turn     0
+    :rooms    rooms
+    :movers   movers
+    :painters painters})
+  ([turn rooms movers painters]
+   [map? vector? vector? vector? => map?]
+   {:turn     (inc (:turn turn))
+    :rooms    rooms
+    :movers   movers
+    :painters painters}))
+
+
+
+(def *state (atom [(create-state rooms movers painters)]))
