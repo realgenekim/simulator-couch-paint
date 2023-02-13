@@ -1,5 +1,6 @@
 (ns genek.sim2
   (:require
+    [clojure.spec.alpha :as s]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]))
 
 (def room-states
@@ -11,6 +12,13 @@
    :waiting-for-movers2
    :restoring-furniture
    :finished])
+
+(def state-needs-mover?
+  {:waiting-for-movers1 true
+   :waiting-for-movers2 true})
+
+(def state-needs-painter?
+  {:waiting-for-painters true})
 
 (def MOVING1-OP-TURNS 10)
 (def PAINTING-OP-TURNS 50)
@@ -103,3 +111,25 @@
   (next-turn! *state)
   (swap! *state next-turn)
   0)
+
+(s/def ::s-room
+  (s/keys :req-un [::role ::state ::id ::painting-time-remaining
+                   ::moving1-time-remaining ::moving2-time-remaining]))
+(s/def ::s-rooms
+  (s/coll-of ::s-room))
+
+(>defn room-needs-mover?
+  " "
+  [rooms] [::s-rooms => ::s-rooms]
+  (->> rooms
+       (filter (fn [r]
+                 (let [state (-> r :state)]
+                   (get state-needs-mover? state))))))
+
+
+(>defn nt-assign-avail-resources
+  " for every room that needs mover/painter, assign one that is available
+  "
+  [state] [map? => map?])
+
+

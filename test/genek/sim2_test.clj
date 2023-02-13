@@ -31,7 +31,22 @@
     (sim/next-turn-fn! *state sim/increment-state)
     (is (= 4 (count @*state)))
     (is (= 3 (->> @*state last :turn))))
-
-
   0)
+
+(deftest match-resource
+  (def *state (atom [(sim/create-state sim/rooms sim/movers sim/painters)]))
+
+  (testing "needs movers/painters"
+    (is (not= true
+          (get sim/state-needs-mover? :initial)))
+    (is (= true
+          (get sim/state-needs-mover? :waiting-for-movers1)))
+    (is (= true
+          (get sim/state-needs-mover? :waiting-for-movers2))))
+
+  (testing "next-turn-fn!"
+    (sim/next-turn-fn! *state sim/increment-state)
+    (is (= 2 (count @*state)))
+
+    0))
 
