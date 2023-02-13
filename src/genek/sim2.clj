@@ -161,8 +161,11 @@
   (available-movers (-> @*state last :movers))
   0)
 
+(s/def ::s-moving-assignment
+  (s/keys :opt-un [::room ::mover]))
+
 (>defn assign-room
-  [[room mover]] [vector? => map?]
+  [[room mover]] [vector? => ::s-moving-assignment]
   ; case 1: no movers
   ; case 2: more movers than rooms
   ; case 3: mover rooms than mover
@@ -173,10 +176,12 @@
   (if (and room mover)
     (let [newroom (assoc room :state :removing-furniture
                               :moving1-time-remaining (dec (-> room :moving1-time-remaining)))
-          newmover (assoc mover :at-room (-> room :id))]
-      (println :assign-room "**** assign!")
-      {:room newroom
-       :mover newmover})))
+          newmover (assoc mover :at-room (-> room :id))
+          retval   {:room newroom
+                    :mover newmover}]
+      (println :assign-room "**** assign! " :retval retval)
+      retval)))
+
 
 (>defn update-by-id
   " input: sequence of maps, and new record with {:id } to replace record
@@ -188,6 +193,34 @@
              newmap
              m)))))
 
+(defn pp-str
+  [x]
+  (with-out-str
+    (clojure.pprint/pprint x)))
+
+(>defn update-rooms-movers
+  " reducing function
+    input: {:old-rooms ... :old-movers ... :new-rms [{:mover .. :room ..} {}]
+    output: same "
+  [{:keys [old-rooms old-movers] :as m} new-rms]
+  [map? (s/nilable sequential?) => map?]
+  ; ending case
+  (println :update-rooms-movers :m (pp-str m)
+    :new-rms (pp-str new-rms))
+  ; empty or nil
+  (if (empty? new-rms)
+    {:old-rooms old-rooms
+     :old-movers old-movers}
+    ; else
+    (let [newrooms (update-by-id old-rooms (:room (first new-rms)))
+          newmovers (update-by-id old-movers (:mover (first new-rms)))]
+      (recur
+        {:old-rooms newrooms
+         :old-movers newmovers}
+        (rest new-rms)))))
+
+
+
 (>defn assign-available-movers
   " for every room that needs mover/painter, assign one that is available
   "
@@ -197,11 +230,19 @@
         _            (println :assign-available-movers :needs-movers needs-movers)
         _            (println :assign-available-movers :movers movers)
         room-movers  (map vector needs-movers movers)
+        ; this creates [{:room newroom :mover newmover}...]
+        _             (println :assign-available-movers :rooms-movers room-movers)
         new-rooms-movers (->> room-movers
                            (map assign-room)
-                           doall)
-        newrooms     {}
-        newmovers    {}]
+                           (remove nil?))
+        _             (println :assign-available-movers :new-rooms-movers new-rooms-movers)
+        newrms        (reduce
+                        update-rooms-movers
+                        {:old-rooms        (-> state :rooms)
+                         :old-movers       (-> state :movers)}
+                        [new-rooms-movers])
+        newrooms     (:old-rooms newrms)
+        newmovers    (:old-movers newrms)]
     (println :assign-available-movers :new-room-movers
       (with-out-str (clojure.pprint/pprint new-rooms-movers)))
     (assoc state :rooms newrooms

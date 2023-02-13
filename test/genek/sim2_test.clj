@@ -44,7 +44,7 @@
             (-> newms first :val)))
       (is (= 997
             (-> newms2 second :val)))
-      (is (= newms3 newms)))
+      (is (= ms newms3)))
     0))
 
 (deftest match-resource
@@ -63,23 +63,33 @@
       (is (= 4
             (count needs-movers)))))
 
-  (testing "assign movers to rooms"
-    (let [new-state (sim/assign-available-movers (-> @*state last))
-          rooms-still-needs-movers (sim/rooms-needing-movers
-                                     (-> new-state :rooms))]
-      (is (= 3
-            (count rooms-still-needs-movers)))))
-
+  (testing "next-turn-fn!"
+    (sim/next-turn-fn! *state sim/increment-state)
+    (is (= 2 (count @*state))))
 
   (testing "available movers"
     (let [available-movers (sim/available-movers (-> @*state last :movers))]
       (is (= 1
             (count available-movers)))))
 
+  ; change state
+  (testing "assign movers to rooms"
+    (let [new-state (sim/assign-available-movers (-> @*state last))
+          rooms-still-needs-movers (sim/rooms-needing-movers
+                                     (-> new-state :rooms))]
+      (def new-state new-state)
+      ; 1 room in work, 3 still needing movers
+      (is (= 3
+            (count rooms-still-needs-movers)))
+      ; mover is at room 0
+      (is (= 0
+            (-> new-state :movers first :at-room)))
+      (is (= 0
+            (count (sim/available-movers (-> new-state :movers))))))
 
-  (testing "next-turn-fn!"
-    (sim/next-turn-fn! *state sim/increment-state)
-    (is (= 2 (count @*state)))
+
+
+
 
     0))
 
