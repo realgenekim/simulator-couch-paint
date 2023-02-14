@@ -1,7 +1,9 @@
 {:paths ["src" "resources"]
  :deps  {org.clojure/clojure        {:mvn/version "1.11.1"}
          com.fulcrologic/guardrails {:mvn/version "1.1.11"}
-         net.sekao/odoyle-rules     {:mvn/version "1.0.0"}}
+         net.sekao/odoyle-rules     {:mvn/version "1.0.0"}
+
+         io.github.humbleui/humbleui {:git/sha "c3eb2ec04fcccb40cc4a3da44ccda0ef3ccacc01"}}
 
  :aliases
  {:dev       {:extra-paths ["dev" "resources" "notebooks"]
