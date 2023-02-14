@@ -15,6 +15,73 @@
     [io.github.humbleui.jwm Window]
     [io.github.humbleui.jwm.skija LayerMetalSkija]))
 
+; https://github.com/HumbleUI/HumbleUI/blob/main/dev/examples/wordle.clj
+
+(defn rooms
+  []
+  (for [r (-> @sim/*state last :rooms)]
+    (ui/row
+      (ui/rect
+        (paint/stroke 0xFFCCCCCC 4)
+        (ui/width 500
+          (ui/height 100
+            (ui/valign 0.5
+              (ui/column
+                (ui/row
+                  (ui/label
+                    (format "Room %d: %s"
+                      (-> r :id)
+                      (-> r :state))))
+                (ui/gap 0 10)
+                (ui/row
+                  (ui/label
+                    (format "    :moving1-time-remaining: %d"
+                      (-> r :moving1-time-remaining))))
+                (ui/gap 0 10)
+                (ui/row
+                  (ui/label
+                    (format "    :painting-time-remaining: %d"
+                      (-> r :painting-time-remaining))))
+                (ui/gap 0 10)
+                (ui/row
+                  (ui/label
+                    (format "    :moving2-time-remaining: %d"
+                      (-> r :moving2-time-remaining))))))
+            #_(ui/label
+                (format "    x"))))))))
+
+(defn movers
+  []
+  (for [r (-> @sim/*state last :movers)]
+    (ui/row
+      (ui/rect
+        (paint/stroke 0xFFCCCCCC 4)
+        (ui/width 500
+          (ui/height 40
+            (ui/valign 0.5
+              (ui/column
+                (ui/row
+                  (ui/label
+                    (format "Mover %d -- In Room: %s"
+                      (-> r :id)
+                      (str (-> r :at-room)))))))))))))
+
+(defn painters
+  []
+  (for [r (-> @sim/*state last :painters)]
+    (ui/row
+      (ui/rect
+        (paint/stroke 0xFFCCCCCC 4)
+        (ui/width 500
+          (ui/height 40
+            (ui/valign 0.5
+              (ui/column
+                (ui/row
+                  (ui/label
+                    (format "Painter %d -- In Room: %s"
+                      (-> r :id)
+                      (str (-> r :at-room)))))))))))))
+
 (def app
   "Main app definition."
   (ui/default-theme ; we must wrap our app in a theme
@@ -25,18 +92,10 @@
         (ui/label "hi"))
       ;(ui/row
       ;  (ui/label (str (-> @sim/*state last :rooms vec))))
-      (for [r (-> @sim/*state last :rooms)]
-        (ui/row
-          (ui/rect
-            (paint/stroke 0xFFCCCCCC 2)
-            (ui/width 500
-              (ui/height 100
-                (ui/valign 0.5
-                  (ui/label
-                      (format "Room %d: %s"
-                        (-> r :id)
-                        (-> r :state))))))))))))
-              ;(utils/pp-str (-> r)))))))))
+      (rooms)
+      (movers)
+      (painters))))
+;(utils/pp-str (-> r)))))))))
 
 ;; reset current app state on eval of this ns
 (reset! state/*app app)
