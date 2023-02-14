@@ -4,10 +4,12 @@
   Responsible for initializing the window and app state when the app starts."
   (:require
     [io.github.humbleui.ui :as ui]
+    [io.github.humbleui.paint :as paint]
     ;; [io.github.humbleui.window :as window]
     ;[town.lilac.humble.app.state :as state]
     [ui.state :as state]
-    [genek.sim2 :as sim])
+    [genek.sim2 :as sim]
+    [genek.utils :as utils])
   (:import
     [io.github.humbleui.skija Color ColorSpace]
     [io.github.humbleui.jwm Window]
@@ -18,12 +20,23 @@
   (ui/default-theme ; we must wrap our app in a theme
     {}
     ;; just some random stuff
-    (ui/center
-      (ui/column
+    (ui/column
+      (ui/row
+        (ui/label "hi"))
+      ;(ui/row
+      ;  (ui/label (str (-> @sim/*state last :rooms vec))))
+      (for [r (-> @sim/*state last :rooms)]
         (ui/row
-          (ui/label "hi"))
-        (ui/row
-          (ui/label (str (-> @sim/*state last :rooms))))))))
+          (ui/rect
+            (paint/stroke 0xFFCCCCCC 2)
+            (ui/width 500
+              (ui/height 100
+                (ui/valign 0.5
+                  (ui/label
+                      (format "Room %d: %s"
+                        (-> r :id)
+                        (-> r :state))))))))))))
+              ;(utils/pp-str (-> r)))))))))
 
 ;; reset current app state on eval of this ns
 (reset! state/*app app)
@@ -39,6 +52,7 @@
         state/*app)))
   (state/redraw!))
 
+(state/redraw!)
 
 (comment
   (-main)
