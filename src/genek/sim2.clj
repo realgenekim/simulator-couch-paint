@@ -174,8 +174,8 @@
   (println :assign-room :room room)
   (println :assign-room :mover mover)
   (if (and room mover)
-    (let [newroom (assoc room :state :removing-furniture
-                              :moving1-time-remaining (dec (-> room :moving1-time-remaining)))
+    (let [newroom (assoc room :state :removing-furniture)
+                              ;:moving1-time-remaining (dec (-> room :moving1-time-remaining)))
           newmover (assoc mover :at-room (-> room :id))
           retval   {:room newroom
                     :mover newmover}]
