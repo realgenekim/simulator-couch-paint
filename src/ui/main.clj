@@ -98,21 +98,29 @@
                       (-> s :turn))))))))))))
 
 
-(def app
-  "Main app definition."
-  (ui/default-theme ; we must wrap our app in a theme
-    {}
-    ;; just some random stuff
-    (ui/column
-      ;(ui/row
-      ;  (ui/label "hi")
-      ;(ui/row
-      ;  (ui/label (str (-> @sim/*state last :rooms vec))))
-      (turn)
-      (rooms)
-      (movers)
-      (painters))))
+;"Main app definition."
+(defn reload!
+  []
+  (def app
+    (ui/default-theme ; we must wrap our app in a theme
+      {}
+      ;; just some random stuff
+      (ui/column
+        ;(ui/row
+        ;  (ui/label "hi")
+        ;(ui/row
+        ;  (ui/label (str (-> @sim/*state last :rooms vec))))
+        (turn)
+        (rooms)
+        (movers)
+        (painters))))
+  (reset! state/*app app)
+  (state/redraw!)
+
+  nil)
 ;(utils/pp-str (-> r)))))))))
+
+(reload!)
 
 ;; reset current app state on eval of this ns
 (reset! state/*app app)
@@ -126,15 +134,23 @@
         {:title    "Editor"
          :bg-color 0xFFFFFFFF}
         state/*app)))
-  (state/redraw!))
+  (state/redraw!)
+
+  (add-watch sim/*state :ui-watcher
+    (fn [key atom old-state new-state]
+      (println :add-watch "*** firing! turn: "
+        (-> new-state last :turn))
+      ;(println new-state)
+      ;(reset! state/*app app)
+      (reload!))))
+      ;(state/redraw!))))
 
 (state/redraw!)
 
-(add-watch sim/*state :ui-watcher
-  (fn [key atom old-state new-state]
-    (state/redraw!)))
+
 
 (comment
   (-main)
   (state/redraw!)
+  (count @sim/*state)
   0)
