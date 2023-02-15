@@ -1,7 +1,8 @@
 (ns genek.sim2-test
   (:require
     [clojure.test :refer :all]
-    [genek.sim2 :as sim]))
+    [genek.sim2 :as sim]
+    [genek.utils :as utils]))
 
 (deftest a-test
   (testing "FIXME, I fail."
@@ -37,9 +38,9 @@
   (testing "update-by-id"
     (let [ms [{:id 1 :val 123}
               {:id 2 :val 456}]
-          newms (sim/update-by-id ms {:id 1 :val 999})
-          newms2 (sim/update-by-id ms {:id 2 :val 997})
-          newms3 (sim/update-by-id ms {:id 3 :val 997})]
+          newms (utils/update-by-id ms {:id 1 :val 999})
+          newms2 (utils/update-by-id ms {:id 2 :val 997})
+          newms3 (utils/update-by-id ms {:id 3 :val 997})]
       (is (= 999
             (-> newms first :val)))
       (is (= 997
@@ -91,7 +92,14 @@
 
       (testing "rooms being moved"
         (is (= [0]
-              (sim/rooms-being-moved (-> new-state))))))
+              (sim/rooms-being-moved (-> new-state)))))
+
+      (testing "update rooms being moved"
+        (is (= 9
+              (-> (sim/advance-state (-> new-state))
+                 :rooms
+                first
+                :moving1-time-remaining)))))
     0
 
 
@@ -100,3 +108,11 @@
 
     0))
 
+
+(deftest anonymous-fns
+  (testing "anon fn"
+    (is (= [{:id 1, :n 2} {:id 2, :n 3}]
+          (utils/update-by-id-apply-fn
+            [{:id 1 :n 1} {:id 2 :n 3}]
+            1
+            #(update-in % [:n] inc))))))

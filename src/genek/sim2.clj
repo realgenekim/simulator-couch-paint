@@ -1,7 +1,9 @@
 (ns genek.sim2
   (:require
     [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]))
+    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
+    [genek.entities :as e]
+    [genek.utils :as utils]))
 
 (def room-states
   [:initial
@@ -95,21 +97,41 @@
     ((fn [movers]
        (map :at-room movers)))))
 
-(comment
-  (rooms-being-moved (-> @*state last))
-  0)
-
 
 (>defn advance-state
   " IMPORTANT: take care of things like
     - decrementing working counters (e.g., :moving1-time-remaining)
     - unassigning movers and painters "
   [state] [map? => map?]
-  (let [movers (-> state :movers)]
-    (update-in [:moving1-time-remaining] dec)))
+  (let [rooms-moving (rooms-being-moved state)]
+    (println :advance-state/entering :rooms-moving rooms-moving)
+    (println :advance-state/entering :state state)
+    (reduce (fn [s rs]
+              (println :advance-state :reduce/entering :state :s s)
+              (println :advance-state :reduce/entering :rs rs)
+              (if-not (empty? rs)
+                (let [room      (first rs)
+                      new-state (-> s
+                                  (assoc :rooms (utils/update-by-id-apply-fn (-> s :rooms)
+                                                  room
+                                                  #(update-in % [:moving1-time-remaining] dec))))]
+                  (recur new-state (rest rs)))
+                ; termination case
+                s))
+      state
+      [rooms-moving])))
+
 
 (comment
-  (let [rooms])
+  (rooms-being-moved (-> @*state last))
+  (advance-state (-> @*state last))
+  (-> @*state last)
+  (-> @*state last
+    ((fn [s]
+       (println s)
+       (println (-> s :rooms))
+       (utils/update-by-id-apply-fn (-> s :rooms) 0 #(update-in % [:moving1-time-remaining] dec)))))
+
   0)
 
 
@@ -151,11 +173,6 @@
 (s/def ::s-rooms
   (s/coll-of ::s-room))
 
-; mover or painter record
-(s/def ::s-record
-  (s/keys :req-un [::id]))
-(s/def ::s-records
-  (s/coll-of ::s-record))
 
 (s/def ::s-mover
   (s/keys :req-un [::id ::role ::at-room]))
@@ -211,20 +228,7 @@
       retval)))
 
 
-(>defn update-by-id
-  " input: sequence of maps, and new record with {:id } to replace record
-    output: seq of maps, with replace record "
-  [ms newmap] [::s-records map? => ::s-records]
-  (->> ms
-    (map (fn [m]
-           (if (= (:id m) (:id newmap))
-             newmap
-             m)))))
 
-(defn pp-str
-  [x]
-  (with-out-str
-    (clojure.pprint/pprint x)))
 
 (>defn update-rooms-movers
   " reducing function
@@ -233,15 +237,15 @@
   [{:keys [old-rooms old-movers] :as m} new-rms]
   [map? (s/nilable sequential?) => map?]
   ; ending case
-  (println :update-rooms-movers :m (pp-str m)
-    :new-rms (pp-str new-rms))
+  (println :update-rooms-movers :m (utils/pp-str m)
+    :new-rms (utils/pp-str new-rms))
   ; empty or nil
   (if (empty? new-rms)
     {:old-rooms old-rooms
      :old-movers old-movers}
     ; else
-    (let [newrooms (update-by-id old-rooms (:room (first new-rms)))
-          newmovers (update-by-id old-movers (:mover (first new-rms)))]
+    (let [newrooms (utils/update-by-id old-rooms (:room (first new-rms)))
+          newmovers (utils/update-by-id old-movers (:mover (first new-rms)))]
       (recur
         {:old-rooms newrooms
          :old-movers newmovers}
