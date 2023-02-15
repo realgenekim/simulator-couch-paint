@@ -125,6 +125,21 @@
 ;; reset current app state on eval of this ns
 (reset! state/*app app)
 
+(defn set-watcher!
+  []
+  (add-watch sim/*state :ui-watcher
+    (fn [key atom old-state new-state]
+      (println :add-watch "*** firing! turn: "
+        (-> new-state last :turn))
+      ;(println new-state)
+      ;(reset! state/*app app)
+      (Thread/sleep 250)
+      (reload!))))
+
+(comment
+  (set-watcher!)
+  0)
+
 (defn -main
   "Run once on app start, starting the humble app."
   [& args]
@@ -135,15 +150,7 @@
          :bg-color 0xFFFFFFFF}
         state/*app)))
   (state/redraw!)
-
-  (add-watch sim/*state :ui-watcher
-    (fn [key atom old-state new-state]
-      (println :add-watch "*** firing! turn: "
-        (-> new-state last :turn))
-      ;(println new-state)
-      ;(reset! state/*app app)
-      (reload!))))
-      ;(state/redraw!))))
+  (set-watcher!))
 
 (state/redraw!)
 
@@ -152,5 +159,6 @@
 (comment
   (-main)
   (state/redraw!)
+  (set-watcher!)
   (count @sim/*state)
   0)
