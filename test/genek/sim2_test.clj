@@ -72,6 +72,8 @@
       (is (= 1
             (count available-movers)))))
 
+
+
   ; change state
   (testing "assign movers to rooms"
     (let [new-state (sim/assign-available-movers (-> @*state last))
@@ -85,7 +87,12 @@
       (is (= 0
             (-> new-state :movers first :at-room)))
       (is (= 0
-            (count (sim/available-movers (-> new-state :movers))))))
+            (count (sim/available-movers (-> new-state :movers)))))
+
+      (testing "rooms being moved"
+        (is (= [0]
+              (sim/rooms-being-moved (-> new-state))))))
+    0
 
 
 

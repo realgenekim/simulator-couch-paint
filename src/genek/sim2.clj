@@ -87,6 +87,30 @@
   (atom? nil)
   0)
 
+(>defn rooms-being-moved
+  " given state, return vector of all rooms being moved "
+  [state] [map? => sequential?]
+  (-> state
+    :movers
+    ((fn [movers]
+       (map :at-room movers)))))
+
+(comment
+  (rooms-being-moved (-> @*state last))
+  0)
+
+
+(>defn advance-state
+  " IMPORTANT: take care of things like
+    - decrementing working counters (e.g., :moving1-time-remaining)
+    - unassigning movers and painters "
+  [state] [map? => map?]
+  (let [movers (-> state :movers)]
+    (update-in [:moving1-time-remaining] dec)))
+
+(comment
+  (let [rooms])
+  0)
 
 
 (>defn next-turn!
