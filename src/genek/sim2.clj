@@ -90,11 +90,15 @@
 
 
 (>defn next-turn!
-  " updates state atom "
-  [*states] [atom? => sequential?]
-  (swap! *states conj
-    (let [state (last @*states)]
-      (assoc state :turn (inc (:turn state))))))
+  " updates state atom: append the new state to end of *states vector
+    if no args, copy state and increment turn"
+  ([*states] [atom? => sequential?]
+   (swap! *states conj
+     (let [state (last @*states)]
+       (assoc state :turn (inc (:turn state))))))
+  ([*states newstate] [atom? map? => sequential?]
+   (swap! *states conj
+     (assoc newstate :turn (inc (:turn newstate))))))
 
 (>defn increment-state
   " identity, but just increment turn "

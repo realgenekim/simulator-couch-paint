@@ -25,8 +25,10 @@
 
 (clerk/table @sim/*state)
 
+;; assign mover to room
+(def newstate (sim/assign-available-movers (-> @sim/*state last)))
+
 ;; increment turn
 
-(sim/next-turn! sim/*state)
-(println sim/next-turn!)
+(sim/next-turn! sim/*state newstate)
 @sim/*state

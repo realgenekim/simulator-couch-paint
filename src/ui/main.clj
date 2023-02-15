@@ -82,16 +82,33 @@
                       (-> r :id)
                       (str (-> r :at-room)))))))))))))
 
+(defn turn
+  []
+  (let [s (-> @sim/*state last)]
+    (ui/row
+      (ui/rect
+        (paint/stroke 0xFFCCCCCC 4)
+        (ui/width 500
+          (ui/height 40
+            (ui/valign 0.5
+              (ui/column
+                (ui/row
+                  (ui/label
+                    (format "Turn %d"
+                      (-> s :turn))))))))))))
+
+
 (def app
   "Main app definition."
   (ui/default-theme ; we must wrap our app in a theme
     {}
     ;; just some random stuff
     (ui/column
-      (ui/row
-        (ui/label "hi"))
+      ;(ui/row
+      ;  (ui/label "hi")
       ;(ui/row
       ;  (ui/label (str (-> @sim/*state last :rooms vec))))
+      (turn)
       (rooms)
       (movers)
       (painters))))
@@ -112,6 +129,10 @@
   (state/redraw!))
 
 (state/redraw!)
+
+(add-watch sim/*state :ui-watcher
+  (fn [key atom old-state new-state]
+    (state/redraw!)))
 
 (comment
   (-main)
