@@ -6,21 +6,6 @@
 
 ;(remove-ns 's02-recursive-search)
 
-;; ## Rooms
-
-(sim/create-room 1)
-
-(clerk/table
-  sim/rooms)
-
-;; ## Movers
-
-(clerk/table sim/movers)
-
-;; ## Painters
-
-(clerk/table sim/painters)
-
 ;; ## State
 
 (clerk/table @sim/*state)
@@ -31,7 +16,6 @@
 ;; increment turn
 
 (sim/next-turn! sim/*state newstate)
-@sim/*state
 
 (doseq [i (range 5)]
   (let [newstate (-> (-> @sim/*state last)
@@ -42,3 +26,4 @@
   ;(let [newstate (sim/assign-available-movers (-> @sim/*state last))]
   ;  (sim/next-turn! sim/*state newstate)))
 
+(-> @sim/*state last)

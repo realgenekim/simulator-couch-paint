@@ -1,7 +1,8 @@
 {:paths ["src" "resources"]
- :deps  {org.clojure/clojure        {:mvn/version "1.11.1"}
-         com.fulcrologic/guardrails {:mvn/version "1.1.11"}
-         net.sekao/odoyle-rules     {:mvn/version "1.0.0"}
+ :deps  {org.clojure/clojure         {:mvn/version "1.11.1"}
+         com.fulcrologic/guardrails  {:mvn/version "1.1.11"}
+         net.sekao/odoyle-rules      {:mvn/version "1.0.0"}
+         com.rpl/specter             {:mvn/version "1.1.4"}
 
          io.github.humbleui/humbleui {:git/sha "c3eb2ec04fcccb40cc4a3da44ccda0ef3ccacc01"}}
 
@@ -13,7 +14,7 @@
                             io.github.nextjournal/clerk {
                                                          :git/url "https://github.com/nextjournal/clerk/"
                                                          :git/sha "d978d0ca6cb7b10cf1a0c0f370cdba6e096551e3"}
-                                                         ;:mvn/version "0.12.707"}
+                            ;:mvn/version "0.12.707"}
                             ;com.lambdaisland/classpath  {:mvn/version "0.4.44"}
                             ;aerial.hanami/aerial.hanami {:mvn/version "0.17.0"}
                             ;com.github.jpmonettas/flow-storm-inst    {:mvn/version "3.0.236"}

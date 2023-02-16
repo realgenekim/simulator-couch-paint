@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
+    [com.rpl.specter :as sp]
     [genek.entities :as e]
     [genek.utils :as utils]))
 
@@ -75,11 +76,61 @@
   (rooms-being-moved (-> @*state last))
   (advance-state (-> @*state last))
   (-> @*state last)
+
+  ; clunky
   (-> @*state last
     ((fn [s]
        (println s)
        (println (-> s :rooms))
        (utils/update-by-id-apply-fn (-> s :rooms) 0 #(update-in % [:moving1-time-remaining] dec)))))
+
+  ; try with specter
+  (-> @*state last
+    ((fn [s]
+       (println s)
+       (println (-> s :rooms))
+       (utils/update-by-id-apply-fn (-> s :rooms) 0 #(update-in % [:moving1-time-remaining] dec)))))
+
+  (def st {:turn 0,
+           :rooms [{:id 0,
+                    :role :room,
+                    :state :waiting-for-movers1,
+                    :moving1-time-remaining 10,
+                    :painting-time-remaining 50,
+                    :moving2-time-remaining 10}
+                   {:id 1,
+                    :role :room,
+                    :state :waiting-for-movers1,
+                    :moving1-time-remaining 10,
+                    :painting-time-remaining 50,
+                    :moving2-time-remaining 10}
+                   {:id 2,
+                    :role :room,
+                    :state :waiting-for-movers1,
+                    :moving1-time-remaining 10,
+                    :painting-time-remaining 50,
+                    :moving2-time-remaining 10}
+                   {:id 3,
+                    :role :room,
+                    :state :waiting-for-movers1,
+                    :moving1-time-remaining 10,
+                    :painting-time-remaining 50,
+                    :moving2-time-remaining 10}],
+           :movers ({:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}),
+           :painters [{:id 0, :role :painter, :at-room nil}
+                      {:id 1, :role :painter, :at-room nil}
+                      {:id 2, :role :painter, :at-room nil}
+                      {:id 3, :role :painter, :at-room nil}]})
+
+
+  (->> st
+    (sp/transform [:turn] inc))
+  (sp/transform [:turn] inc st)
+  (->> st
+    (sp/transform [:rooms 0 :moving1-time-remaining] dec))
+
+  (->> @*state last
+    (sp/setval [sp/ALL :rooms 1 :moving1-time-remaining]  inc))
 
   0)
 
