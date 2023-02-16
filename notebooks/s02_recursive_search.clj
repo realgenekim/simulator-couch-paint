@@ -32,3 +32,13 @@
 
 (sim/next-turn! sim/*state newstate)
 @sim/*state
+
+(doseq [i (range 5)]
+  (let [newstate (-> (-> @sim/*state last)
+                   sim/assign-available-movers
+                   sim/free-completed-movers
+                   sim/advance-state)]
+    (sim/next-turn! sim/*state newstate)))
+  ;(let [newstate (sim/assign-available-movers (-> @sim/*state last))]
+  ;  (sim/next-turn! sim/*state newstate)))
+

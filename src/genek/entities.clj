@@ -10,6 +10,8 @@
 (s/def ::s-records
   (s/coll-of ::s-record))
 
+(s/def ::s-state
+  (s/keys :req-un [::turn ::rooms ::movers ::painters]))
 
 (def room-states
   [:initial
@@ -73,3 +75,53 @@
   [n] [integer? => sequential?]
   (for [r (range n)]
     (create-painter r)))
+
+;
+;
+
+(s/def ::s-room
+  (s/keys :req-un [::role ::state ::id ::painting-time-remaining
+                   ::moving1-time-remaining ::moving2-time-remaining]))
+(s/def ::s-rooms
+  (s/coll-of ::s-room))
+
+(s/def ::s-mover
+  (s/keys :req-un [::id ::role ::at-room]))
+
+(s/def ::s-movers
+  (s/coll-of ::s-mover))
+
+(>defn rooms-needing-movers
+  " input: all rooms
+    output: all rooms that need movers"
+  [rooms] [::s-rooms => ::s-rooms]
+  (->> rooms
+    (filter (fn [r]
+              (let [state (-> r :state)]
+                (get state-needs-mover? state))))))
+
+(>defn rooms-done-with-movers
+  " input: all rooms
+    output: all rooms that need movers"
+  [rooms] [::s-rooms => ::s-rooms]
+  (->> rooms
+    (filter (fn [r]
+              (zero? (-> r :moving1-time-remaining))))))
+
+;
+; movers
+;
+
+(>defn available-movers
+  " input: state
+    output: all movers that are available "
+  [state] [::s-state => ::s-state]
+  (let [movers (-> state :movers)]
+    (->> movers
+      (filter (fn [m]
+                (nil? (:at-room m)))))))
+
+
+(comment
+  (available-movers (-> @genek.simw/*state last :movers))
+  0)

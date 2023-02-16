@@ -101,6 +101,7 @@
                  :rooms
                 first
                 :moving1-time-remaining)))))
+
     0
 
 
@@ -124,6 +125,26 @@
     (def *state (atom [(sim/create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 2))]))
     (is (= 2
           (-> @*state last :movers count))))
+
+  (testing "(e/rooms-done-with-movers)"
+    (let [rooms [{:id                      0,
+                  :role                    :room,
+                  :state                   :removing-furniture,
+                  :moving1-time-remaining  10,
+                  :painting-time-remaining 50,
+                  :moving2-time-remaining  10}
+                 {:id                      1,
+                  :role                    :room,
+                  :state                   :removing-furniture,
+                  :moving1-time-remaining  0,
+                  :painting-time-remaining 50,
+                  :moving2-time-remaining  10}]
+          retval (e/rooms-done-with-movers rooms)]
+      (is (= 1
+            (count retval)))
+      (is (= [1]
+            (->> retval
+              (map :id))))))
 
 
   0)
