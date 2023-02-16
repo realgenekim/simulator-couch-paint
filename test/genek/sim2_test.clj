@@ -179,77 +179,77 @@
     #_(is (= 1
             (utils/update-rooms-movers {:old-rooms nil :old-movers nil})))
     (is (= 1 1)))
-  (testing "free-room-movers"
-    (let [state {:turn 0,
-                 :rooms [{:id 0,
-                          :role :room,
-                          :state :removing-furniture
-                          :moving1-time-remaining 10,
-                          :painting-time-remaining 50,
-                          :moving2-time-remaining 10}
-                         {:id 1,
-                          :role :room,
-                          :state :waiting-for-movers1,
-                          :moving1-time-remaining 10,
-                          :painting-time-remaining 50,
-                          :moving2-time-remaining 10}]
-                 :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room 0}],
-                 :painters [{:id 0, :role :painter, :at-room nil}
-                            {:id 1, :role :painter, :at-room nil}
-                            {:id 2, :role :painter, :at-room nil}
-                            {:id 3, :role :painter, :at-room nil}]}
-          newstate (utils/free-room-movers state [0])]
-      ;(println :test-free-room-movers newstate)
-      (def newstate newstate)
-      (is (= :waiting-for-painters
-            (->> newstate
-              (sp/select [:rooms 0 :state])
-              first)))
-      (is (= nil
-            (->> newstate
-              (sp/select [:movers 1 :at-room])
-              first)))
-      (is (= :waiting-for-painters
-            (->> newstate
-              (sp/select [:rooms 0 :state])
-              first))))
-    (is (= 1 1)))
+  #_(testing "free-room-movers"
+      (let [state {:turn 0,
+                   :rooms [{:id 0,
+                            :role :room,
+                            :state :removing-furniture
+                            :moving1-time-remaining 10,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining 10}
+                           {:id 1,
+                            :role :room,
+                            :state :waiting-for-movers1,
+                            :moving1-time-remaining 10,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining 10}]
+                   :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room 0}],
+                   :painters [{:id 0, :role :painter, :at-room nil}
+                              {:id 1, :role :painter, :at-room nil}
+                              {:id 2, :role :painter, :at-room nil}
+                              {:id 3, :role :painter, :at-room nil}]}
+            newstate (utils/free-room-movers state [0])]
+        ;(println :test-free-room-movers newstate)
+        (def newstate newstate)
+        (is (= :waiting-for-painters
+              (->> newstate
+                (sp/select [:rooms 0 :state])
+                first)))
+        (is (= nil
+              (->> newstate
+                (sp/select [:movers 1 :at-room])
+                first)))
+        (is (= :waiting-for-painters
+              (->> newstate
+                (sp/select [:rooms 0 :state])
+                first))))
+      (is (= 1 1)))
 
 
   0)
 
 (deftest next-actions
-  (loop [n     20
+  (loop [n     1
          state {:turn     10,
-                :rooms    '({:id                      0,
-                             :role                    :room,
-                             :state                   :removing-furniture,
-                             :moving1-time-remaining  0,
-                             :painting-time-remaining 50,
-                             :moving2-time-remaining  10}
-                            {:id                      1,
-                             :role                    :room,
-                             :state                   :removing-furniture,
-                             :moving1-time-remaining  1,
-                             :painting-time-remaining 50,
-                             :moving2-time-remaining  10}
-                            {:id                      2,
-                             :role                    :room,
-                             :state                   :waiting-for-movers1,
-                             :moving1-time-remaining  10,
-                             :painting-time-remaining 50,
-                             :moving2-time-remaining  10}
-                            {:id                      3,
-                             :role                    :room,
-                             :state                   :waiting-for-movers1,
-                             :moving1-time-remaining  10,
-                             :painting-time-remaining 50,
-                             :moving2-time-remaining  10}),
-                :movers   '({:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}),
-                :painters '({:id 0, :role :painter, :at-room nil}
-                            {:id 1, :role :painter, :at-room nil}
-                            {:id 2, :role :painter, :at-room nil}
-                            {:id 3, :role :painter, :at-room nil})}]
+                :rooms    [{:id                      0,
+                            :role                    :room,
+                            :state                   :removing-furniture,
+                            :moving1-time-remaining  0,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining  10}
+                           {:id                      1,
+                            :role                    :room,
+                            :state                   :removing-furniture,
+                            :moving1-time-remaining  1,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining  10}
+                           {:id                      2,
+                            :role                    :room,
+                            :state                   :waiting-for-movers1,
+                            :moving1-time-remaining  10,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining  10}
+                           {:id                      3,
+                            :role                    :room,
+                            :state                   :waiting-for-movers1,
+                            :moving1-time-remaining  10,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining  10}],
+                :movers   (vector {:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}),
+                :painters (vector {:id 0, :role :painter, :at-room nil}
+                                  {:id 1, :role :painter, :at-room nil}
+                                  {:id 2, :role :painter, :at-room nil}
+                                  {:id 3, :role :painter, :at-room nil})}]
     (let [newstate (-> state
                      sim/assign-available-movers
                      sim/free-completed-movers

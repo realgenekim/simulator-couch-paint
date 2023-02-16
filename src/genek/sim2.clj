@@ -228,7 +228,6 @@
     newstate))
 
 
-#trace
 (>defn free-completed-movers
   " for every room that has done mover/painter:
       advance room state
@@ -239,13 +238,14 @@
                          (map :id))
         ; ^^ list of rooms that are done (0 1 2)
         ; now we need to
+        _           (println :free-completed-movers :done-rooms done-rooms)
         newstate    (utils/free-room-movers state done-rooms)]
-    (println :free-completed-movers :done-rooms done-rooms)
     (def ns2 newstate)
     newstate))
 
 (comment
   (e/rooms-done-with-movers (-> @*state last :rooms))
+  (free-completed-movers (-> @*state last :rooms))
   0)
 
 

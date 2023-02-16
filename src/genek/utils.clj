@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.rpl.specter :as sp]
+    [flow-storm.api]
     [genek.entities :as e]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]))
 
@@ -27,7 +28,8 @@
     (map (fn [m]
            (if (= (:id m) (:id newmap))
              newmap
-             m)))))
+             m)))
+    vec))
 
 (>defn update-by-id-apply-fn
   " input: sequence of maps (rooms, movers, painters), and new record with {:id } to apply f
@@ -37,7 +39,8 @@
     (map (fn [m]
            (if (= (:id m) id)
              (-> m f)
-             m)))))
+             m)))
+    vec))
 
 (comment
   ; all these are equivalent
@@ -46,7 +49,8 @@
     1
     #(update-in % [:n] inc))
 
-  (sp/transform [0 :n] inc [{:id 1 :n 1} {:id 2 :n 3}])
+  (sp/transform [0 :n] inc (list {:id 1 :n 1} {:id 2 :n 3}))
+  ; ^^ omg, doesn't work!
   (sp/transform [sp/ALL (sp/pred #(= 1 (:id %))) :n] inc [{:id 1 :n 1} {:id 2 :n 3}])
 
   0)
@@ -83,44 +87,108 @@
   [state done-rooms]
   [map? sequential? => map?]
   (println :free-room-movers :state (pp-str state) :done-rooms (pp-str done-rooms))
-  ; empty or nil
-  (if (empty? done-rooms)
-    state
-    (let [roomnum (first done-rooms)
-          newstate (->> state
-                     ; room: advance to next state
-                     ((fn [x]
-                        (let [rstate (-> (sp/select [:rooms roomnum :state] x)
-                                       first)
-                              nextstate (get e/next-room-state rstate)]
-                          (println :free-room-movers :setting :roomnum roomnum :rstate rstate :nextstate nextstate)
-                          ;rstate))))
-                          (sp/setval [:rooms roomnum :state] nextstate x))))
-                     ; mover: set :at-room to nil
-                     (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))]
-      (recur newstate (rest done-rooms)))))
+  (loop [state state
+         done-rooms done-rooms]
+    ;(tap> "done-rooms")
+    ;(tap> drooms)
+    ; empty or nil
+    (if (empty? done-rooms)
+      (do
+        (println :free-room-movers :done)
+        state)
+      (let [roomnum (first done-rooms)
+            newstate (->> state
+                       ; room: advance to next state
+                       ((fn [x]
+                          ;(tap> "state")
+                          ;(tap> curr-state)
+                          ;(tap> "roomnum")
+                          (let [rstate (-> (sp/select [:rooms roomnum :state] x)
+                                         first)
+                                nextstate (get e/next-room-state rstate)]
+                            ;(tap> "nextstate")
+                            (println :free-room-movers :setting :roomnum roomnum :rstate rstate :nextstate nextstate)
+                            ;rstate))))
+                            (sp/setval [:rooms roomnum :state] nextstate x))))
+                       ; mover: set :at-room to nil
+                       (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))]
+        (recur newstate (rest done-rooms))))))
 
 
 (comment
+
+  ; 14m!
+  (loop [n     1
+         state {:turn     10,
+                :rooms    '({:id                      0,
+                             :role                    :room,
+                             :state                   :removing-furniture,
+                             :moving1-time-remaining  0,
+                             :painting-time-remaining 50,
+                             :moving2-time-remaining  10}
+                            {:id                      1,
+                             :role                    :room,
+                             :state                   :removing-furniture,
+                             :moving1-time-remaining  1,
+                             :painting-time-remaining 50,
+                             :moving2-time-remaining  10}
+                            {:id                      2,
+                             :role                    :room,
+                             :state                   :waiting-for-movers1,
+                             :moving1-time-remaining  10,
+                             :painting-time-remaining 50,
+                             :moving2-time-remaining  10}
+                            {:id                      3,
+                             :role                    :room,
+                             :state                   :waiting-for-movers1,
+                             :moving1-time-remaining  10,
+                             :painting-time-remaining 50,
+                             :moving2-time-remaining  10}),
+                :movers   '({:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}),
+                :painters '({:id 0, :role :painter, :at-room nil}
+                            {:id 1, :role :painter, :at-room nil}
+                            {:id 2, :role :painter, :at-room nil}
+                            {:id 3, :role :painter, :at-room nil})}]
+    (let [newstate (-> state
+                     genek.sim2/assign-available-movers
+                     genek.sim2/free-completed-movers
+                     genek.sim2/advance-state)]
+      (def newstate newstate)
+      (println "done")))
+
+  (free-room-movers nil [0])
+
   (def roomnumg 0)
-  (->> {:turn 0,
-        :rooms [{:id 0,
-                 :role :room,
-                 :state :removing-furniture
-                 :moving1-time-remaining 10,
-                 :painting-time-remaining 50,
-                 :moving2-time-remaining 10}
-                {:id 1,
-                 :role :room,
-                 :state :waiting-for-movers1,
-                 :moving1-time-remaining 10,
-                 :painting-time-remaining 50,
-                 :moving2-time-remaining 10}]
-        :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room 0}],
-        :painters [{:id 0, :role :painter, :at-room nil}
-                   {:id 1, :role :painter, :at-room nil}
-                   {:id 2, :role :painter, :at-room nil}
-                   {:id 3, :role :painter, :at-room nil}]}
+  (->> {:turn     10,
+        :rooms    '({:id                      0,
+                     :role                    :room,
+                     :state                   :removing-furniture,
+                     :moving1-time-remaining  0,
+                     :painting-time-remaining 50,
+                     :moving2-time-remaining  10}
+                    {:id                      1,
+                     :role                    :room,
+                     :state                   :removing-furniture,
+                     :moving1-time-remaining  1,
+                     :painting-time-remaining 50,
+                     :moving2-time-remaining  10}
+                    {:id                      2,
+                     :role                    :room,
+                     :state                   :waiting-for-movers1,
+                     :moving1-time-remaining  10,
+                     :painting-time-remaining 50,
+                     :moving2-time-remaining  10}
+                    {:id                      3,
+                     :role                    :room,
+                     :state                   :waiting-for-movers1,
+                     :moving1-time-remaining  10,
+                     :painting-time-remaining 50,
+                     :moving2-time-remaining  10}),
+        :movers   '({:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}),
+        :painters '({:id 0, :role :painter, :at-room nil}
+                    {:id 1, :role :painter, :at-room nil}
+                    {:id 2, :role :painter, :at-room nil}
+                    {:id 3, :role :painter, :at-room nil})}
     ((fn [x]
        (let [rstate    (-> (sp/select [:rooms roomnumg :state] x) first)
              nextstate (get e/next-room-state rstate)]

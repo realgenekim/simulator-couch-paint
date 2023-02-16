@@ -65,8 +65,10 @@
 (>defn create-movers
   "input: # of movers"
   [n] [integer? => sequential?]
-  (for [r (range n)]
-    (create-mover r)))
+  (-> (for [r (range n)]
+        (create-mover r))
+    vec))
+
 
 (>defn create-painter
   [id] [integer? => map?]
@@ -77,8 +79,9 @@
 (>defn create-painters
   "input: # of painters"
   [n] [integer? => sequential?]
-  (for [r (range n)]
-    (create-painter r)))
+  (-> (for [r (range n)]
+        (create-painter r))
+    vec))
 
 ;
 ;
@@ -127,7 +130,7 @@
 (>defn available-movers
   " input: state
     output: all movers that are available "
-  [state] [::s-state => ::s-state]
+  [state] [::s-state => sequential?]
   (let [movers (-> state :movers)]
     (->> movers
       (filter (fn [m]

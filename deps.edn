@@ -14,7 +14,9 @@
                             io.github.nextjournal/clerk {
                                                          :git/url "https://github.com/nextjournal/clerk/"
                                                          :git/sha "d978d0ca6cb7b10cf1a0c0f370cdba6e096551e3"}
-                            com.github.jpmonettas/flow-storm-dbg    {:mvn/version "3.3.320"}
+                            com.github.jpmonettas/flow-storm-dbg    {:git/sha "4dcd709e5b51861f95cb65269b17ddd6337aa7cc"
+                                                                     :git/url "https://github.com/jpmonettas/flow-storm-debugger"}
+                            ;{:mvn/version "3.3.320"}
                             ;:mvn/version "0.12.707"}
                             ;com.lambdaisland/classpath  {:mvn/version "0.4.44"}
                             ;aerial.hanami/aerial.hanami {:mvn/version "0.17.0"}
