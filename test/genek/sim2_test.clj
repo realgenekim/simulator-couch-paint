@@ -119,7 +119,11 @@
             #(update-in % [:n] inc))))))
 
 
-;(deftest mult-painters-movers
-;  (testing "var painters"))
-    ;(let [state (sim/create-state)])
-    ;(is (= 2))))
+(deftest mult-painters-movers
+  (testing "var painters"
+    (def *state (atom [(sim/create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 2))]))
+    (is (= 2
+          (-> @*state last :movers count))))
+
+
+  0)
