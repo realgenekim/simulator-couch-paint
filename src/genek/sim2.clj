@@ -24,10 +24,11 @@
 
 
 
-(def *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
+(defonce *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
 
 (comment
   @*state
+  (def *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
   0)
 
 (defn atom?
@@ -175,7 +176,7 @@
 
 
 (comment
-  (rooms-needing-movers (-> @*state last :rooms))
+  (e/rooms-needing-movers (-> @*state last :rooms))
   0)
 
 
@@ -227,17 +228,25 @@
     newstate))
 
 
+#trace
 (>defn free-completed-movers
   " for every room that has done mover/painter:
       advance room state
       set mover :at-room to nil
   "
   [state] [::e/s-state => ::e/s-state]
-  (let [done-rooms  (e/rooms-done-with-movers (-> state :rooms))
+  (let [done-rooms  (->> (e/rooms-done-with-movers (-> state :rooms))
+                         (map :id))
         ; ^^ list of rooms that are done (0 1 2)
         ; now we need to
         newstate    (utils/free-room-movers state done-rooms)]
+    (println :free-completed-movers :done-rooms done-rooms)
+    (def ns2 newstate)
     newstate))
+
+(comment
+  (e/rooms-done-with-movers (-> @*state last :rooms))
+  0)
 
 
 

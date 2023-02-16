@@ -1,6 +1,7 @@
 (ns dev
   (:require
     [nextjournal.clerk :as clerk]
+    [flow-storm.api :as fs-api]
     [portal.api :as p]))
 ;[flow-storm.api :as fs-api]))
 
@@ -11,15 +12,18 @@
 ;(clerk/show! "notebooks/rule_30.clj")
 
 ;; or let Clerk watch the given `:paths` for changes
-(clerk/serve! {:watch-paths ["notebooks"]
-               :browse? true})
 
 (comment
+  (clerk/serve! {:watch-paths ["notebooks"]
+                 :browse? true})
+
   (clerk/serve! {:watch-paths ["notebooks" "src"]
                  :browse? true})
 
   (clerk/halt!)
   (clerk/clear-cache!)
+
+  (fs-api/local-connect)
 
 
   (do

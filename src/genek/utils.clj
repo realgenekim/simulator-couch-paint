@@ -79,30 +79,29 @@
     input: state
            done-rooms: vector of room numbers: [0 1 2]
     output: new state "
-  [{:keys [rooms movers] :as state} done-rooms]
-  [map? (s/nilable sequential?) => map?]
-  (println :free-room-movers :m (pp-str state) :new-rms (pp-str done-rooms))
+  [state done-rooms]
+  [map? sequential? => map?]
+  (println :free-room-movers :state (pp-str state) :done-rooms (pp-str done-rooms))
   ; empty or nil
   (if (empty? done-rooms)
     state
-    (let [roomnum   (first done-rooms)]
-          ;newrooms  (update-by-id rooms (:room (first done-rooms)))
-          ;newmovers (update-by-id movers (:mover (first done-rooms)))]
-      ;(sp/transform [sp/ALL (sp/pred #(= 1 (:id %))) :n] inc [{:id 1 :n 1} {:id 2 :n 3}])
-      (->> state
-        ; room: advance to next state
-        ((fn [x]
-           (let [rstate (-> (sp/select [:rooms roomnum :state] x) last)]
-             ;rstate))))
-             (sp/setval [:rooms roomnum :state] (get e/next-room-state rstate) x))))
-        ; mover: set :at-room to nil
-        (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil)))
-    #_(recur (assoc state :rooms newrooms :movers newmovers)
-        (rest done-rooms))))
+    (let [roomnum (first done-rooms)
+          newstate (->> state
+                     ; room: advance to next state
+                     ((fn [x]
+                        (let [rstate (-> (sp/select [:rooms roomnum :state] x)
+                                       first)
+                              nextstate (get e/next-room-state rstate)]
+                          (println :free-room-movers :setting :roomnum roomnum :rstate rstate :nextstate nextstate)
+                          ;rstate))))
+                          (sp/setval [:rooms roomnum :state] nextstate x))))
+                     ; mover: set :at-room to nil
+                     (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))]
+      (recur newstate (rest done-rooms)))))
 
 
 (comment
-  (def roomnum 0)
+  (def roomnumg 0)
   (->> {:turn 0,
         :rooms [{:id 0,
                  :role :room,
@@ -121,5 +120,11 @@
                    {:id 1, :role :painter, :at-room nil}
                    {:id 2, :role :painter, :at-room nil}
                    {:id 3, :role :painter, :at-room nil}]}
-    (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))
+    ((fn [x]
+       (let [rstate    (-> (sp/select [:rooms roomnumg :state] x) first)
+             nextstate (get e/next-room-state rstate)]
+         (println :free-room-movers :setting :roomnum roomnumg :rstate rstate :nextstate nextstate)
+         rstate))))
+         ;(sp/setval [:rooms roomnum :state] nextstate x)))))
+    ;(sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))
   0)
