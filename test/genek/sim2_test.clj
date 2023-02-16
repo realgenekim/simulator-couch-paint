@@ -61,7 +61,7 @@
           (get e/state-needs-mover? :waiting-for-movers2))))
 
   (testing "room needs movers"
-    (let [needs-movers (sim/rooms-needing-movers (-> @*state last :rooms))]
+    (let [needs-movers (e/rooms-needing-movers (-> @*state last :rooms))]
       (is (= 4
             (count needs-movers)))))
 
@@ -79,7 +79,7 @@
   ; change state
   (testing "assign movers to rooms"
     (let [new-state (sim/assign-available-movers (-> @*state last))
-          rooms-still-needs-movers (sim/rooms-needing-movers
+          rooms-still-needs-movers (e/rooms-needing-movers
                                      (-> new-state :rooms))]
       (def new-state new-state)
       ; 1 room in work, 3 still needing movers

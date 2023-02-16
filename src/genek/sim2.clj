@@ -113,26 +113,7 @@
   0)
 
 
-(s/def ::s-room
-  (s/keys :req-un [::role ::state ::id ::painting-time-remaining
-                   ::moving1-time-remaining ::moving2-time-remaining]))
-(s/def ::s-rooms
-  (s/coll-of ::s-room))
 
-(s/def ::s-mover
-  (s/keys :req-un [::id ::role ::at-room]))
-
-(s/def ::s-movers
-  (s/coll-of ::s-mover))
-
-(>defn rooms-needing-movers
-  " input: all rooms
-    output: all rooms that need movers"
-  [rooms] [::s-rooms => ::s-rooms]
-  (->> rooms
-       (filter (fn [r]
-                 (let [state (-> r :state)]
-                   (get e/state-needs-mover? state))))))
 
 (comment
   (rooms-needing-movers (-> @*state last :rooms))
@@ -190,7 +171,7 @@
   " for every room that needs mover/painter, assign one that is available
   "
   [state] [::s-state => ::s-state]
-  (let [needs-movers (rooms-needing-movers (-> state :rooms))
+  (let [needs-movers (e/rooms-needing-movers (-> state :rooms))
         movers       (e/available-movers state)
         _            (println :assign-available-movers :needs-movers needs-movers)
         _            (println :assign-available-movers :movers movers)
@@ -213,32 +194,32 @@
     (assoc state :rooms newrooms
                  :movers newmovers)))
 
-(>defn free-completed-movers
-  " for every room that has done mover/painter, free it up
+#_(>defn free-completed-movers
+    " for every room that has done mover/painter, free it up
   "
-  [state] [::s-state => ::s-state]
-  (let [needs-movers (rooms-needing-movers (-> state :rooms))
-        movers       (e/available-movers state)
-        _            (println :assign-available-movers :needs-movers needs-movers)
-        _            (println :assign-available-movers :movers movers)
-        room-movers  (map vector needs-movers movers)
-        ; this creates [{:room newroom :mover newmover}...]
-        _             (println :assign-available-movers :rooms-movers room-movers)
-        new-rooms-movers (->> room-movers
-                           (map assign-room)
-                           (remove nil?))
-        _             (println :assign-available-movers :new-rooms-movers new-rooms-movers)
-        newrms        (reduce
-                        update-rooms-movers
-                        {:old-rooms        (-> state :rooms)
-                         :old-movers       (-> state :movers)}
-                        [new-rooms-movers])
-        newrooms     (:old-rooms newrms)
-        newmovers    (:old-movers newrms)]
-    (println :assign-available-movers :new-room-movers
-      (with-out-str (clojure.pprint/pprint new-rooms-movers)))
-    (assoc state :rooms newrooms
-                 :movers newmovers)))
+    [state] [::s-state => ::s-state]
+    (let [done-movers (rooms-done-with-movers (-> state :rooms))
+          movers       (e/available-movers state)
+          _            (println :assign-available-movers :needs-movers needs-movers)
+          _            (println :assign-available-movers :movers movers)
+          room-movers  (map vector needs-movers movers)
+          ; this creates [{:room newroom :mover newmover}...]
+          _             (println :assign-available-movers :rooms-movers room-movers)
+          new-rooms-movers (->> room-movers
+                             (map assign-room)
+                             (remove nil?))
+          _             (println :assign-available-movers :new-rooms-movers new-rooms-movers)
+          newrms        (reduce
+                          update-rooms-movers
+                          {:old-rooms        (-> state :rooms)
+                           :old-movers       (-> state :movers)}
+                          [new-rooms-movers])
+          newrooms     (:old-rooms newrms)
+          newmovers    (:old-movers newrms)]
+      (println :assign-available-movers :new-room-movers
+        (with-out-str (clojure.pprint/pprint new-rooms-movers)))
+      (assoc state :rooms newrooms
+                   :movers newmovers)))
 
 
 
