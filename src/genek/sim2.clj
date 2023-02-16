@@ -211,17 +211,13 @@
                            (map assign-room)
                            (remove nil?))
         _             (println :assign-available-movers :new-rooms-movers new-rooms-movers)
-        newrms        (reduce
-                        utils/update-rooms-movers
-                        {:old-rooms        (-> state :rooms)
-                         :old-movers       (-> state :movers)}
-                        [new-rooms-movers])
-        newrooms     (:old-rooms newrms)
-        newmovers    (:old-movers newrms)]
-    (println :assign-available-movers :new-room-movers
-      (with-out-str (clojure.pprint/pprint new-rooms-movers)))
-    (assoc state :rooms newrooms
-                 :movers newmovers)))
+        newstate        (reduce
+                          utils/update-rooms-movers2 state
+                          [new-rooms-movers])]
+    #_(println :assign-available-movers :new-room-movers
+        (with-out-str (clojure.pprint/pprint new-rooms-movers)))
+    newstate))
+
 
 (>defn free-completed-movers
   " for every room that has done mover/painter, free it up

@@ -55,29 +55,29 @@
 ; update
 ;
 
-(>defn update-rooms-movers
-  " reducing function
+#_(>defn update-rooms-movers
+    " reducing function
     input: m:       {:old-rooms ... :old-movers ...} (old state)
            new-rms: [{:mover .. :room ..} {}] (set of tuples, mover -> new room)
     output: {:old-rooms :old-movers}
 
     XXX: signature should be state, move-assingments"
-  [{:keys [old-rooms old-movers] :as m} new-rms]
-  [map? (s/nilable sequential?) => map?]
-  ; ending case
-  (println :update-rooms-movers :m (pp-str m)
-    :new-rms (pp-str new-rms))
-  ; empty or nil
-  (if (empty? new-rms)
-    {:old-rooms old-rooms
-     :old-movers old-movers}
-    ; else
-    (let [newrooms (update-by-id old-rooms (:room (first new-rms)))
-          newmovers (update-by-id old-movers (:mover (first new-rms)))]
-      (recur
-        {:old-rooms newrooms
-         :old-movers newmovers}
-        (rest new-rms)))))
+    [{:keys [old-rooms old-movers] :as m} new-rms]
+    [map? (s/nilable sequential?) => map?]
+    ; ending case
+    (println :update-rooms-movers :m (pp-str m)
+      :new-rms (pp-str new-rms))
+    ; empty or nil
+    (if (empty? new-rms)
+      {:old-rooms old-rooms
+       :old-movers old-movers}
+      ; else
+      (let [newrooms (update-by-id old-rooms (:room (first new-rms)))
+            newmovers (update-by-id old-movers (:mover (first new-rms)))]
+        (recur
+          {:old-rooms newrooms
+           :old-movers newmovers}
+          (rest new-rms)))))
 
 (>defn update-rooms-movers2
   " reducing function
