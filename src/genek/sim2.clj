@@ -3,6 +3,7 @@
     [clojure.spec.alpha :as s]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
     [com.rpl.specter :as sp]
+    [flow-storm.api]
     [genek.entities :as e]
     [genek.utils :as utils]))
 

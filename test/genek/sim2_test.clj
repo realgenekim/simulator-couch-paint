@@ -220,7 +220,7 @@
   0)
 
 (deftest next-actions
-  (loop [n     1
+  (loop [n     15
          state {:turn     10,
                 :rooms    [{:id                      0,
                             :role                    :room,
@@ -255,7 +255,9 @@
                      sim/assign-available-movers
                      sim/free-completed-movers
                      sim/advance-state)]
+      (def newstate newstate)
 
+      (is (not (nil? (-> newstate :rooms first :state))))
 
       (is (= 1 1))
       (println :test-next-actions :newstate (utils/pp-str newstate))

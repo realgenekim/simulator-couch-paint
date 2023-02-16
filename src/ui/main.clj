@@ -17,85 +17,119 @@
 
 ; https://github.com/HumbleUI/HumbleUI/blob/main/dev/examples/wordle.clj
 
+; -1 is last
+(def *config (atom {:max   (-> @sim/*state count)
+                    :value (-> @sim/*state count dec)}))
+
+(defn get-state
+  " get state turn, based on config "
+  [slider]
+  (let [turn (-> slider :value dec)
+        state (-> @sim/*state
+                (nth turn))]
+    (println :get-state :turn turn :state state)
+    state))
+
+
 (defn rooms
-  []
-  (for [r (-> @sim/*state last :rooms)]
-    (ui/row
-      (ui/rect
-        (paint/stroke 0xFFCCCCCC 4)
-        (ui/width 500
-          (ui/height 100
-            (ui/valign 0.5
-              (ui/column
-                (ui/row
-                  (ui/label
-                    (format "Room %d: %s"
-                      (-> r :id)
-                      (-> r :state))))
-                (ui/gap 0 10)
-                (ui/row
-                  (ui/label
-                    (format "    :moving1-time-remaining: %d"
-                      (-> r :moving1-time-remaining))))
-                (ui/gap 0 10)
-                (ui/row
-                  (ui/label
-                    (format "    :painting-time-remaining: %d"
-                      (-> r :painting-time-remaining))))
-                (ui/gap 0 10)
-                (ui/row
-                  (ui/label
-                    (format "    :moving2-time-remaining: %d"
-                      (-> r :moving2-time-remaining))))))
-            #_(ui/label
-                (format "    x"))))))))
+  [slider]
+  (let [state (get-state slider)]
+    (for [r (-> state :rooms)]
+      (ui/row
+        (ui/rect
+          (paint/stroke 0xFFCCCCCC 4)
+          (ui/width 500
+            (ui/height 100
+              (ui/valign 0.5
+                (ui/column
+                  (ui/row
+                    (ui/label
+                      (format "Room %d: %s"
+                        (-> r :id)
+                        (-> r :state))))
+                  (ui/gap 0 10)
+                  (ui/row
+                    (ui/label
+                      (format "    :moving1-time-remaining: %d"
+                        (-> r :moving1-time-remaining))))
+                  (ui/gap 0 10)
+                  (ui/row
+                    (ui/label
+                      (format "    :painting-time-remaining: %d"
+                        (-> r :painting-time-remaining))))
+                  (ui/gap 0 10)
+                  (ui/row
+                    (ui/label
+                      (format "    :moving2-time-remaining: %d"
+                        (-> r :moving2-time-remaining))))))
+              #_(ui/label
+                  (format "    x")))))))))
 
 (defn movers
-  []
-  (for [r (-> @sim/*state last :movers)]
-    (ui/row
-      (ui/rect
-        (paint/stroke 0xFFCCCCCC 4)
-        (ui/width 500
-          (ui/height 40
-            (ui/valign 0.5
-              (ui/column
-                (ui/row
-                  (ui/label
-                    (format "Mover %d -- In Room: %s"
-                      (-> r :id)
-                      (str (-> r :at-room)))))))))))))
+  [slider]
+  (let [state (get-state slider)]
+    (for [r (-> state :movers)]
+      (ui/row
+        (ui/rect
+          (paint/stroke 0xFFCCCCCC 4)
+          (ui/width 500
+            (ui/height 40
+              (ui/valign 0.5
+                (ui/column
+                  (ui/row
+                    (ui/label
+                      (format "Mover %d -- In Room: %s"
+                        (-> r :id)
+                        (str (-> r :at-room))))))))))))))
 
 (defn painters
-  []
-  (for [r (-> @sim/*state last :painters)]
-    (ui/row
-      (ui/rect
-        (paint/stroke 0xFFCCCCCC 4)
-        (ui/width 500
-          (ui/height 40
-            (ui/valign 0.5
-              (ui/column
-                (ui/row
-                  (ui/label
-                    (format "Painter %d -- In Room: %s"
-                      (-> r :id)
-                      (str (-> r :at-room)))))))))))))
+  [slider]
+  (let [state (get-state slider)]
+    (for [r (-> state :painters)]
+      (ui/row
+        (ui/rect
+          (paint/stroke 0xFFCCCCCC 4)
+          (ui/width 500
+            (ui/height 40
+              (ui/valign 0.5
+                (ui/column
+                  (ui/row
+                    (ui/label
+                      (format "Painter %d -- In Room: %s"
+                        (-> r :id)
+                        (str (-> r :at-room))))))))))))))
 
 (defn turn
-  []
-  (let [s (-> @sim/*state last)]
-    (ui/row
-      (ui/rect
-        (paint/stroke 0xFFCCCCCC 4)
-        (ui/width 500
-          (ui/height 40
-            (ui/valign 0.5
-              (ui/column
-                (ui/row
-                  (ui/label
-                    (format "Turn %d"
-                      (-> s :turn))))))))))))
+  [*slider]
+  (let [state (get-state @*slider)]
+    (ui/dynamic ctx
+      [value @*slider]
+      (ui/row
+        (ui/rect
+          (paint/stroke 0xFFCCCCCC 4)
+          (ui/width 500
+            (ui/height 40
+              (ui/valign 0.5
+                (ui/column
+                  (ui/row
+                    (ui/label
+                      (format "Turn %d of %d"
+                        (-> state :turn)
+                        (-> @sim/*state count)))))))))))))
+
+(defn slider
+  [*config]
+  (ui/row
+    (ui/rect
+      (paint/stroke 0xFFCCCCCC 4)
+      (ui/width 500
+        (ui/height 40
+          (ui/valign 0.5
+            (ui/column
+              (ui/label "Turn:")
+              (ui/slider *config))))))))
+
+
 
 
 ;"Main app definition."
@@ -107,13 +141,11 @@
       ;; just some random stuff
       (ui/column
         ;(ui/row
-        ;  (ui/label "hi")
-        ;(ui/row
-        ;  (ui/label (str (-> @sim/*state last :rooms vec))))
-        (turn)
-        (rooms)
-        (movers)
-        (painters))))
+        (slider *config)
+        (turn *config)
+        (rooms @*config)
+        (movers @*config)
+        (painters @*config))))
   (reset! state/*app app)
   (state/redraw!)
 
@@ -134,10 +166,16 @@
       ;(println new-state)
       ;(reset! state/*app app)
       (Thread/sleep 250)
-      (reload!))))
+      (reload!)))
+
+  #_(add-watch *config :slider
+      (fn [key atom old-state new-state]
+        ;(println :add-watch "*** firing! turn: " @*config)
+        (reload!))))
 
 (comment
   (set-watcher!)
+  (remove-watch *config :slider)
   0)
 
 (defn -main
@@ -154,10 +192,9 @@
 
 (state/redraw!)
 
-
-
 (comment
   (-main)
+  (reload!)
   (state/redraw!)
   (set-watcher!)
   (count @sim/*state)
