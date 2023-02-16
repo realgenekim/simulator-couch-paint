@@ -1,6 +1,7 @@
 (ns genek.utils
   (:require
     [clojure.spec.alpha :as s]
+    [com.rpl.specter :as sp]
     [genek.entities :as e]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]))
 
@@ -39,10 +40,15 @@
              m)))))
 
 (comment
+  ; all these are equivalent
   (update-by-id-apply-fn
     [{:id 1 :n 1} {:id 2 :n 3}]
     1
     #(update-in % [:n] inc))
+
+  (sp/transform [0 :n] inc [{:id 1 :n 1} {:id 2 :n 3}])
+  (sp/transform [sp/ALL (sp/pred #(= 1 (:id %))) :n] inc [{:id 1 :n 1} {:id 2 :n 3}])
+
   0)
 
 ;

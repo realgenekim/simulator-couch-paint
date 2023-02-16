@@ -62,9 +62,12 @@
               (if-not (empty? rs)
                 (let [room      (first rs)
                       new-state (-> s
+                                  ; TODO: fix this someday
+                                  ;(sp/transform [:rooms room :moving1-time-remaining] dec)
+                                  ;(sp/transform [sp/ALL (sp/pred #(= room (:id %))) :moving1-time-remaining] inc)
                                   (assoc :rooms (utils/update-by-id-apply-fn (-> s :rooms)
                                                   room
-                                                  #(update-in % [:moving1-time-remaining] dec))))]
+                                                  #(sp/transform [:moving1-time-remaining] dec %))))]
                   (recur new-state (rest rs)))
                 ; termination case
                 s))
@@ -128,9 +131,6 @@
   (sp/transform [:turn] inc st)
   (->> st
     (sp/transform [:rooms 0 :moving1-time-remaining] dec))
-
-  (->> @*state last
-    (sp/setval [sp/ALL :rooms 1 :moving1-time-remaining]  inc))
 
   0)
 
