@@ -79,7 +79,7 @@
            :old-movers newmovers}
           (rest new-rms)))))
 
-(>defn update-rooms-movers2
+(>defn update-rooms-movers
   " reducing function
     input: state
            room-assignments: [{:mover .. :room ..} {}] (set of tuples, mover -> new room)

@@ -147,7 +147,7 @@
               (map :id))))))
 
   (testing "update-rooms-movers"
-    #_(let [newstate (utils/update-rooms-movers2
+    #_(let [newstate (utils/update-rooms-movers
                        {:old-rooms (-> @*state last :rooms)
                         :old-movers (-> @*state last :movers)}
                        [{:room {:id 0,
@@ -160,7 +160,7 @@
         (is (= :removing-furniture
               (-> newstate :old-rooms first :state))))
 
-    (let [newstate (utils/update-rooms-movers2
+    (let [newstate (utils/update-rooms-movers
                      (-> @*state last)
                      [{:room {:id 0,
                               :role :room,

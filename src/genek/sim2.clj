@@ -212,7 +212,7 @@
                            (remove nil?))
         _             (println :assign-available-movers :new-rooms-movers new-rooms-movers)
         newstate        (reduce
-                          utils/update-rooms-movers2 state
+                          utils/update-rooms-movers state
                           [new-rooms-movers])]
     #_(println :assign-available-movers :new-room-movers
         (with-out-str (clojure.pprint/pprint new-rooms-movers)))
