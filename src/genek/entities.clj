@@ -50,3 +50,26 @@
   (for [r (range n)]
     (create-room r)))
 
+(>defn create-mover
+  [id] [integer? => map?]
+  {:id id
+   :role :mover
+   :at-room nil})
+
+(>defn create-movers
+  "input: # of movers"
+  [n] [integer? => sequential?]
+  (for [r (range n)]
+    (create-mover r)))
+
+(>defn create-painter
+  [id] [integer? => map?]
+  {:id id
+   :role :painter
+   :at-room nil})
+
+(>defn create-painters
+  "input: # of painters"
+  [n] [integer? => sequential?]
+  (for [r (range n)]
+    (create-painter r)))

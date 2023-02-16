@@ -6,23 +6,6 @@
     [genek.utils :as utils]))
 
 
-(>defn create-mover
-  [id] [integer? => map?]
-  {:id id
-   :role :mover
-   :at-room nil})
-
-(def movers (for [r (range 1)]
-              (create-mover r)))
-
-(>defn create-painter
-  [id] [integer? => map?]
-  {:id id
-   :role :painter
-   :at-room nil})
-
-(def painters (for [r (range 1)]
-                (create-painter r)))
 
 (>defn create-state
   ([rooms movers painters]
@@ -40,7 +23,7 @@
 
 
 
-(def *state (atom [(create-state (e/create-rooms 4) movers painters)]))
+(def *state (atom [(create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 4))]))
 
 (comment
   @*state

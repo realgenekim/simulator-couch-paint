@@ -18,7 +18,7 @@
       (is (= 2 (:turn newturn))))))
 
 (deftest states
-  (def *state (atom [(sim/create-state (e/create-rooms 4) sim/movers sim/painters)]))
+  (def *state (atom [(sim/create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 1))]))
   (testing "next-turn with identity"
     (is (= 1 (count @*state)))
 
@@ -50,7 +50,7 @@
     0))
 
 (deftest match-resource
-  (def *state (atom [(sim/create-state (e/create-rooms 4) sim/movers sim/painters)]))
+  (def *state (atom [(sim/create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 1))]))
 
   (testing "needs movers/painters"
     (is (not= true
