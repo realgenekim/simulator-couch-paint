@@ -1,6 +1,7 @@
 (ns genek.sim2-test
   (:require
     [clojure.test :refer :all]
+    [com.rpl.specter :as sp]
     [genek.entities :as e]
     [genek.sim2 :as sim]
     [genek.utils :as utils]))
@@ -178,6 +179,31 @@
             (utils/update-rooms-movers {:old-rooms nil :old-movers nil})))
     (is (= 1 1)))
   (testing "free-room-movers"
+    (let [state {:turn 0,
+                 :rooms [{:id 0,
+                          :role :room,
+                          :state :removing-furniture
+                          :moving1-time-remaining 10,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 1,
+                          :role :room,
+                          :state :waiting-for-movers1,
+                          :moving1-time-remaining 10,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}]
+                 :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room 0}],
+                 :painters [{:id 0, :role :painter, :at-room nil}
+                            {:id 1, :role :painter, :at-room nil}
+                            {:id 2, :role :painter, :at-room nil}
+                            {:id 3, :role :painter, :at-room nil}]}
+          newstate (utils/free-room-movers state [0])]
+      (println :test-free-room-movers newstate)
+      (is (= :waiting-for-painters
+            (->> newstate
+              (sp/select [:rooms 0 :state])
+              first))))
+            ;(-> newstate :rooms first :state))))
     (is (= 1 1))))
 
 

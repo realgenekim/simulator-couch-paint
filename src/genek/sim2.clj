@@ -97,7 +97,7 @@
   (def st {:turn 0,
            :rooms [{:id 0,
                     :role :room,
-                    :state :waiting-for-movers1,
+                    :state :removing-furniture
                     :moving1-time-remaining 10,
                     :painting-time-remaining 50,
                     :moving2-time-remaining 10}
@@ -119,7 +119,7 @@
                     :moving1-time-remaining 10,
                     :painting-time-remaining 50,
                     :moving2-time-remaining 10}],
-           :movers ({:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}),
+           :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
            :painters [{:id 0, :role :painter, :at-room nil}
                       {:id 1, :role :painter, :at-room nil}
                       {:id 2, :role :painter, :at-room nil}
@@ -131,6 +131,14 @@
   (sp/transform [:turn] inc st)
   (->> st
     (sp/transform [:rooms 0 :moving1-time-remaining] dec))
+
+  (->> st
+    (sp/select [:rooms 0 :state]))
+  (->> st
+    ((fn [x]
+       (let [rstate (-> (sp/select [:rooms 0 :state] x) last)]
+         ;rstate))))
+         (sp/setval [:rooms 0 :state] (get e/next-room-state rstate) x)))))
 
   0)
 
@@ -220,31 +228,16 @@
 
 
 (>defn free-completed-movers
-  " for every room that has done mover/painter, free it up
+  " for every room that has done mover/painter:
+      advance room state
+      set mover :at-room to nil
   "
   [state] [::e/s-state => ::e/s-state]
-  (let [done-movers  (e/rooms-done-with-movers (-> state :rooms))
-        ;movers       (e/available-movers state)
-        _            (println :free-completed-movers :needs-movers done-movers)
-        ;_            (println :free-completed-movers :movers movers)
-        ;room-movers  (map vector done-movers movers)
-        ; this creates [{:room newroom :mover newmover}...]
-        ;_             (println :free-completed-movers :rooms-movers room-movers)
-        ;new-rooms-movers (->> room-movers
-        ;                   (map assign-room)
-        ;                   (remove nil?))
-        ;_             (println :free-completed-movers :new-rooms-movers new-rooms-movers)
-        newrms        (reduce
-                        utils/free-room-movers
-                        {:old-rooms        (-> state :rooms)
-                         :old-movers       (-> state :movers)}
-                        [done-movers])
-        newrooms     (:old-rooms newrms)
-        newmovers    (:old-movers newrms)]
-    #_(println :free-completed-movers :new-room-movers
-        (with-out-str (clojure.pprint/pprint new-rooms-movers)))
-    (assoc state :rooms newrooms
-                 :movers newmovers)))
+  (let [done-rooms  (e/rooms-done-with-movers (-> state :rooms))
+        ; ^^ list of rooms that are done (0 1 2)
+        ; now we need to
+        newstate    (utils/free-room-movers state done-rooms)]
+    newstate))
 
 
 

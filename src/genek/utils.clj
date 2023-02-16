@@ -55,30 +55,6 @@
 ; update
 ;
 
-#_(>defn update-rooms-movers
-    " reducing function
-    input: m:       {:old-rooms ... :old-movers ...} (old state)
-           new-rms: [{:mover .. :room ..} {}] (set of tuples, mover -> new room)
-    output: {:old-rooms :old-movers}
-
-    XXX: signature should be state, move-assingments"
-    [{:keys [old-rooms old-movers] :as m} new-rms]
-    [map? (s/nilable sequential?) => map?]
-    ; ending case
-    (println :update-rooms-movers :m (pp-str m)
-      :new-rms (pp-str new-rms))
-    ; empty or nil
-    (if (empty? new-rms)
-      {:old-rooms old-rooms
-       :old-movers old-movers}
-      ; else
-      (let [newrooms (update-by-id old-rooms (:room (first new-rms)))
-            newmovers (update-by-id old-movers (:mover (first new-rms)))]
-        (recur
-          {:old-rooms newrooms
-           :old-movers newmovers}
-          (rest new-rms)))))
-
 (>defn update-rooms-movers
   " reducing function
     input: state
@@ -86,8 +62,7 @@
     output: new state "
   [{:keys [rooms movers] :as state} room-assignments]
   [map? (s/nilable sequential?) => map?]
-  ; ending case
-  (println :update-rooms-movers2 :m (pp-str state) :new-rms (pp-str room-assignments))
+  (println :update-rooms-movers :m (pp-str state) :new-rms (pp-str room-assignments))
   ; empty or nil
   (if (empty? room-assignments)
     state
@@ -98,21 +73,29 @@
 
 (>defn free-room-movers
   " reducing function
-    input: {:old-rooms ... :old-movers ... :new-rms [{:mover .. :room ..} {}]
-    output: same "
-  [{:keys [old-rooms old-movers] :as m} new-rms]
+      for every room that has done mover/painter:
+        advance room state
+        set mover :at-room to nil
+    input: state
+           done-rooms: vector of room numbers: [0 1 2]
+    output: new state "
+  [{:keys [rooms movers] :as state} done-rooms]
   [map? (s/nilable sequential?) => map?]
-  ; ending case
-  (println :update-rooms-movers :m (pp-str m)
-    :new-rms (pp-str new-rms))
+  (println :free-room-movers :m (pp-str state) :new-rms (pp-str done-rooms))
   ; empty or nil
-  (if (empty? new-rms)
-    {:old-rooms old-rooms
-     :old-movers old-movers}
-    ; else
-    (let [newrooms (update-by-id old-rooms (:room (first new-rms)))
-          newmovers (update-by-id old-movers (:mover (first new-rms)))]
-      (recur
-        {:old-rooms newrooms
-         :old-movers newmovers}
-        (rest new-rms)))))
+  (if (empty? done-rooms)
+    state
+    (let [roomnum   (first done-rooms)]
+          ;newrooms  (update-by-id rooms (:room (first done-rooms)))
+          ;newmovers (update-by-id movers (:mover (first done-rooms)))]
+      ;(sp/transform [sp/ALL (sp/pred #(= 1 (:id %))) :n] inc [{:id 1 :n 1} {:id 2 :n 3}])
+      (->> state
+        ; room: advance to next state
+        ((fn [x]
+           (let [rstate (-> (sp/select [:rooms roomnum :state] x) last)]
+             ;rstate))))
+             (sp/setval [:rooms roomnum :state] (get e/next-room-state rstate) x))))
+        ; mover: set :at-room to nil
+        (sp/setval [:movers roomnum :state] e/next-room-state)))
+    #_(recur (assoc state :rooms newrooms :movers newmovers)
+        (rest done-rooms))))

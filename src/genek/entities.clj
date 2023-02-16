@@ -23,6 +23,10 @@
    :restoring-furniture
    :finished])
 
+(def next-room-state
+  {:removing-furniture :waiting-for-painters})
+
+
 (def state-needs-mover?
   {:waiting-for-movers1 true
    :waiting-for-movers2 true})
@@ -110,7 +114,9 @@
   [rooms] [::s-rooms => ::s-rooms]
   (->> rooms
     (filter (fn [r]
-              (zero? (-> r :moving1-time-remaining))))))
+              (or
+                (zero? (-> r :moving1-time-remaining))
+                (zero? (-> r :moving2-time-remaining)))))))
 
 ;
 ; movers
