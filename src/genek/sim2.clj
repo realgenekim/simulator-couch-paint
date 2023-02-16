@@ -5,40 +5,6 @@
     [genek.entities :as e]
     [genek.utils :as utils]))
 
-(def room-states
-  [:initial
-   :waiting-for-movers1
-   :removing-furniture
-   :waiting-for-painters
-   :painting
-   :waiting-for-movers2
-   :restoring-furniture
-   :finished])
-
-(def state-needs-mover?
-  {:waiting-for-movers1 true
-   :waiting-for-movers2 true})
-
-(def state-needs-painter?
-  {:waiting-for-painters true})
-
-(def MOVING1-OP-TURNS 10)
-(def PAINTING-OP-TURNS 50)
-(def MOVING2-OP-TURNS 10)
-
-
-(>defn create-room
-  [id] [integer? => map?]
-  {:id id
-   :role :room
-   ; start with :waiting-for-movers1
-   :state (second room-states)
-   :moving1-time-remaining MOVING1-OP-TURNS
-   :painting-time-remaining PAINTING-OP-TURNS
-   :moving2-time-remaining MOVING2-OP-TURNS})
-
-(def rooms (for [r (range 4)]
-             (create-room r)))
 
 (>defn create-mover
   [id] [integer? => map?]
@@ -74,7 +40,7 @@
 
 
 
-(def *state (atom [(create-state rooms movers painters)]))
+(def *state (atom [(create-state (e/create-rooms 4) movers painters)]))
 
 (comment
   @*state
@@ -100,7 +66,7 @@
 
 (>defn advance-state
   " IMPORTANT: take care of things like
-    - decrementing working counters (e.g., :moving1-time-remaining)
+    - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
     - unassigning movers and painters "
   [state] [map? => map?]
   (let [rooms-moving (rooms-being-moved state)]
@@ -187,7 +153,7 @@
   (->> rooms
        (filter (fn [r]
                  (let [state (-> r :state)]
-                   (get state-needs-mover? state))))))
+                   (get e/state-needs-mover? state))))))
 
 (comment
   (rooms-needing-movers (-> @*state last :rooms))

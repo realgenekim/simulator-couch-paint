@@ -1,6 +1,7 @@
 (ns genek.sim2-test
   (:require
     [clojure.test :refer :all]
+    [genek.entities :as e]
     [genek.sim2 :as sim]
     [genek.utils :as utils]))
 
@@ -17,7 +18,7 @@
       (is (= 2 (:turn newturn))))))
 
 (deftest states
-  (def *state (atom [(sim/create-state sim/rooms sim/movers sim/painters)]))
+  (def *state (atom [(sim/create-state (e/create-rooms 4) sim/movers sim/painters)]))
   (testing "next-turn with identity"
     (is (= 1 (count @*state)))
 
@@ -49,15 +50,15 @@
     0))
 
 (deftest match-resource
-  (def *state (atom [(sim/create-state sim/rooms sim/movers sim/painters)]))
+  (def *state (atom [(sim/create-state (e/create-rooms 4) sim/movers sim/painters)]))
 
   (testing "needs movers/painters"
     (is (not= true
-          (get sim/state-needs-mover? :initial)))
+          (get e/state-needs-mover? :initial)))
     (is (= true
-          (get sim/state-needs-mover? :waiting-for-movers1)))
+          (get e/state-needs-mover? :waiting-for-movers1)))
     (is (= true
-          (get sim/state-needs-mover? :waiting-for-movers2))))
+          (get e/state-needs-mover? :waiting-for-movers2))))
 
   (testing "room needs movers"
     (let [needs-movers (sim/rooms-needing-movers (-> @*state last :rooms))]
@@ -116,3 +117,9 @@
             [{:id 1 :n 1} {:id 2 :n 3}]
             1
             #(update-in % [:n] inc))))))
+
+
+;(deftest mult-painters-movers
+;  (testing "var painters"))
+    ;(let [state (sim/create-state)])
+    ;(is (= 2))))
