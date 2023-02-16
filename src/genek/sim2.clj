@@ -23,7 +23,7 @@
 
 
 
-(def *state (atom [(create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 4))]))
+(def *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
 
 (comment
   @*state
@@ -121,7 +121,6 @@
                    ::moving1-time-remaining ::moving2-time-remaining]))
 (s/def ::s-rooms
   (s/coll-of ::s-room))
-
 
 (s/def ::s-mover
   (s/keys :req-un [::id ::role ::at-room]))
