@@ -177,25 +177,25 @@
   "
   [state] [::e/s-state => ::e/s-state]
   (let [done-movers  (e/rooms-done-with-movers (-> state :rooms))
-        movers       (e/available-movers state)
+        ;movers       (e/available-movers state)
         _            (println :free-completed-movers :needs-movers done-movers)
-        _            (println :free-completed-movers :movers movers)
-        room-movers  (map vector done-movers movers)
+        ;_            (println :free-completed-movers :movers movers)
+        ;room-movers  (map vector done-movers movers)
         ; this creates [{:room newroom :mover newmover}...]
-        _             (println :free-completed-movers :rooms-movers room-movers)
-        new-rooms-movers (->> room-movers
-                           (map assign-room)
-                           (remove nil?))
-        _             (println :free-completed-movers :new-rooms-movers new-rooms-movers)
+        ;_             (println :free-completed-movers :rooms-movers room-movers)
+        ;new-rooms-movers (->> room-movers
+        ;                   (map assign-room)
+        ;                   (remove nil?))
+        ;_             (println :free-completed-movers :new-rooms-movers new-rooms-movers)
         newrms        (reduce
-                        utils/update-rooms-movers
+                        utils/free-room-movers
                         {:old-rooms        (-> state :rooms)
                          :old-movers       (-> state :movers)}
-                        [new-rooms-movers])
+                        [done-movers])
         newrooms     (:old-rooms newrms)
         newmovers    (:old-movers newrms)]
-    (println :free-completed-movers :new-room-movers
-      (with-out-str (clojure.pprint/pprint new-rooms-movers)))
+    #_(println :free-completed-movers :new-room-movers
+        (with-out-str (clojure.pprint/pprint new-rooms-movers)))
     (assoc state :rooms newrooms
                  :movers newmovers)))
 

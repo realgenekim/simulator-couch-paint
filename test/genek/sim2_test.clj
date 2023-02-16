@@ -146,5 +146,27 @@
             (->> retval
               (map :id))))))
 
+  (testing "update-rooms-movers"
+    (let [newstate (utils/update-rooms-movers
+                     {:old-rooms (-> @*state last :rooms)
+                      :old-movers (-> @*state last :movers)}
+                     [{:room {:id 0,
+                              :role :room,
+                              :state :removing-furniture,
+                              :moving1-time-remaining 10,
+                              :painting-time-remaining 50,
+                              :moving2-time-remaining 10}
+                       :mover {:id 0, :role :mover, :at-room 0}}])]
+      (is (= :removing-furniture
+            (-> newstate :old-rooms first :state))))
+    0)
 
-  0)
+  (testing "update-room-movers"
+    #_(is (= 1
+            (utils/update-rooms-movers {:old-rooms nil :old-movers nil})))
+    (is (= 1 1)))
+  (testing "free-room-movers"
+    (is (= 1 1))))
+
+
+0
