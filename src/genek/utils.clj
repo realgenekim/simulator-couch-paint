@@ -79,6 +79,23 @@
          :old-movers newmovers}
         (rest new-rms)))))
 
+(>defn update-rooms-movers2
+  " reducing function
+    input: state
+           room-assignments: [{:mover .. :room ..} {}] (set of tuples, mover -> new room)
+    output: new state "
+  [{:keys [rooms movers] :as state} room-assignments]
+  [map? (s/nilable sequential?) => map?]
+  ; ending case
+  (println :update-rooms-movers2 :m (pp-str state) :new-rms (pp-str room-assignments))
+  ; empty or nil
+  (if (empty? room-assignments)
+    state
+    (let [newrooms  (update-by-id rooms (:room (first room-assignments)))
+          newmovers (update-by-id movers (:mover (first room-assignments)))]
+      (recur (assoc state :rooms newrooms :movers newmovers)
+        (rest room-assignments)))))
+
 (>defn free-room-movers
   " reducing function
     input: {:old-rooms ... :old-movers ... :new-rms [{:mover .. :room ..} {}]

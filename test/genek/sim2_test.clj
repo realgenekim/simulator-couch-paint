@@ -159,6 +159,18 @@
                        :mover {:id 0, :role :mover, :at-room 0}}])]
       (is (= :removing-furniture
             (-> newstate :old-rooms first :state))))
+
+    (let [newstate (utils/update-rooms-movers2
+                     (-> @*state last)
+                     [{:room {:id 0,
+                              :role :room,
+                              :state :removing-furniture,
+                              :moving1-time-remaining 10,
+                              :painting-time-remaining 50,
+                              :moving2-time-remaining 10}
+                       :mover {:id 0, :role :mover, :at-room 0}}])]
+      (is (= :removing-furniture
+            (-> newstate :rooms first :state))))
     0)
 
   (testing "update-room-movers"
