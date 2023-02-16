@@ -71,7 +71,8 @@
       (recur (assoc state :rooms newrooms :movers newmovers)
         (rest room-assignments)))))
 
-(>defn free-room-movers
+#trace
+(defn free-room-movers
   " reducing function
       for every room that has done mover/painter:
         advance room state
