@@ -44,3 +44,28 @@
     1
     #(update-in % [:n] inc))
   0)
+
+;
+; update
+;
+
+(>defn update-rooms-movers
+  " reducing function
+    input: {:old-rooms ... :old-movers ... :new-rms [{:mover .. :room ..} {}]
+    output: same "
+  [{:keys [old-rooms old-movers] :as m} new-rms]
+  [map? (s/nilable sequential?) => map?]
+  ; ending case
+  (println :update-rooms-movers :m (pp-str m)
+    :new-rms (pp-str new-rms))
+  ; empty or nil
+  (if (empty? new-rms)
+    {:old-rooms old-rooms
+     :old-movers old-movers}
+    ; else
+    (let [newrooms (update-by-id old-rooms (:room (first new-rms)))
+          newmovers (update-by-id old-movers (:mover (first new-rms)))]
+      (recur
+        {:old-rooms newrooms
+         :old-movers newmovers}
+        (rest new-rms)))))

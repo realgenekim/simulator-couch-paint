@@ -91,6 +91,10 @@
 (s/def ::s-movers
   (s/coll-of ::s-mover))
 
+;
+; find
+;
+
 (>defn rooms-needing-movers
   " input: all rooms
     output: all rooms that need movers"
@@ -125,3 +129,5 @@
 (comment
   (available-movers (-> @genek.simw/*state last :movers))
   0)
+
+
