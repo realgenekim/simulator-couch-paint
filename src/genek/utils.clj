@@ -96,6 +96,30 @@
              ;rstate))))
              (sp/setval [:rooms roomnum :state] (get e/next-room-state rstate) x))))
         ; mover: set :at-room to nil
-        (sp/setval [:movers roomnum :state] e/next-room-state)))
+        (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil)))
     #_(recur (assoc state :rooms newrooms :movers newmovers)
         (rest done-rooms))))
+
+
+(comment
+  (def roomnum 0)
+  (->> {:turn 0,
+        :rooms [{:id 0,
+                 :role :room,
+                 :state :removing-furniture
+                 :moving1-time-remaining 10,
+                 :painting-time-remaining 50,
+                 :moving2-time-remaining 10}
+                {:id 1,
+                 :role :room,
+                 :state :waiting-for-movers1,
+                 :moving1-time-remaining 10,
+                 :painting-time-remaining 50,
+                 :moving2-time-remaining 10}]
+        :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room 0}],
+        :painters [{:id 0, :role :painter, :at-room nil}
+                   {:id 1, :role :painter, :at-room nil}
+                   {:id 2, :role :painter, :at-room nil}
+                   {:id 3, :role :painter, :at-room nil}]}
+    (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))
+  0)

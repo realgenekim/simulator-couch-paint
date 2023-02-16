@@ -198,12 +198,16 @@
                             {:id 2, :role :painter, :at-room nil}
                             {:id 3, :role :painter, :at-room nil}]}
           newstate (utils/free-room-movers state [0])]
-      (println :test-free-room-movers newstate)
+      ;(println :test-free-room-movers newstate)
+      (def newstate newstate)
       (is (= :waiting-for-painters
             (->> newstate
               (sp/select [:rooms 0 :state])
+              first)))
+      (is (= nil
+            (->> newstate
+              (sp/select [:movers 1 :at-room])
               first))))
-            ;(-> newstate :rooms first :state))))
     (is (= 1 1))))
 
 
