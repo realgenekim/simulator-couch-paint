@@ -113,9 +113,6 @@
   0)
 
 
-(s/def ::s-state
-  (s/keys :req-un [::turn ::rooms ::movers ::painters]))
-
 (s/def ::s-room
   (s/keys :req-un [::role ::state ::id ::painting-time-remaining
                    ::moving1-time-remaining ::moving2-time-remaining]))
@@ -141,19 +138,6 @@
   (rooms-needing-movers (-> @*state last :rooms))
   0)
 
-(>defn available-movers
-  " input: state
-    output: all movers that are available "
-  [state] [::s-state => ::s-state]
-  (let [movers (-> state :movers)]
-    (->> movers
-      (filter (fn [m]
-                (nil? (:at-room m)))))))
-
-
-(comment
-  (available-movers (-> @*state last :movers))
-  0)
 
 (s/def ::s-moving-assignment
   (s/keys :opt-un [::room ::mover]))
@@ -207,7 +191,7 @@
   "
   [state] [::s-state => ::s-state]
   (let [needs-movers (rooms-needing-movers (-> state :rooms))
-        movers       (available-movers state)
+        movers       (e/available-movers state)
         _            (println :assign-available-movers :needs-movers needs-movers)
         _            (println :assign-available-movers :movers movers)
         room-movers  (map vector needs-movers movers)
@@ -234,7 +218,7 @@
   "
   [state] [::s-state => ::s-state]
   (let [needs-movers (rooms-needing-movers (-> state :rooms))
-        movers       (available-movers state)
+        movers       (e/available-movers state)
         _            (println :assign-available-movers :needs-movers needs-movers)
         _            (println :assign-available-movers :movers movers)
         room-movers  (map vector needs-movers movers)

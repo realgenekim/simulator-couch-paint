@@ -70,7 +70,7 @@
     (is (= 2 (count @*state))))
 
   (testing "available movers"
-    (let [available-movers (sim/available-movers (-> @*state last))]
+    (let [available-movers (e/available-movers (-> @*state last))]
       (is (= 1
             (count available-movers)))))
 
@@ -89,7 +89,7 @@
       (is (= 0
             (-> new-state :movers first :at-room)))
       (is (= 0
-            (count (sim/available-movers new-state))))
+            (count (e/available-movers new-state))))
 
       (testing "rooms being moved"
         (is (= [0]
