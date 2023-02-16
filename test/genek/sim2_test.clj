@@ -70,7 +70,7 @@
     (is (= 2 (count @*state))))
 
   (testing "available movers"
-    (let [available-movers (sim/available-movers (-> @*state last :movers))]
+    (let [available-movers (sim/available-movers (-> @*state last))]
       (is (= 1
             (count available-movers)))))
 
@@ -89,15 +89,15 @@
       (is (= 0
             (-> new-state :movers first :at-room)))
       (is (= 0
-            (count (sim/available-movers (-> new-state :movers)))))
+            (count (sim/available-movers new-state))))
 
       (testing "rooms being moved"
         (is (= [0]
-              (sim/rooms-being-moved (-> new-state)))))
+              (sim/rooms-being-moved new-state))))
 
       (testing "update rooms being moved"
         (is (= 9
-              (-> (sim/advance-state (-> new-state))
+              (-> (sim/advance-state new-state)
                  :rooms
                 first
                 :moving1-time-remaining)))))

@@ -142,12 +142,13 @@
   0)
 
 (>defn available-movers
-  " input: all movers
+  " input: state
     output: all movers that are available "
-  [movers] [::s-movers => ::s-movers]
-  (->> movers
-    (filter (fn [m]
-              (nil? (:at-room m))))))
+  [state] [::s-state => ::s-state]
+  (let [movers (-> state :movers)]
+    (->> movers
+      (filter (fn [m]
+                (nil? (:at-room m)))))))
 
 
 (comment
@@ -206,7 +207,34 @@
   "
   [state] [::s-state => ::s-state]
   (let [needs-movers (rooms-needing-movers (-> state :rooms))
-        movers       (available-movers (-> state :movers))
+        movers       (available-movers state)
+        _            (println :assign-available-movers :needs-movers needs-movers)
+        _            (println :assign-available-movers :movers movers)
+        room-movers  (map vector needs-movers movers)
+        ; this creates [{:room newroom :mover newmover}...]
+        _             (println :assign-available-movers :rooms-movers room-movers)
+        new-rooms-movers (->> room-movers
+                           (map assign-room)
+                           (remove nil?))
+        _             (println :assign-available-movers :new-rooms-movers new-rooms-movers)
+        newrms        (reduce
+                        update-rooms-movers
+                        {:old-rooms        (-> state :rooms)
+                         :old-movers       (-> state :movers)}
+                        [new-rooms-movers])
+        newrooms     (:old-rooms newrms)
+        newmovers    (:old-movers newrms)]
+    (println :assign-available-movers :new-room-movers
+      (with-out-str (clojure.pprint/pprint new-rooms-movers)))
+    (assoc state :rooms newrooms
+                 :movers newmovers)))
+
+(>defn free-completed-movers
+  " for every room that has done mover/painter, free it up
+  "
+  [state] [::s-state => ::s-state]
+  (let [needs-movers (rooms-needing-movers (-> state :rooms))
+        movers       (available-movers state)
         _            (println :assign-available-movers :needs-movers needs-movers)
         _            (println :assign-available-movers :movers movers)
         room-movers  (map vector needs-movers movers)
