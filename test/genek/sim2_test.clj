@@ -333,9 +333,41 @@
               (sp/select [:rooms 0 :state])
               first))))
     (is (= 1 1)))
-
-
   0)
+
+(deftest add-painting
+  (let [state {:turn 26,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 1,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 2,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 3,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}],
+               :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+               :painters [{:id 0, :role :painter, :at-room nil}
+                          {:id 1, :role :painter, :at-room nil}
+                          {:id 2, :role :painter, :at-room nil}
+                          {:id 3, :role :painter, :at-room nil}]}]
+    (is (= 1 1))))
+
 
 (deftest next-actions
   (loop [n     15
