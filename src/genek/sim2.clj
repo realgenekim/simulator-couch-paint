@@ -199,7 +199,7 @@
 (s/def ::s-moving-assignments
   (s/coll-of ::s-moving-assignment))
 
-(>defn assign-room
+(>defn vecmap->room-assignments
   " change room state, change mover
     input: [[ room mover] ...] (created by map vector of rooms needing moving, and available movers)
     output: {:room ... :mover ...}"
@@ -232,7 +232,7 @@
         ; this creates [{:room newroom :mover newmover}...]
         _                (println :create-mover-assignments :rooms+movers room+movers)
         new-rooms+movers (->> room+movers
-                           (map assign-room)
+                           (map vecmap->room-assignments)
                            (remove nil?))]
     (println :create-mover-assignments :new-room-movers
       (with-out-str (clojure.pprint/pprint new-rooms+movers)))
