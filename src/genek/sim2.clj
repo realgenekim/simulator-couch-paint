@@ -306,11 +306,24 @@
       (with-out-str (clojure.pprint/pprint new-rooms+painters)))
     new-rooms+painters))
 
+(>defn- apply-painting-assignments
+  " input:  state
+            moving assignments: [{:room .. :mover} ...] : these are moving assigments, created by create-mover-assignments
+    output: state "
+  [state assignments] [::e/s-state ::s-moving-assignments => ::e/s-state]
+  (println :apply-painting-assignments :assignments assignments)
+  (let [newstate (reduce
+                   utils/update-rooms-movers
+                   state [assignments])]
+    #_(println :apply-painting-assignments :new-room-movers
+        (with-out-str (clojure.pprint/pprint new-rooms+movers)))
+    newstate))
+
 (>defn assign-painters
   " for every room that needs mover/painter, assign one that is available
   "
   [state] [::e/s-state => ::e/s-state]
-  (let [assignments (create-mover-assignments state)
+  (let [assignments (create-painter-assignments state)
         newstate    (apply-moving-assignments state assignments)]
     newstate))
 
