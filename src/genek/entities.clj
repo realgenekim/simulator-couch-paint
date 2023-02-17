@@ -128,10 +128,14 @@
   (->> rooms
     (filter (fn [r]
               (or
-                (neg? (-> r :moving1-time-remaining))
-                (zero? (-> r :moving1-time-remaining))
-                (neg? (-> r :moving2-time-remaining))
-                (zero? (-> r :moving2-time-remaining)))))))
+                (and
+                  (= :waiting-for-painters (-> r :state))
+                  (neg? (-> r :moving1-time-remaining))
+                  (zero? (-> r :moving1-time-remaining)))
+                (and
+                  (= :waiting-for-painters (-> r :state))
+                  (neg? (-> r :moving2-time-remaining))
+                  (zero? (-> r :moving2-time-remaining))))))))
 
 ;
 ; movers
