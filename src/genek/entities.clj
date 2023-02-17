@@ -5,10 +5,28 @@
 
 
 ; mover or painter record
+
 (s/def ::s-record
   (s/keys :req-un [::id]))
 (s/def ::s-records
   (s/coll-of ::s-record))
+
+(s/def ::state keyword?)
+
+(s/def ::s-room
+  (s/keys :req-un [::role ::state ::id ::painting-time-remaining
+                   ::moving1-time-remaining ::moving2-time-remaining]))
+(s/def ::s-rooms
+  (s/coll-of ::s-room))
+
+(s/def ::s-mover
+  (s/keys :req-un [::id ::role ::at-room]))
+
+(s/def ::s-movers
+  (s/coll-of ::s-mover))
+
+(s/def ::rooms ::s-rooms)
+(s/def ::movers ::s-movers)
 
 (s/def ::s-state
   (s/keys :req-un [::turn ::rooms ::movers ::painters]))
@@ -86,17 +104,7 @@
 ;
 ;
 
-(s/def ::s-room
-  (s/keys :req-un [::role ::state ::id ::painting-time-remaining
-                   ::moving1-time-remaining ::moving2-time-remaining]))
-(s/def ::s-rooms
-  (s/coll-of ::s-room))
 
-(s/def ::s-mover
-  (s/keys :req-un [::id ::role ::at-room]))
-
-(s/def ::s-movers
-  (s/coll-of ::s-mover))
 
 ;
 ; find

@@ -41,13 +41,19 @@
   (atom? nil)
   0)
 
+(s/def ::s-index nat-int?)
+(s/def ::s-indexes
+  (s/coll-of ::s-index))
+
 (>defn rooms-being-moved
   " given state, return vector of all rooms being moved "
-  [state] [map? => sequential?]
+  [state] [map? => ::s-indexes]
   (-> state
     :movers
     ((fn [movers]
-       (map :at-room movers)))))
+       (->> movers
+         (map :at-room)
+         (remove nil?))))))
 
 
 (>defn advance-state

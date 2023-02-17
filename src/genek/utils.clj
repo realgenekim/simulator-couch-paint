@@ -35,6 +35,7 @@
   " input: sequence of maps (rooms, movers, painters), and new record with {:id } to apply f
     output: seq of maps, with replace record "
   [ms id f] [::e/s-records integer? fn? => ::e/s-records]
+  {:pre  [(nat-int? id)]}
   (->> ms
     (map (fn [m]
            (if (= (:id m) id)
@@ -66,7 +67,7 @@
     output: new state "
   [{:keys [rooms movers] :as state} room-assignments]
   [map? (s/nilable sequential?) => map?]
-  (println :update-rooms-movers :m (pp-str state) :new-rms (pp-str room-assignments))
+  (println :update-rooms-movers :m (pp-str state) :room-assignments (pp-str room-assignments))
   ; empty or nil
   (if (empty? room-assignments)
     state
@@ -85,7 +86,7 @@
            done-rooms: vector of room numbers: [0 1 2]
     output: new state "
   [state done-rooms]
-  [map? sequential? => map?]
+  [::e/s-state sequential? => map?]
   (println :free-room-movers :state (pp-str state) :done-rooms (pp-str done-rooms))
   (loop [state state
          done-rooms done-rooms]
