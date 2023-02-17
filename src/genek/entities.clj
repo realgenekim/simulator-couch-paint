@@ -157,8 +157,8 @@
   " input: state
     output: all movers that are available "
   [state] [::s-state => sequential?]
-  (let [movers (-> state :painters)]
-    (->> movers
+  (let [painters (-> state :painters)]
+    (->> painters
       (filter (fn [m]
                 (nil? (:at-room m)))))))
 

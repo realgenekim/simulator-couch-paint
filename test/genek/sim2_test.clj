@@ -370,8 +370,12 @@
     (is (= [0 1 2 3]
           (->> (e/rooms-needing-painters (-> state :rooms))
             (mapv :id))))
-    (is (= []
-          (#'sim/create-painter-assignments state)))
+    (is (= [:painting :painting :painting :painting]
+          (->> (#'sim/create-painter-assignments state)
+            (map #(-> % :room :state)))))
+    (is (= [0 1 2 3]
+          (->> (#'sim/create-painter-assignments state)
+            (map #(-> % :painter :at-room)))))
     0))
 
 

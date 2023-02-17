@@ -217,7 +217,12 @@
   (println :vecmap->room-assignments :room room)
   (println :vecmap->room-assignments :mover mover)
   (if (and room mover)
-    (let [newroom (assoc room :state :removing-furniture)
+    (let [roomstate (-> room :state)
+          newroom (assoc room :state
+                              (case roomstate
+                                :waiting-for-movers1 :removing-furniture
+                                :waiting-for-painters :painting
+                                :waiting-for-movers2 :restoring-furniture))
           newmover (assoc mover :at-room (-> room :id))
           retval   {:room newroom
                     k newmover}]
