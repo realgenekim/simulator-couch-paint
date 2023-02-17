@@ -469,13 +469,30 @@
       (is (= [0]
             (->> (e/rooms-done-with-painters (-> state :rooms))
               (map :id))))
-      (is (= []
-            (sim/free-painters state)))
+
+      (let [newstate (sim/free-painters state)]
+        (def newstate newstate)
+
+        (is (= nil
+              (->> newstate
+                :painters
+                first
+                :at-room))))
+
+      (testing "advance state"
+        (let [newstate2 (sim/advance-state newstate)]
+          (def newstate2 newstate2)
+
+          (is (= :waiting-for-movers2
+                (->> newstate2
+                  :rooms
+                  first
+                  :state)))))
       0)))
 
 
 (deftest next-actions
-  (loop [n     15
+  (loop [n     35
          state {:turn     10,
                 :rooms    [{:id                      0,
                             :role                    :room,
@@ -516,6 +533,7 @@
                      sim/assign-movers
                      sim/free-movers
                      sim/assign-painters
+                     sim/free-painters
                      sim/advance-state
                      sim/next-turn)]
       (def newstate newstate)

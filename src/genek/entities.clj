@@ -44,7 +44,9 @@
    :finished])
 
 (def next-room-state
-  {:removing-furniture :waiting-for-painters})
+  {:removing-furniture  :waiting-for-painters
+   :painting            :waiting-for-movers2
+   :restoring-furniture :finished})
 
 
 (def state-needs-mover?
