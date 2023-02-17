@@ -76,17 +76,19 @@
       (recur (assoc state :rooms newrooms :movers newmovers)
         (rest room-assignments)))))
 
-#trace
 (defn free-room-movers
   " reducing function
       for every room that has done mover/painter:
-        advance room state
+        advance room state (:removing-furniture -> :waiting-for-painters)
         set mover :at-room to nil
     input: state
            done-rooms: vector of room numbers: [0 1 2]
     output: new state "
   [state done-rooms]
-  [::e/s-state sequential? => map?]
+  [::e/s-state sequential? => ::e/s-state]
+  {:pre [(vector? (-> state :rooms))
+         (vector? (-> state :movers))
+         (vector? (-> state :painters))]}
   (println :free-room-movers :state (pp-str state) :done-rooms (pp-str done-rooms))
   (loop [state state
          done-rooms done-rooms]
@@ -98,6 +100,7 @@
         (println :free-room-movers :done)
         state)
       (let [roomnum (first done-rooms)
+            _       (println :free-room-movers :roomnum roomnum)
             newstate (->> state
                        ; room: advance to next state
                        ((fn [x]

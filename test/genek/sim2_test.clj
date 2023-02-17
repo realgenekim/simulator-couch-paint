@@ -73,42 +73,100 @@
   (testing "available movers"
     (let [available-movers (e/available-movers (-> @*state last))]
       (is (= 1
-            (count available-movers)))))
+            (count available-movers))))))
+
+
+(deftest moving
+  (testing "isolate failing case"
+    (let [state {:turn 0,
+                 :rooms [{:id 0,
+                          :role :room,
+                          :state :removing-furniture
+                          :moving1-time-remaining 10,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 1,
+                          :role :room,
+                          :state :waiting-for-movers1,
+                          :moving1-time-remaining 10,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}]
+                 :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room 0}],
+                 :painters [{:id 0, :role :painter, :at-room nil}
+                            {:id 1, :role :painter, :at-room nil}
+                            {:id 2, :role :painter, :at-room nil}
+                            {:id 3, :role :painter, :at-room nil}]}
+          retval (e/rooms-needing-movers (-> state :rooms))]
+      (is (= [1]
+            (->> retval
+              (mapv :id))))))
 
 
 
   ; change state
   (testing "assign movers to rooms"
-    (let [_ 1])
-    (let [new-state (sim/assign-available-movers (-> @*state last))
-          rooms-still-needs-movers (e/rooms-needing-movers
-                                     (-> new-state :rooms))]
-      (def new-state2 new-state)
-      ; 1 room in work, 3 still needing movers
-      (is (= 3
-            (count rooms-still-needs-movers)))
-      ; mover is at room 0
-      (is (= 0
-            (-> new-state :movers first :at-room)))
-      (is (= 0
-            (count (e/available-movers new-state))))
-
-      (testing "rooms being moved"
-        (is (= [0]
-              (sim/rooms-being-moved new-state))))
-
-      (testing "update rooms being moved"
-        (is (= 9
-              (-> (sim/advance-state new-state)
+    (let [state {:turn 3,
                  :rooms
-                first
-                :moving1-time-remaining)))))
+                 (list
+                   {:id 0,
+                    :role :room,
+                    :state :waiting-for-movers1,
+                    :moving1-time-remaining 10,
+                    :painting-time-remaining 50,
+                    :moving2-time-remaining 10}
+                  {:id 1,
+                   :role :room,
+                   :state :waiting-for-movers1,
+                   :moving1-time-remaining 10,
+                   :painting-time-remaining 50,
+                   :moving2-time-remaining 10}
+                  {:id 2,
+                   :role :room,
+                   :state :waiting-for-movers1,
+                   :moving1-time-remaining 10,
+                   :painting-time-remaining 50,
+                   :moving2-time-remaining 10}
+                  {:id 3,
+                   :role :room,
+                   :state :waiting-for-movers1,
+                   :moving1-time-remaining 10,
+                   :painting-time-remaining 50,
+                   :moving2-time-remaining 10}),
+                 :movers [{:id 0, :role :mover, :at-room nil}],
+                 :painters [{:id 0, :role :painter, :at-room nil}]}
+          ; should assign mover 0 to room 0
+          assignments (#'sim/create-mover-assignments state)]
+          ;new-state (sim/assign-available-movers state)]
+      (is (= 1
+            (count assignments)))
+      (is (= :removing-furniture
+            (-> assignments first :room :state)))
+      (is (= 0
+            (-> assignments first :mover :at-room)))
 
-    0
+      ; now state transform
+      (let [new-state (#'sim/apply-moving-assignments state assignments)]
 
+         ;1 room in work, 3 still needing movers)
+        (is (= 3
+              (count (e/rooms-needing-movers
+                       (-> new-state :rooms)))))
+         ;mover is at room 0)
+        (is (= 0
+              (-> new-state :movers first :at-room)))
+        (is (= 0
+              (count (e/available-movers new-state))))
 
+        (testing "rooms being moved"
+          (is (= [0]
+                (sim/rooms-being-moved new-state))))
 
-
+        (testing "update rooms being moved"
+          (is (= 9
+                (-> (sim/advance-state new-state)
+                   :rooms
+                  first
+                  :moving1-time-remaining))))))
 
     0))
 
@@ -251,16 +309,23 @@
                                   {:id 1, :role :painter, :at-room nil}
                                   {:id 2, :role :painter, :at-room nil}
                                   {:id 3, :role :painter, :at-room nil})}]
+
+    (let [newstate (-> state
+                     sim/assign-available-movers)]
+      (def newstate newstate)
+      (is (not (nil? (-> newstate :rooms first :state)))))
+
     (let [newstate (-> state
                      sim/assign-available-movers
                      sim/free-completed-movers
-                     sim/advance-state)]
+                     sim/advance-state
+                     sim/next-turn)]
       (def newstate newstate)
 
       (is (not (nil? (-> newstate :rooms first :state))))
 
       (is (= 1 1))
-      (println :test-next-actions :newstate (utils/pp-str newstate))
+      (println :test :next-actions :newstate (utils/pp-str newstate))
       (if (pos? n)
         (recur (dec n) newstate))))
 

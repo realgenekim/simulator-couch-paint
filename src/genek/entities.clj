@@ -23,7 +23,9 @@
   (s/keys :req-un [::id ::role ::at-room]))
 
 (s/def ::s-movers
-  (s/coll-of ::s-mover))
+  (s/and
+    (s/coll-of ::s-mover)
+    vector?))
 
 (s/def ::rooms ::s-rooms)
 (s/def ::movers ::s-movers)
