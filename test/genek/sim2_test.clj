@@ -208,6 +208,7 @@
       (let [new-state (#'sim/apply-moving-assignments state assignments)]
 
          ;1 room in work, 3 still needing movers)
+        (def new-state new-state)
         (is (= 3
               (count (e/rooms-needing-movers
                        (-> new-state :rooms)))))
@@ -376,6 +377,8 @@
     (is (= [0 1 2 3]
           (->> (#'sim/create-painter-assignments state)
             (map #(-> % :painter :at-room)))))
+    (is (= []
+          (->> (sim/assign-painters state))))
     0))
 
 

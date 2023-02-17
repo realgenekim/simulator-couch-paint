@@ -66,18 +66,26 @@
     input: state
            room-assignments: [{:mover .. :room ..} {}] (set of tuples, mover -> new room)
     output: new state "
-  [worker {:keys [rooms movers] :as state} room-assignments]
+  [kworker {:keys [rooms] :as state} room-assignments]
   [keyword? map? (s/nilable sequential?) => map?]
-  (println :update-rooms-movers :m (pp-str state) :room-assignments (pp-str room-assignments))
+  (println :update-rooms-workers :m (pp-str state) :room-assignments (pp-str room-assignments))
   ; empty or nil
   (if (empty? room-assignments)
     state
-    (let [newrooms  (update-by-id rooms (:room (first room-assignments)))
-          newmovers (update-by-id movers (worker (first room-assignments)))]
-      (recur worker (assoc state :rooms newrooms :movers newmovers)
+    (let [newrooms   (update-by-id rooms (:room (first room-assignments)))
+          workers    (case kworker
+                       :movers (-> state :movers)
+                       :painters (-> state :painters))
+          _          (println :update-rooms-workers :assignments (kworker (first room-assignments)) :workers workers)
+          newworkers (update-by-id workers
+                       ; get :mover or :painter key in assignment
+                       ((case kworker
+                          :movers :mover
+                          :painters :painter) (first room-assignments)))]
+      (recur kworker (assoc state :rooms newrooms kworker newworkers)
         (rest room-assignments)))))
 
-(def update-rooms-movers (partial update-rooms-workers :mover))
+(def update-rooms-movers (partial update-rooms-workers :movers))
 (def update-rooms-painters (partial update-rooms-workers :painters))
 
 (defn free-room-movers

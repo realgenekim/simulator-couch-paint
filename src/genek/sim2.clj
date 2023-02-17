@@ -313,7 +313,7 @@
   [state assignments] [::e/s-state ::s-moving-assignments => ::e/s-state]
   (println :apply-painting-assignments :assignments assignments)
   (let [newstate (reduce
-                   utils/update-rooms-movers
+                   utils/update-rooms-painters
                    state [assignments])]
     #_(println :apply-painting-assignments :new-room-movers
         (with-out-str (clojure.pprint/pprint new-rooms+movers)))
