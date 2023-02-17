@@ -99,7 +99,61 @@
           retval (e/rooms-needing-movers (-> state :rooms))]
       (is (= [1]
             (->> retval
-              (mapv :id))))))
+              (mapv :id)))))
+
+    (testing "failing test case"
+      (let [state  {:turn 11,
+                    :rooms
+                    [{:id                      0,
+                      :role                    :room,
+                      :state                   :waiting-for-painters,
+                      :moving1-time-remaining  0,
+                      :painting-time-remaining 50,
+                      :moving2-time-remaining  10}
+                     {:id                      1,
+                      :role                    :room,
+                      :state                   :removing-furniture,
+                      :moving1-time-remaining  0,
+                      :painting-time-remaining 50,
+                      :moving2-time-remaining  10}
+                     {:id                      2,
+                      :role                    :room,
+                      :state                   :removing-furniture,
+                      :moving1-time-remaining  10,
+                      :painting-time-remaining 50,
+                      :moving2-time-remaining  10}
+                     {:id                      3,
+                      :role                    :room,
+                      :state                   :waiting-for-movers1,
+                      :moving1-time-remaining  10,
+                      :painting-time-remaining 50,
+                      :moving2-time-remaining  10}],
+                    :movers
+                    [{:id 0, :role :mover, :at-room 2} {:id 1, :role :mover, :at-room 1}],
+                    :painters
+                    [{:id 0, :role :painter, :at-room nil}
+                     {:id 1, :role :painter, :at-room nil}
+                     {:id 2, :role :painter, :at-room nil}
+                     {:id 3, :role :painter, :at-room nil}]}]
+
+        (is (= 1
+              (-> (e/rooms-needing-movers (-> state :rooms))
+                count)))
+        (is (= [3]
+              (->> (e/rooms-needing-movers (-> state :rooms))
+                (mapv :id))))
+
+        (is (= []
+              (#'sim/create-mover-assignments state)))
+        ; looks good
+        #_(is (= []
+                (sim/assign-available-movers (-> state)))))
+
+      0)
+
+
+
+    0)
 
 
 
