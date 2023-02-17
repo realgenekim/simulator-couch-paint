@@ -129,12 +129,10 @@
     (filter (fn [r]
               (or
                 (and
-                  (= :waiting-for-painters (-> r :state))
-                  (neg? (-> r :moving1-time-remaining))
+                  (= :removing-furniture (-> r :state))
                   (zero? (-> r :moving1-time-remaining)))
                 (and
-                  (= :waiting-for-painters (-> r :state))
-                  (neg? (-> r :moving2-time-remaining))
+                  (= :restoring-furniture (-> r :state))
                   (zero? (-> r :moving2-time-remaining))))))))
 
 ;
