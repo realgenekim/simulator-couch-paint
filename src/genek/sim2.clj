@@ -199,7 +199,7 @@
 (s/def ::s-moving-assignments
   (s/coll-of ::s-moving-assignment))
 
-(>defn vecmap->room-assignments
+(>defn- vecmap->room-assignments
   " change room state, change mover
     input: [[ room mover] ...] (created by map vector of rooms needing moving, and available movers)
     output: {:room ... :mover ...}"
@@ -209,14 +209,14 @@
   ; case 3: mover rooms than mover
   ;
   ; put them into one vector
-  (println :assign-room :room room)
-  (println :assign-room :mover mover)
+  (println :vecmap->room-assignments :room room)
+  (println :vecmap->room-assignments :mover mover)
   (if (and room mover)
     (let [newroom (assoc room :state :removing-furniture)
           newmover (assoc mover :at-room (-> room :id))
           retval   {:room newroom
                     :mover newmover}]
-      (println :assign-room "**** assign! " :retval retval)
+      (println :vecmap->room-assignments :retval retval)
       retval)))
 
 (>defn- create-mover-assignments
@@ -251,15 +251,12 @@
         (with-out-str (clojure.pprint/pprint new-rooms+movers)))
     newstate))
 
-
-
-
 (>defn assign-available-movers
   " for every room that needs mover/painter, assign one that is available
   "
   [state] [::e/s-state => ::e/s-state]
   (let [assignments (create-mover-assignments state)
-        newstate (apply-moving-assignments state assignments)]
+        newstate    (apply-moving-assignments state assignments)]
     newstate))
 
 
