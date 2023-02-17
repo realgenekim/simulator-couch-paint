@@ -194,6 +194,10 @@
   0)
 
 
+;
+; painters
+;
+
 (s/def ::s-moving-assignment
   (s/keys :opt-un [::room ::mover]))
 (s/def ::s-moving-assignments
@@ -201,9 +205,10 @@
 
 (>defn- vecmap->room-assignments
   " change room state, change mover
-    input: [[ room mover] ...] (created by map vector of rooms needing moving, and available movers)
+    input: k: :mover or :painter
+           [[ room mover] ...] (created by map vector of rooms needing moving, and available movers)
     output: {:room ... :mover ...}"
-  [[room mover]] [vector? => ::s-moving-assignment]
+  [k [room mover]] [keyword? vector? => ::s-moving-assignment]
   ; case 1: no movers
   ; case 2: more movers than rooms
   ; case 3: mover rooms than mover
@@ -215,7 +220,7 @@
     (let [newroom (assoc room :state :removing-furniture)
           newmover (assoc mover :at-room (-> room :id))
           retval   {:room newroom
-                    :mover newmover}]
+                    k newmover}]
       (println :vecmap->room-assignments :retval retval)
       retval)))
 
@@ -232,7 +237,7 @@
         ; this creates [{:room newroom :mover newmover}...]
         _                (println :create-mover-assignments :rooms+movers room+movers)
         new-rooms+movers (->> room+movers
-                           (map vecmap->room-assignments)
+                           (map #(vecmap->room-assignments :mover %))
                            (remove nil?))]
     (println :create-mover-assignments :new-room-movers
       (with-out-str (clojure.pprint/pprint new-rooms+movers)))
@@ -259,7 +264,6 @@
         newstate    (apply-moving-assignments state assignments)]
     newstate))
 
-
 (>defn free-movers
   " for every room that has done mover/painter:
       advance room state
@@ -270,9 +274,39 @@
                          (map :id))
         ; ^^ list of rooms that are done (0 1 2)
         ; now we need to
-        _           (println :free-completed-movers :done-rooms done-rooms)
+        _           (println :free-movers :done-rooms done-rooms)
         newstate    (utils/free-room-movers state done-rooms)]
-    (def ns2 newstate)
+    newstate))
+
+;
+; painters
+;
+
+(>defn- create-painter-assignments
+  " for every room that needs mover/painter, identify a mover to be assigned
+    input: state
+    output: [{:room .. :mover} ...] "
+  [state] [::e/s-state => ::s-moving-assignments]
+  (let [needs-movers     (e/rooms-needing-painters (-> state :rooms))
+        painters         (e/available-painters state)
+        _                (println :create-painter-assignments :needs-movers needs-movers)
+        _                (println :create-painter-assignments :painters painters)
+        room+painters    (map vector needs-movers painters)
+        ; this creates [{:room newroom :mover newmover}...]
+        _                (println :create-painter-assignments :rooms+painters room+painters)
+        new-rooms+painters (->> room+painters
+                             (map #(vecmap->room-assignments :painter %))
+                             (remove nil?))]
+    (println :create-painter-assignments :new-room-movers
+      (with-out-str (clojure.pprint/pprint new-rooms+painters)))
+    new-rooms+painters))
+
+(>defn assign-painters
+  " for every room that needs mover/painter, assign one that is available
+  "
+  [state] [::e/s-state => ::e/s-state]
+  (let [assignments (create-mover-assignments state)
+        newstate    (apply-moving-assignments state assignments)]
     newstate))
 
 (comment

@@ -121,6 +121,15 @@
               (let [state (-> r :state)]
                 (get state-needs-mover? state))))))
 
+(>defn rooms-needing-painters
+  " input: all rooms
+    output: all rooms that need movers"
+  [rooms] [::s-rooms => ::s-rooms]
+  (->> rooms
+    (filter (fn [r]
+              (let [state (-> r :state)]
+                (get state-needs-painter? state))))))
+
 (>defn rooms-done-with-movers
   " input: all rooms
     output: all rooms that need movers"
@@ -135,15 +144,20 @@
                   (= :restoring-furniture (-> r :state))
                   (zero? (-> r :moving2-time-remaining))))))))
 
-;
-; movers
-;
-
 (>defn available-movers
   " input: state
     output: all movers that are available "
   [state] [::s-state => sequential?]
   (let [movers (-> state :movers)]
+    (->> movers
+      (filter (fn [m]
+                (nil? (:at-room m)))))))
+
+(>defn available-painters
+  " input: state
+    output: all movers that are available "
+  [state] [::s-state => sequential?]
+  (let [movers (-> state :painters)]
     (->> movers
       (filter (fn [m]
                 (nil? (:at-room m)))))))
