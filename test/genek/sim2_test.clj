@@ -151,9 +151,9 @@
                 (mapv :id))))
 
         ; next step: free completed movers
-        (let [state (sim/assign-available-movers state)]
+        (let [state (sim/assign-movers state)]
           (is (map?
-                (sim/free-completed-movers state)))))
+                (sim/free-movers state)))))
 
       0)
 
@@ -196,7 +196,7 @@
                  :painters [{:id 0, :role :painter, :at-room nil}]}
           ; should assign mover 0 to room 0
           assignments (#'sim/create-mover-assignments state)]
-          ;new-state (sim/assign-available-movers state)]
+          ;new-state (sim/assign-movers state)]
       (is (= 1
             (count assignments)))
       (is (= :removing-furniture
@@ -371,13 +371,13 @@
                                   {:id 3, :role :painter, :at-room nil})}]
 
     (let [newstate (-> state
-                     sim/assign-available-movers)]
+                     sim/assign-movers)]
       (def newstate newstate)
       (is (not (nil? (-> newstate :rooms first :state)))))
 
     (let [newstate (-> state
-                     sim/assign-available-movers
-                     sim/free-completed-movers
+                     sim/assign-movers
+                     sim/free-movers
                      sim/advance-state
                      sim/next-turn)]
       (def newstate newstate)

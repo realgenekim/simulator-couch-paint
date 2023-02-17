@@ -11,7 +11,7 @@
 (clerk/table @sim/*state)
 
 ;; assign mover to room
-(def newstate (sim/assign-available-movers (-> @sim/*state last)))
+(def newstate (sim/assign-movers (-> @sim/*state last)))
 
 ;; increment turn
 
@@ -19,11 +19,11 @@
 
 (doseq [i (range 5)]
   (let [newstate (-> (-> @sim/*state last)
-                   sim/assign-available-movers
-                   sim/free-completed-movers
+                   sim/assign-movers
+                   sim/free-movers
                    sim/advance-state)]
     (sim/next-turn! sim/*state newstate)))
-  ;(let [newstate (sim/assign-available-movers (-> @sim/*state last))]
+  ;(let [newstate (sim/assign-movers (-> @sim/*state last))]
   ;  (sim/next-turn! sim/*state newstate)))
 
 (-> @sim/*state last)

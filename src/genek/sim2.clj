@@ -251,7 +251,7 @@
         (with-out-str (clojure.pprint/pprint new-rooms+movers)))
     newstate))
 
-(>defn assign-available-movers
+(>defn assign-movers
   " for every room that needs mover/painter, assign one that is available
   "
   [state] [::e/s-state => ::e/s-state]
@@ -260,7 +260,7 @@
     newstate))
 
 
-(>defn free-completed-movers
+(>defn free-movers
   " for every room that has done mover/painter:
       advance room state
       set mover :at-room to nil
@@ -277,7 +277,7 @@
 
 (comment
   (e/rooms-done-with-movers (-> @*state last :rooms))
-  (free-completed-movers (-> @*state last :rooms))
+  (free-movers (-> @*state last :rooms))
   0)
 
 

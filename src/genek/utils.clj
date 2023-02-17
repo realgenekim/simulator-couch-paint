@@ -154,8 +154,8 @@
                             {:id 2, :role :painter, :at-room nil}
                             {:id 3, :role :painter, :at-room nil})}]
     (let [newstate (-> state
-                     genek.sim2/assign-available-movers
-                     genek.sim2/free-completed-movers
+                     genek.sim2/assign-movers
+                     genek.sim2/free-movers
                      genek.sim2/advance-state)]
       (def newstate newstate)
       (println "done")))
