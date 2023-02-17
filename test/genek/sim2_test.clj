@@ -425,6 +425,7 @@
     (let [newstate (-> state
                      sim/assign-movers
                      sim/free-movers
+                     sim/assign-painters
                      sim/advance-state
                      sim/next-turn)]
       (def newstate newstate)

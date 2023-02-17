@@ -45,16 +45,20 @@
 (s/def ::s-indexes
   (s/coll-of ::s-index))
 
-(>defn rooms-being-moved
+(>defn rooms-being-worked
   " given state, return vector of all rooms being moved "
-  [state] [map? => ::s-indexes]
+  [kworkers state] [keyword? map? => ::s-indexes]
   (-> state
-    :movers
+    kworkers
     ((fn [movers]
        (->> movers
          ; :at-room are all the room numbers that the movers are at
          (map :at-room)
          (remove nil?))))))
+
+(def rooms-being-moved (partial rooms-being-worked :movers))
+(def rooms-being-painted (partial rooms-being-worked :painters))
+
 
 
 (>defn advance-state
@@ -62,7 +66,8 @@
     - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
     - unassigning movers and painters "
   [state] [map? => map?]
-  (let [rooms-moving (rooms-being-moved state)]
+  (let [rooms-moving (rooms-being-moved state)
+        rooms-painting (rooms-being-painted state)]
     (println :advance-state/entering :rooms-moving rooms-moving)
     (println :advance-state/entering :state state)
     (reduce (fn [s rs]
