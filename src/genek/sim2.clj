@@ -366,7 +366,7 @@
         ; ^^ list of rooms that are done (0 1 2)
         ; now we need to
         _           (println :free-painters :done-rooms done-rooms)
-        newstate    (utils/free-room-movers state done-rooms)]
+        newstate    (utils/free-room-painters state done-rooms)]
     newstate))
 
 

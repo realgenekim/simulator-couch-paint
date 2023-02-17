@@ -136,10 +136,11 @@
                             ;rstate))))
                             (sp/setval [:rooms roomnum :state] nextstate x))))
                        ; mover: set :at-room to nil
-                       (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))]
+                       (sp/setval [kworker sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))]
         (recur kworker newstate (rest done-rooms))))))
 
 (def free-room-movers (partial free-room-workers :movers))
+(def free-room-painters (partial free-room-workers :painters))
 
 (comment
 
