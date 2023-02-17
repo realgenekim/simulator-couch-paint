@@ -144,6 +144,16 @@
                   (= :restoring-furniture (-> r :state))
                   (zero? (-> r :moving2-time-remaining))))))))
 
+(>defn rooms-done-with-painters
+  " input: all rooms
+    output: all rooms that need movers"
+  [rooms] [::s-rooms => ::s-rooms]
+  (->> rooms
+    (filter (fn [r]
+              (and
+                (= :painting (-> r :state))
+                (zero? (-> r :painting-time-remaining)))))))
+
 (>defn available-movers
   " input: state
     output: all movers that are available "

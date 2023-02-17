@@ -355,5 +355,19 @@
   (free-movers (-> @*state last :rooms))
   0)
 
+(>defn free-painters
+  " for every room that has done mover/painter:
+      advance room state
+      set mover :at-room to nil
+  "
+  [state] [::e/s-state => ::e/s-state]
+  (let [done-rooms  (->> (e/rooms-done-with-painters (-> state :rooms))
+                      (map :id))
+        ; ^^ list of rooms that are done (0 1 2)
+        ; now we need to
+        _           (println :free-painters :done-rooms done-rooms)
+        newstate    (utils/free-room-movers state done-rooms)]
+    newstate))
+
 
 

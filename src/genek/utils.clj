@@ -94,7 +94,7 @@
 (def update-rooms-movers (partial update-rooms-workers :movers))
 (def update-rooms-painters (partial update-rooms-workers :painters))
 
-(defn free-room-movers
+(>defn free-room-movers
   " reducing function
       for every room that has done mover/painter:
         advance room state (:removing-furniture -> :waiting-for-painters)
