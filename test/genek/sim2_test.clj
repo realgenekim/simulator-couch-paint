@@ -338,51 +338,137 @@
   0)
 
 (deftest add-painting
-  (let [state {:turn 26,
-               :rooms [{:id 0,
-                        :role :room,
-                        :state :waiting-for-painters,
-                        :moving1-time-remaining 0,
-                        :painting-time-remaining 50,
-                        :moving2-time-remaining 10}
-                       {:id 1,
-                        :role :room,
-                        :state :waiting-for-painters,
-                        :moving1-time-remaining 0,
-                        :painting-time-remaining 50,
-                        :moving2-time-remaining 10}
-                       {:id 2,
-                        :role :room,
-                        :state :waiting-for-painters,
-                        :moving1-time-remaining 0,
-                        :painting-time-remaining 50,
-                        :moving2-time-remaining 10}
-                       {:id 3,
-                        :role :room,
-                        :state :waiting-for-painters,
-                        :moving1-time-remaining 0,
-                        :painting-time-remaining 50,
-                        :moving2-time-remaining 10}],
-               :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
-               :painters [{:id 0, :role :painter, :at-room nil}
-                          {:id 1, :role :painter, :at-room nil}
-                          {:id 2, :role :painter, :at-room nil}
-                          {:id 3, :role :painter, :at-room nil}]}]
-    (is (= 1 1))
-    (is (= [0 1 2 3]
-          (->> (e/rooms-needing-painters (-> state :rooms))
-            (mapv :id))))
-    (is (= [:painting :painting :painting :painting]
-          (->> (#'sim/create-painter-assignments state)
-            (map #(-> % :room :state)))))
-    (is (= [0 1 2 3]
-          (->> (#'sim/create-painter-assignments state)
-            (map #(-> % :painter :at-room)))))
-    (is (= [0 1 2 3]
-          (->> (sim/assign-painters state)
-            :painters
-            (mapv #(-> % :at-room)))))
-    0))
+  (testing "basics painting"
+    (let [state {:turn 26,
+                 :rooms [{:id 0,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 1,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 2,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 3,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}],
+                 :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+                 :painters [{:id 0, :role :painter, :at-room nil}
+                            {:id 1, :role :painter, :at-room nil}
+                            {:id 2, :role :painter, :at-room nil}
+                            {:id 3, :role :painter, :at-room nil}]}]
+      (is (= 1 1))
+      (is (= [0 1 2 3]
+            (->> (e/rooms-needing-painters (-> state :rooms))
+              (mapv :id))))
+      (is (= [:painting :painting :painting :painting]
+            (->> (#'sim/create-painter-assignments state)
+              (map #(-> % :room :state)))))
+      (is (= [0 1 2 3]
+            (->> (#'sim/create-painter-assignments state)
+              (map #(-> % :painter :at-room)))))
+      (is (= [0 1 2 3]
+            (->> (sim/assign-painters state)
+              :painters
+              (mapv #(-> % :at-room)))))
+
+      0))
+  ; now test for painting done
+  (testing "basics painting"
+    (let [state {:turn 26,
+                 :rooms [{:id 0,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 1,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 2,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 3,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}],
+                 :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+                 :painters [{:id 0, :role :painter, :at-room nil}
+                            {:id 1, :role :painter, :at-room nil}
+                            {:id 2, :role :painter, :at-room nil}
+                            {:id 3, :role :painter, :at-room nil}]}]
+      (is (= 1 1))
+      (is (= [0 1 2 3]
+            (->> (e/rooms-needing-painters (-> state :rooms))
+              (mapv :id))))
+      (is (= [:painting :painting :painting :painting]
+            (->> (#'sim/create-painter-assignments state)
+              (map #(-> % :room :state)))))
+      (is (= [0 1 2 3]
+            (->> (#'sim/create-painter-assignments state)
+              (map #(-> % :painter :at-room)))))
+      (is (= [0 1 2 3]
+            (->> (sim/assign-painters state)
+              :painters
+              (mapv #(-> % :at-room)))))
+
+      ; now test for painting done
+      0))
+  (testing "painting done"
+    (let [state {:turn 26,
+                 :rooms [{:id 0,
+                          :role :room,
+                          :state :painting
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 0,
+                          :moving2-time-remaining 10}
+                         {:id 1,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 2,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}
+                         {:id 3,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 10,
+                          :moving2-time-remaining 10}],
+                 :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+                 :painters [{:id 0, :role :painter, :at-room 0}
+                            {:id 1, :role :painter, :at-room nil}
+                            {:id 2, :role :painter, :at-room nil}
+                            {:id 3, :role :painter, :at-room nil}]}]
+      (is (= 1 2))
+      (is (= []
+            (sim/free-painters)))
+      0)))
 
 
 (deftest next-actions
@@ -392,25 +478,25 @@
                             :role                    :room,
                             :state                   :removing-furniture,
                             :moving1-time-remaining  0,
-                            :painting-time-remaining 50,
+                            :painting-time-remaining 10,
                             :moving2-time-remaining  10}
                            {:id                      1,
                             :role                    :room,
                             :state                   :removing-furniture,
                             :moving1-time-remaining  1,
-                            :painting-time-remaining 50,
+                            :painting-time-remaining 10,
                             :moving2-time-remaining  10}
                            {:id                      2,
                             :role                    :room,
                             :state                   :waiting-for-movers1,
                             :moving1-time-remaining  10,
-                            :painting-time-remaining 50,
+                            :painting-time-remaining 10,
                             :moving2-time-remaining  10}
                            {:id                      3,
                             :role                    :room,
                             :state                   :waiting-for-movers1,
                             :moving1-time-remaining  10,
-                            :painting-time-remaining 50,
+                            :painting-time-remaining 10,
                             :moving2-time-remaining  10}],
                 :movers   (vector {:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}),
                 :painters (vector {:id 0, :role :painter, :at-room nil}
