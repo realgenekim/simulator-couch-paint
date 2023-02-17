@@ -45,16 +45,18 @@
 (s/def ::s-indexes
   (s/coll-of ::s-index))
 
+; TODO: return full room, not id, so we can assoc in new value in advance state
 (>defn rooms-being-worked
   " given state, return vector of all rooms being moved "
-  [kworkers state] [keyword? map? => ::s-indexes]
-  (-> state
+  [kworkers state] [keyword? map? => ::e/s-movers]
+  (->> state
     kworkers
-    ((fn [movers]
-       (->> movers
-         ; :at-room are all the room numbers that the movers are at
-         (map :at-room)
-         (remove nil?))))))
+    (filter :at-room)
+    vec
+    #_((fn [movers]
+         (->> movers
+           ; :at-room are all the room numbers that the movers are at
+           (filter #(:at-room %)))))))
 
 (def rooms-being-moved (partial rooms-being-worked :movers))
 (def rooms-being-painted (partial rooms-being-worked :painters))
@@ -67,18 +69,22 @@
     - unassigning movers and painters "
   [state] [map? => map?]
   (let [rooms-moving (rooms-being-moved state)
-        rooms-painting (rooms-being-painted state)]
+        rooms-painting (rooms-being-painted state)
+        combined (flatten (conj rooms-moving rooms-painting))]
     (println :advance-state/entering :rooms-moving rooms-moving)
+    (println :advance-state/entering :rooms-painting rooms-painting)
+    (println :advance-state/entering :rooms-combined combined)
     (println :advance-state/entering :state state)
     (reduce (fn [s rs]
               (println :advance-state :reduce/entering :state :s s)
               (println :advance-state :reduce/entering :rooms-being-moved rs)
               (if-not (empty? rs)
-                (let [room      (first rs)
+                (let [room      (-> rs first :id)
                       new-state (-> s
                                   ; TODO: fix this someday
                                   ;(sp/transform [:rooms room :moving1-time-remaining] dec)
                                   ;(sp/transform [sp/ALL (sp/pred #(= room (:id %))) :moving1-time-remaining] inc)
+                                  (println :advance-state :reduce/assoc :room room)
                                   (assoc :rooms (utils/update-by-id-apply-fn (-> s :rooms)
                                                   room
                                                   #(sp/transform [:moving1-time-remaining] dec %))))]
@@ -86,7 +92,7 @@
                 ; termination case
                 s))
       state
-      [rooms-moving])))
+      [combined])))
 
 
 (comment

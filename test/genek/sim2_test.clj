@@ -220,7 +220,8 @@
 
         (testing "rooms being moved"
           (is (= [0]
-                (sim/rooms-being-moved new-state))))
+                (->> (sim/rooms-being-moved new-state)
+                  (mapv :id)))))
 
         (testing "update rooms being moved"
           (is (= 9
