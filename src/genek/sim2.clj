@@ -205,27 +205,27 @@
 
 (>defn- vecmap->room-assignments
   " change room state, change mover
-    input: k: :mover or :painter
+    input: kworker: :mover or :painter
            [[ room mover] ...] (created by map vector of rooms needing moving, and available movers)
     output: {:room ... :mover ...}"
-  [k [room mover]] [keyword? vector? => ::s-moving-assignment]
+  [kworker [room worker]] [keyword? vector? => ::s-moving-assignment]
   ; case 1: no movers
   ; case 2: more movers than rooms
   ; case 3: mover rooms than mover
   ;
   ; put them into one vector
   (println :vecmap->room-assignments :room room)
-  (println :vecmap->room-assignments :mover mover)
-  (if (and room mover)
+  (println :vecmap->room-assignments :worker worker)
+  (if (and room worker)
     (let [roomstate (-> room :state)
-          newroom (assoc room :state
-                              (case roomstate
-                                :waiting-for-movers1 :removing-furniture
-                                :waiting-for-painters :painting
-                                :waiting-for-movers2 :restoring-furniture))
-          newmover (assoc mover :at-room (-> room :id))
-          retval   {:room newroom
-                    k newmover}]
+          newroom   (assoc room :state
+                                (case roomstate
+                                  :waiting-for-movers1 :removing-furniture
+                                  :waiting-for-painters :painting
+                                  :waiting-for-movers2 :restoring-furniture))
+          newmover  (assoc worker :at-room (-> room :id))
+          retval    {:room   newroom
+                     kworker newmover}]
       (println :vecmap->room-assignments :retval retval)
       retval)))
 
@@ -292,13 +292,13 @@
     input: state
     output: [{:room .. :mover} ...] "
   [state] [::e/s-state => ::s-moving-assignments]
-  (let [needs-movers     (e/rooms-needing-painters (-> state :rooms))
-        painters         (e/available-painters state)
-        _                (println :create-painter-assignments :needs-movers needs-movers)
-        _                (println :create-painter-assignments :painters painters)
-        room+painters    (map vector needs-movers painters)
+  (let [needs-painters     (e/rooms-needing-painters (-> state :rooms))
+        painters           (e/available-painters state)
+        _                  (println :create-painter-assignments :needs-movers needs-painters)
+        _                  (println :create-painter-assignments :painters painters)
+        room+painters      (map vector needs-painters painters)
         ; this creates [{:room newroom :mover newmover}...]
-        _                (println :create-painter-assignments :rooms+painters room+painters)
+        _                  (println :create-painter-assignments :rooms+painters room+painters)
         new-rooms+painters (->> room+painters
                              (map #(vecmap->room-assignments :painter %))
                              (remove nil?))]
@@ -324,7 +324,7 @@
   "
   [state] [::e/s-state => ::e/s-state]
   (let [assignments (create-painter-assignments state)
-        newstate    (apply-moving-assignments state assignments)]
+        newstate    (apply-painting-assignments state assignments)]
     newstate))
 
 (comment

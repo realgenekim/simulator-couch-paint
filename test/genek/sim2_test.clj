@@ -377,8 +377,10 @@
     (is (= [0 1 2 3]
           (->> (#'sim/create-painter-assignments state)
             (map #(-> % :painter :at-room)))))
-    (is (= []
-          (->> (sim/assign-painters state))))
+    (is (= [0 1 2 3]
+          (->> (sim/assign-painters state)
+            :painters
+            (mapv #(-> % :at-room)))))
     0))
 
 

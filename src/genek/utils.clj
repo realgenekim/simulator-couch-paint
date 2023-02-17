@@ -68,7 +68,7 @@
     output: new state "
   [kworker {:keys [rooms] :as state} room-assignments]
   [keyword? map? (s/nilable sequential?) => map?]
-  (println :update-rooms-workers :m (pp-str state) :room-assignments (pp-str room-assignments))
+  (println :update-rooms-workers :worker kworker :state (pp-str state) :room-assignments (pp-str room-assignments))
   ; empty or nil
   (if (empty? room-assignments)
     state
