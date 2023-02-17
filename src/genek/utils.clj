@@ -94,21 +94,24 @@
 (def update-rooms-movers (partial update-rooms-workers :movers))
 (def update-rooms-painters (partial update-rooms-workers :painters))
 
-(>defn free-room-movers
+(>defn free-room-workers
   " reducing function
       for every room that has done mover/painter:
         advance room state (:removing-furniture -> :waiting-for-painters)
         set mover :at-room to nil
     input: state
            done-rooms: vector of room numbers: [0 1 2]
+           kworker: :movers or :painters
     output: new state "
-  [state done-rooms]
-  [::e/s-state sequential? => ::e/s-state]
+  [kworker state done-rooms]
+  ; TODO: make s/def of :movers or :painters
+  [keyword? ::e/s-state sequential? => ::e/s-state]
   {:pre [(vector? (-> state :rooms))
          (vector? (-> state :movers))
          (vector? (-> state :painters))]}
   (println :free-room-movers :state (pp-str state) :done-rooms (pp-str done-rooms))
-  (loop [state state
+  (loop [kworker kworker
+         state state
          done-rooms done-rooms]
     ;(tap> "done-rooms")
     ;(tap> drooms)
@@ -134,8 +137,9 @@
                             (sp/setval [:rooms roomnum :state] nextstate x))))
                        ; mover: set :at-room to nil
                        (sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))]
-        (recur newstate (rest done-rooms))))))
+        (recur kworker newstate (rest done-rooms))))))
 
+(def free-room-movers (partial free-room-workers :movers))
 
 (comment
 
