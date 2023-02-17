@@ -67,7 +67,7 @@
   " IMPORTANT: take care of things like
     - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
     - unassigning movers and painters "
-  [state] [map? => map?]
+  [state] [::e/s-state => ::e/s-state]
   (let [rooms-moving (rooms-being-moved state)
         rooms-painting (rooms-being-painted state)
         combined (flatten (conj rooms-moving rooms-painting))]
@@ -79,15 +79,27 @@
               (println :advance-state :reduce/entering :state :s s)
               (println :advance-state :reduce/entering :rooms-being-moved rs)
               (if-not (empty? rs)
-                (let [room      (-> rs first :id)
+                ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
+                ; get the room number
+                ; decrement room counter based on current state
+                ;    :removing-furniture (dec :moving1-time-remaining)
+                ;    :painting  (dec :painting-time-remaining)
+                ;    :restoring-furniture (dec :moving2-time-remaining)
+                (let [
+                      ;roomnum   (-> rs first :id)
+                      worktask  (first rs)
+                      roomnum   (:at-room worktask)
+                      oldroom   (utils/get-by-id (-> state :rooms) roomnum)
+                      newroom   (case (:state oldroom)
+                                  :removing-furniture
+                                  (update-in oldroom [:moving1-time-remaining] dec)
+                                  :painting
+                                  (update-in oldroom [:painting-time-remaining] dec)
+                                  :restoring-furniture
+                                  (update-in oldroom [:moving2-time-remaining] dec))
+                      newrooms   (utils/update-by-id (-> state :rooms) newroom)
                       new-state (-> s
-                                  ; TODO: fix this someday
-                                  ;(sp/transform [:rooms room :moving1-time-remaining] dec)
-                                  ;(sp/transform [sp/ALL (sp/pred #(= room (:id %))) :moving1-time-remaining] inc)
-                                  (println :advance-state :reduce/assoc :room room)
-                                  (assoc :rooms (utils/update-by-id-apply-fn (-> s :rooms)
-                                                  room
-                                                  #(sp/transform [:moving1-time-remaining] dec %))))]
+                                  (assoc :rooms newrooms))]
                   (recur new-state (rest rs)))
                 ; termination case
                 s))

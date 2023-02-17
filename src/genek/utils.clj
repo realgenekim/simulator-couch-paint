@@ -20,6 +20,12 @@
         newlist (concat newlist (drop (+ 1 i) l))]
     newlist))
 
+(>defn get-by-id
+  " input: sequence of maps (rooms, movers, painters), and new record with {:id } to replace record
+    output: seq of maps, with replace record "
+  [ms id] [::e/s-records nat-int? => ::e/s-record]
+  (get ms id))
+
 (>defn update-by-id
   " input: sequence of maps (rooms, movers, painters), and new record with {:id } to replace record
     output: seq of maps, with replace record "
