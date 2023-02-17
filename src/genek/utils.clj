@@ -73,11 +73,12 @@
   (if (empty? room-assignments)
     state
     (let [newrooms  (update-by-id rooms (:room (first room-assignments)))
-          newmovers (update-by-id movers (:mover (first room-assignments)))]
+          newmovers (update-by-id movers (worker (first room-assignments)))]
       (recur worker (assoc state :rooms newrooms :movers newmovers)
         (rest room-assignments)))))
 
 (def update-rooms-movers (partial update-rooms-workers :mover))
+(def update-rooms-painters (partial update-rooms-workers :painters))
 
 (defn free-room-movers
   " reducing function
