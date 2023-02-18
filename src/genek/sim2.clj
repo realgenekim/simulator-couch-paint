@@ -260,6 +260,7 @@
         painters           (e/available-painters state)
         _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
         _                  (log/debug :create-painter-assignments :painters painters)
+        ;room+painters      (map vector needs-painters painters)
         room+painters      (map vector needs-painters painters)
         ; this creates [{:room newroom :mover newmover}...]
         _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
@@ -319,17 +320,19 @@
     output: sequence of states, run through state machine"
   ; 2 arity, build upon state
   ([state states] [::e/s-state ::e/s-states => ::e/s-states]
-   (let [newstate (-> state
-                    assign-movers
-                    free-movers
-                    assign-painters
-                    free-painters
-                    advance-state
-                    next-turn)]
+   (let [nextfn #(-> %
+                   assign-movers
+                   free-movers
+                   assign-painters
+                   free-painters
+                   advance-state
+                   next-turn)
+         newstate (nextfn state)]
      ; if done return, else recurse
      (log/warn :simulate-until-done :turn (-> newstate :turn))
      (if (e/all-rooms-finished? newstate)
-       states
+       ; one more frame needed, to get completed
+       (conj states (nextfn newstate))
        (recur newstate (conj states newstate)))))
   ; 1 arity: create new states
   ([state] [::e/s-state => ::e/s-states]

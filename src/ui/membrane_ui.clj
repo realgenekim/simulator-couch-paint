@@ -125,6 +125,7 @@
                    "^" [[::first-frame]]
                    "0" [[::first-frame]]
                    "A" [[::animate-all-frames]]
+                   "a" [[::animate-all-frames]]
                    nil))
 
     (ui/horizontal-layout
@@ -320,6 +321,7 @@
 
 (comment
   (skia/run #'dev-view)
+  (init-state!)
   (def w (skia/run #'dev-view))
   ((:membrane.skia/repaint w))
   @*app-state

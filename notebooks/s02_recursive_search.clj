@@ -23,6 +23,10 @@
 
 (reset! sim/*state newstates)
 
+; ## Results
+;
+; - FIFO: 175 turns
+
 #_(doseq [i (range 200)]
     (let [newstate (-> (-> @sim/*state last)
                      sim/assign-movers
@@ -34,4 +38,3 @@
   ;(let [newstate (sim/assign-movers (-> @sim/*state last))]
   ;  (sim/next-turn! sim/*state newstate)))
 
-(-> @sim/*state last)
