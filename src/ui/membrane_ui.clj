@@ -19,6 +19,12 @@
 ; - show all stages [:start :waiting-for-movers1 ...]
 ;   - highlight which stage we're in (RED)
 
+; Adrian, to run:
+; go into ns notebooks/s02-recursive-search.clj, and load the namespace -- it will
+; create the state, which is about 500 frames
+; then in this namespace, run
+;(def w (skia/run #'dev-view))
+
 (def *sim-state genek.sim2/*state)
 
 ; :frame: either frame number or :last-frame
@@ -176,10 +182,15 @@
                       (-> r :moving1-time-remaining)))
           (time-remaining-bar (-> r :moving1-time-remaining)))
 
-        (ui/label (format "                :painting-time-remaining: %d"
-                    (-> r :painting-time-remaining)))
-        (ui/label (format "                :moving2-time-remaining: %d"
-                    (-> r :moving2-time-remaining)))
+        (ui/horizontal-layout
+          (ui/label (format "                :painting-time-remaining: %d"
+                      (-> r :painting-time-remaining)))
+          (time-remaining-bar (-> r :painting-time-remaining)))
+
+        (ui/horizontal-layout
+          (ui/label (format "                :moving2-time-remaining: %d"
+                      (-> r :moving2-time-remaining)))
+          (time-remaining-bar (-> r :moving2-time-remaining)))
 
         (ui/spacer 25)))))
 
