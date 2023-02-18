@@ -492,7 +492,7 @@
 
 
 (deftest next-actions
-  (loop [n     35
+  (loop [n     40
          state {:turn     10,
                 :rooms    [{:id                      0,
                             :role                    :room,

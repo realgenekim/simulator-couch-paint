@@ -11,18 +11,20 @@
               :jvm-opts    ["-Dguardrails.enabled=true"]
               :extra-deps  {
                             ; move into separate analysis module
-                            io.github.nextjournal/clerk {
-                                                         :git/url "https://github.com/nextjournal/clerk/"
-                                                         :git/sha "d978d0ca6cb7b10cf1a0c0f370cdba6e096551e3"}
-                            com.github.jpmonettas/flow-storm-dbg    {:git/sha "4dcd709e5b51861f95cb65269b17ddd6337aa7cc"
-                                                                     :git/url "https://github.com/jpmonettas/flow-storm-debugger"}
+                            io.github.nextjournal/clerk                        {
+                                                                                :git/url "https://github.com/nextjournal/clerk/"
+                                                                                :git/sha "d978d0ca6cb7b10cf1a0c0f370cdba6e096551e3"}
+                            com.github.jpmonettas/flow-storm-dbg               {:git/sha "4dcd709e5b51861f95cb65269b17ddd6337aa7cc"
+                                                                                :git/url "https://github.com/jpmonettas/flow-storm-debugger"}
+                            com.phronemophobic/membrane                        {:mvn/version "0.11.1.1-beta"}
+                            com.phronemophobic.membrane/skialib-macosx-aarch64 {:mvn/version "0.9.31.0-beta"}
                             ;{:mvn/version "3.3.320"}
                             ;:mvn/version "0.12.707"}
                             ;com.lambdaisland/classpath  {:mvn/version "0.4.44"}
                             ;aerial.hanami/aerial.hanami {:mvn/version "0.17.0"}
                             ;com.github.jpmonettas/flow-storm-inst    {:mvn/version "3.0.236"}
                             ;com.github.jpmonettas/flow-storm-dbg     {:mvn/version "3.0.236"}
-                            djblue/portal               {:mvn/version "0.35.1"}}}
+                            djblue/portal                                      {:mvn/version "0.35.1"}}}
   :run-m     {:main-opts ["-m" "genek.simulator-couch-paint"]}
   :run-x     {:ns-default genek.simulator-couch-paint
               :exec-fn    greet
