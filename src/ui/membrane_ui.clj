@@ -34,6 +34,32 @@
                     (-> r :moving2-time-remaining)))
         (ui/spacer 25)))))
 
+(defn movers
+  [states]
+  (apply
+    ui/vertical-layout
+    (interpose (ui/spacer 10)
+      (for [r (-> states last :movers)]
+        (let [roomnum (-> r :at-room)]
+          (ui/label (format "Mover %d -- In Room: %s"
+                      (-> r :id)
+                      (if roomnum
+                        (str (-> r :at-room))
+                        "---"))))))))
+
+(defn painters
+  [states]
+  (apply
+    ui/vertical-layout
+    (interpose (ui/spacer 10)
+      (for [r (-> states last :painters)]
+        (let [roomnum (-> r :at-room)]
+          (ui/label (format "Painter %d -- In Room: %s"
+                      (-> r :id)
+                      (if roomnum
+                        (str (-> r :at-room))
+                        "---"))))))))
+
 
 (defn dev-view []
   " helper: put anything you're working in here in dev
@@ -41,7 +67,9 @@
   (let [states @*mystate]
     (ui/vertical-layout
       (turn states)
-      (rooms states))))
+      (rooms states)
+      (movers states)
+      (painters states))))
 
 (comment
   (skia/run #'dev-view)
