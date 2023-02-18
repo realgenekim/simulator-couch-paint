@@ -32,6 +32,8 @@
 
 (s/def ::s-state
   (s/keys :req-un [::turn ::rooms ::movers ::painters]))
+(s/def ::s-states
+  (s/coll-of ::s-state))
 
 (def room-states
   [:initial

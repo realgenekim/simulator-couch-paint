@@ -378,3 +378,27 @@
 
 
 
+; main interface
+(>defn simulate-until-done
+  " this is responsible for running the sim
+    input: initial state
+    output: sequence of states, run through state machine"
+  ; 2 arity, build upon state
+  ([state states] [::e/s-state ::e/s-states => ::e/s-states]
+   (let [newstate (-> state
+                    assign-movers
+                    free-movers
+                    assign-painters
+                    free-painters
+                    advance-state
+                    next-turn)]
+     ; if done return, else recurse
+     (if (e/all-rooms-finished? newstate)
+       states
+       (recur newstate (conj states newstate)))))
+  ; 1 arity: create new states
+  ([state] [::e/s-state => ::e/s-states]
+   (simulate-until-done state [])))
+
+
+
