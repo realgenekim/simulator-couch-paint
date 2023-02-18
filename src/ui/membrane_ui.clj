@@ -181,42 +181,49 @@
         (ui/label msg)
         (ui/label "  ")))))
 
+(defn room
+  [r movers painters]
+  (ui/vertical-layout
+    (ui/horizontal-layout
+      (ui/label (format "Room %d:"
+                  (-> r :id)))
+      (room-state r))
+
+    (ui/horizontal-layout
+      (ui/label (format "                :moving1-time-remaining: %d"
+                  (-> r :moving1-time-remaining)))
+      (time-remaining-bar (-> r :moving1-time-remaining)))
+
+    (ui/horizontal-layout
+      (ui/label (format "                :painting-time-remaining: %d"
+                  (-> r :painting-time-remaining)))
+      (time-remaining-bar (-> r :painting-time-remaining)))
+
+    (ui/horizontal-layout
+      (ui/label (format "                :moving2-time-remaining: %d"
+                  (-> r :moving2-time-remaining)))
+      (time-remaining-bar (-> r :moving2-time-remaining)))
+
+    (ui/vertical-layout
+      #_(ui/spacer 70 20)
+      (ui/horizontal-layout
+        (ui/spacer 70 10)
+        (workers-present r movers painters)))
+    (ui/spacer 10)))
 
 
 (defn rooms
   " main view: will show all details of room, as well as any movers/painters present "
   [state]
-  (let [{:keys [rooms movers painters]} state]
-    (apply
-      ui/vertical-layout
-      (for [r rooms]
-        (ui/vertical-layout
-          (ui/horizontal-layout
-            (ui/label (format "Room %d:"
-                        (-> r :id)))
-            (room-state r))
-
-          (ui/horizontal-layout
-            (ui/label (format "                :moving1-time-remaining: %d"
-                        (-> r :moving1-time-remaining)))
-            (time-remaining-bar (-> r :moving1-time-remaining)))
-
-          (ui/horizontal-layout
-            (ui/label (format "                :painting-time-remaining: %d"
-                        (-> r :painting-time-remaining)))
-            (time-remaining-bar (-> r :painting-time-remaining)))
-
-          (ui/horizontal-layout
-            (ui/label (format "                :moving2-time-remaining: %d"
-                        (-> r :moving2-time-remaining)))
-            (time-remaining-bar (-> r :moving2-time-remaining)))
-
-          (ui/vertical-layout
-            #_(ui/spacer 70 20)
-            (ui/horizontal-layout
-              (ui/spacer 70 10)
-              (workers-present r movers painters)))
-          (ui/spacer 10))))))
+  (let [elem
+        (let [{:keys [rooms movers painters]} state]
+          (apply
+            ui/vertical-layout
+            (for [r rooms]
+              (room r movers painters))))
+        bounds (ui/bounds elem)]
+    ;(println :rooms :bounds bounds)
+    elem))
 
 (defn movers
   [state]
