@@ -83,8 +83,8 @@
         (Thread/sleep 50)
         (next-frame! framenum total-pages)
         ; see if we can force repaint
-        (if-let [w (resolve 'w)]
-          ((:membrane.skia/repaint w)))
+        (if-let [w (resolve `w)]
+          ((:membrane.skia/repaint @w)))
         (recur (inc framenum) total-pages)))))
 
 
