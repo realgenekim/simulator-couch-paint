@@ -5,8 +5,15 @@
     [com.rpl.specter :as sp]
     [flow-storm.api]
     [genek.entities :as e]
-    [genek.utils :as utils]))
+    [genek.utils :as utils]
+    [logging.main :as glog]
+    [taoensso.timbre :as log]))
 
+(glog/configure-logging! glog/config)
+
+(comment
+  (log/warn :abc)
+  0)
 
 
 (>defn create-state
