@@ -148,9 +148,9 @@
                    :loose  : any state when operations isn't done (can cause deadlock)}
     output: all rooms that need painters "
   ([rooms {:keys [strict]
-           :or   {strict true}
+           ;:or   {strict true}
            :as   opts}] [::s-rooms map? => ::s-rooms]
-   (log/warn :rooms-needing-painting :opts opts)
+   (log/debug :rooms-needing-painting :opts opts)
    (if strict
      (->> rooms
        (filter (fn [r]

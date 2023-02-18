@@ -14,9 +14,6 @@
 ;; assign mover to room
 (def newstate (sim/assign-movers (-> @sim/*state last)))
 
-;; increment turn
-
-(sim/next-turn! sim/*state newstate)
 
 (def newstates
   (sim/simulate-until-done (-> @sim/*state last)))
@@ -38,4 +35,5 @@
       (sim/next-turn! sim/*state newstate)))
   ;(let [newstate (sim/assign-movers (-> @sim/*state last))]
   ;  (sim/next-turn! sim/*state newstate)))
+
 

@@ -65,55 +65,23 @@
            ; :at-room are all the room numbers that the movers are at
            (filter #(:at-room %)))))))
 
+; TODO: move this to entities
+
 (def rooms-being-moved (partial rooms-being-worked :movers))
 (def rooms-being-painted (partial rooms-being-worked :painters))
 
+(>defn room-has-painter
+  " does the room have a painter there? "
+  [state roomnum] [::e/s-state nat-int? => boolean?]
+  (let [rooms (into #{} (->> (rooms-being-painted state)
+                          (map :id)))]
+    (boolean (rooms roomnum))))
+
+; ^^^^^ MOVE
 
 
-(>defn advance-state
-  " IMPORTANT: take care of things like
-    - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
-    - change state of room
-    - unassigning movers and painters (XXX: isn't this done elsewhere?) "
-  [state] [::e/s-state => ::e/s-state]
-  (let [rooms-moving (rooms-being-moved state)
-        rooms-painting (rooms-being-painted state)
-        combined (flatten (conj rooms-moving rooms-painting))]
-    (log/debug :advance-state/entering :rooms-moving rooms-moving)
-    (log/debug :advance-state/entering :rooms-painting rooms-painting)
-    (log/debug :advance-state/entering :rooms-combined combined)
-    (log/debug :advance-state/entering :state state)
-    ; intentially shadow state var
-    (reduce (fn [state rs]
-              (log/debug :advance-state :reduce/entering :state :s state)
-              (log/debug :advance-state :reduce/entering :rooms-being-moved rs)
-              (if-not (empty? rs)
-                ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
-                ; get the room number
-                ; decrement room counter based on current state
-                ;    :removing-furniture (dec :moving1-time-remaining)
-                ;    :painting  (dec :painting-time-remaining)
-                ;    :restoring-furniture (dec :moving2-time-remaining)
-                (let [
-                      ;roomnum   (-> rs first :id)
-                      worktask  (first rs)
-                      roomnum   (:at-room worktask)
-                      oldroom   (utils/get-by-id (-> state :rooms) roomnum)
-                      newroom   (case (:state oldroom)
-                                  :removing-furniture
-                                  (update-in oldroom [:moving1-time-remaining] dec)
-                                  :painting
-                                  (update-in oldroom [:painting-time-remaining] dec)
-                                  :restoring-furniture
-                                  (update-in oldroom [:moving2-time-remaining] dec))
-                      newrooms  (utils/update-by-id (-> state :rooms) newroom)
-                      new-state (-> state
-                                  (assoc :rooms newrooms))]
-                  (recur new-state (rest rs)))
-                ; termination case
-                state))
-      state
-      [combined])))
+
+
 
 
 (>defn next-turn!
@@ -168,7 +136,8 @@
   (s/coll-of ::s-moving-assignment))
 
 (>defn- vecmap->room-assignments
-  " change room state, change mover
+  " input as tuplies of [room, worker]
+       assign the room, which means we change room state, change mover :at-room
     input: kworker: :mover or :painter
            [[ room mover] ...] (created by map vector of rooms needing moving, and available movers)
     output: {:room ... :mover ...}"
@@ -178,19 +147,22 @@
   ; case 3: mover rooms than mover
   ;
   ; put them into one vector
-  (log/debug :vecmap->room-assignments :room room)
-  (log/debug :vecmap->room-assignments :worker worker)
+  (log/warn :vecmap->room-assignments :room room)
+  (log/warn :vecmap->room-assignments :worker (str worker))
   (if (and room worker)
     (let [roomstate (-> room :state)
+          ; update room state, given that we've just assigned a worker
           newroom   (assoc room :state
                                 (case roomstate
                                   :waiting-for-movers1 :removing-furniture
                                   :waiting-for-painters :painting
-                                  :waiting-for-movers2 :restoring-furniture))
+                                  :waiting-for-movers2 :restoring-furniture
+                                  ; else: this can happen, if we assign a worker ahead of time
+                                  roomstate))
           newmover  (assoc worker :at-room (-> room :id))
           retval    {:room   newroom
                      kworker newmover}]
-      (log/debug :vecmap->room-assignments :retval retval)
+      (log/warn :vecmap->room-assignments :retval retval)
       retval)))
 
 (>defn- create-mover-assignments
@@ -277,18 +249,18 @@
     input: state
     output: [{:room .. :mover} ...] "
   [state] [::e/s-state => ::s-moving-assignments]
-  (let [needs-painters     (e/rooms-needing-painters (-> state :rooms))
+  (let [needs-painters     (e/rooms-needing-painters (e/state->rooms state) {:strict false})
         painters           (e/available-painters state)
-        _                  (log/warn :create-painter-assignments :needs-movers needs-painters)
-        _                  (log/warn :create-painter-assignments :painters painters)
-        ;room+painters      (map vector needs-painters painters)
-        room+painters      (map vector (reverse needs-painters) painters)
+        _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
+        _                  (log/debug :create-painter-assignments :painters painters)
+        room+painters      (map vector needs-painters painters)
+        ;room+painters      (map vector (reverse needs-painters) painters)
         ; this creates [{:room newroom :mover newmover}...]
-        _                  (log/warn :create-painter-assignments :rooms+painters room+painters)
+        _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
         new-rooms+painters (->> room+painters
                              (map #(vecmap->room-assignments :painter %))
                              (remove nil?))]
-    (log/warn :create-painter-assignments :new-room-movers
+    (log/debug :create-painter-assignments :new-room-movers
       (with-out-str (clojure.pprint/pprint new-rooms+painters)))
     new-rooms+painters))
 
@@ -334,7 +306,7 @@
   " for every room that needs mover/painter, assign one that is available
   "
   [state] [::e/s-state => ::e/s-state]
-  (let [assignments (create-painter-assignments state)
+  (let [assignments (create-painter-assignments2 state)
         newstate    (apply-painting-assignments state assignments)]
     newstate))
 
@@ -357,6 +329,56 @@
         newstate    (utils/free-room-painters state done-rooms)]
     newstate))
 
+(>defn advance-state
+  " IMPORTANT: take care of things like
+    - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
+    - change state of room
+    - unassigning movers and painters (XXX: isn't this done elsewhere?) "
+  [state] [::e/s-state => ::e/s-state]
+  (let [rooms-moving (rooms-being-moved state)
+        rooms-painting (rooms-being-painted state)
+        combined (flatten (conj rooms-moving rooms-painting))]
+    (log/debug :advance-state/entering :rooms-moving rooms-moving)
+    (log/debug :advance-state/entering :rooms-painting rooms-painting)
+    (log/debug :advance-state/entering :rooms-combined combined)
+    (log/debug :advance-state/entering :state state)
+    ; intentially shadow state var
+    (reduce (fn [state rs]
+              (log/debug :advance-state :reduce/entering :state :s state)
+              (log/debug :advance-state :reduce/entering :rooms-being-moved rs)
+              (if-not (empty? rs)
+                ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
+                ; get the room number
+                ; decrement room counter based on current state
+                ;    :removing-furniture (dec :moving1-time-remaining)
+                ;    :painting  (dec :painting-time-remaining)
+                ;    :restoring-furniture (dec :moving2-time-remaining)
+                (let [
+                      ;roomnum   (-> rs first :id)
+                      worktask  (first rs)
+                      roomnum   (:at-room worktask)
+                      oldroom   (utils/get-by-id (-> state :rooms) roomnum)
+                      newroom   (case (:state oldroom)
+                                  :removing-furniture
+                                  (update-in oldroom [:moving1-time-remaining] dec)
+                                  :painting
+                                  (update-in oldroom [:painting-time-remaining] dec)
+                                  :restoring-furniture
+                                  (update-in oldroom [:moving2-time-remaining] dec)
+                                  :waiting-for-painters
+                                  (when (room-has-painter state roomnum)
+                                    (assoc-in oldroom [:state] :painting))
+                                  ; default
+                                  state)
+                      newrooms  (utils/update-by-id (-> state :rooms) newroom)
+                      new-state (-> state
+                                  (assoc :rooms newrooms))]
+                  (recur new-state (rest rs)))
+                ; termination case
+                state))
+      state
+      [combined])))
+
 
 
 ; main interface
@@ -366,6 +388,8 @@
     output: sequence of states, run through state machine"
   ; 2 arity, build upon state
   ([state states] [::e/s-state ::e/s-states => ::e/s-states]
+   ; save to global var so we can watch
+   (reset! *state states)
    (let [nextfn #(-> %
                    assign-movers
                    free-movers
@@ -376,7 +400,9 @@
          newstate (nextfn state)]
      ; if done return, else recurse
      (log/warn :simulate-until-done :turn (-> newstate :turn))
-     (if (e/all-rooms-finished? newstate)
+     (if (or
+           (e/all-rooms-finished? newstate)
+           (> (-> state :turn) 1000))
        ; one more frame needed, to get completed
        (conj states (nextfn newstate))
        (recur newstate (conj states newstate)))))

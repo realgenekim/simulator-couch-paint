@@ -654,12 +654,48 @@
     0)
   0)
 
+(deftest painter-present
+  (let [state {:turn 19,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 1,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 2,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 8,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 3,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 10,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}],
+               :movers [{:id 0, :role :mover, :at-room 2}],
+               :painters [{:id 0, :role :painter, :at-room 0}]}]
+    (is (true? (sim/room-has-painter state 0)))
+    (is (false? (sim/room-has-painter state 1)))
+    (is (false? (sim/room-has-painter state 2)))))
+
 (deftest complete-sim-1
+  ; problem: room stuck in :waiting for painters, even though painter is already there
   (let [state (sim/create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 1))
         states (sim/simulate-until-done state)]
     (def states states)
-    (is (= 224
+    (is (= 221
           (count states)))))
+  ;XXX
+  ;(reset! sim/*state states))
+
 
 (deftest parking-painters
   (let [state {:turn     26,
@@ -686,12 +722,65 @@
             (mapv :id))))
     (is (= [0 1]
           (->> (e/rooms-needing-painters (e/state->rooms state) {:strict false})
-            (mapv :id))))
+            (mapv :id)))))
 
-
-
-
-
+  (testing "painting already there"
+    (let [state {:turn 21440,
+                 :rooms [{:id 0,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 1,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 2,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 3,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 4,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 5,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 6,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}
+                         {:id 7,
+                          :role :room,
+                          :state :waiting-for-painters,
+                          :moving1-time-remaining 0,
+                          :painting-time-remaining 50,
+                          :moving2-time-remaining 10}],
+                 :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+                 :painters [{:id 0, :role :painter, :at-room 7} {:id 1, :role :painter, :at-room 6} {:id 2, :role :painter, :at-room 5}]}
+          nextstate (sim/next-turn state)]))
+  (comment
+    (-> sim/*state deref last)
     0)
+
+
   0)
 
