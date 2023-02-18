@@ -1,10 +1,11 @@
 (ns genek.utils
   (:require
     [clojure.spec.alpha :as s]
+    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
     [com.rpl.specter :as sp]
     [flow-storm.api]
     [genek.entities :as e]
-    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]))
+    [taoensso.timbre :as log]))
 
 (defn pp-str
   [x]
@@ -74,7 +75,7 @@
     output: new state "
   [kworker {:keys [rooms] :as state} room-assignments]
   [keyword? map? (s/nilable sequential?) => map?]
-  (println :update-rooms-workers :worker kworker :state (pp-str state) :room-assignments (pp-str room-assignments))
+  (log/debug :update-rooms-workers :worker kworker :state (pp-str state) :room-assignments (pp-str room-assignments))
   ; empty or nil
   (if (empty? room-assignments)
     state
@@ -82,7 +83,7 @@
           workers    (case kworker
                        :movers (-> state :movers)
                        :painters (-> state :painters))
-          _          (println :update-rooms-workers :assignments (kworker (first room-assignments)) :workers workers)
+          _          (log/debug :update-rooms-workers :assignments (kworker (first room-assignments)) :workers workers)
           newworkers (update-by-id workers
                        ; get :mover or :painter key in assignment
                        ((case kworker
@@ -109,7 +110,7 @@
   {:pre [(vector? (-> state :rooms))
          (vector? (-> state :movers))
          (vector? (-> state :painters))]}
-  (println :free-room-movers :state (pp-str state) :done-rooms (pp-str done-rooms))
+  (log/debug :free-room-movers :state (pp-str state) :done-rooms (pp-str done-rooms))
   (loop [kworker kworker
          state state
          done-rooms done-rooms]
@@ -118,10 +119,10 @@
     ; empty or nil
     (if (empty? done-rooms)
       (do
-        (println :free-room-movers :done)
+        (log/debug :free-room-movers :done)
         state)
       (let [roomnum (first done-rooms)
-            _       (println :free-room-movers :roomnum roomnum)
+            _       (log/debug :free-room-movers :roomnum roomnum)
             newstate (->> state
                        ; room: advance to next state
                        ((fn [x]
@@ -132,7 +133,7 @@
                                          first)
                                 nextstate (get e/next-room-state rstate)]
                             ;(tap> "nextstate")
-                            (println :free-room-movers :setting :roomnum roomnum :rstate rstate :nextstate nextstate)
+                            (log/debug :free-room-movers :setting :roomnum roomnum :rstate rstate :nextstate nextstate)
                             ;rstate))))
                             (sp/setval [:rooms roomnum :state] nextstate x))))
                        ; mover: set :at-room to nil
@@ -181,7 +182,7 @@
                      genek.sim2/free-movers
                      genek.sim2/advance-state)]
       (def newstate newstate)
-      (println "done")))
+      (log/debug "done")))
 
   (free-room-movers nil [0])
 
@@ -219,7 +220,7 @@
     ((fn [x]
        (let [rstate    (-> (sp/select [:rooms roomnumg :state] x) first)
              nextstate (get e/next-room-state rstate)]
-         (println :free-room-movers :setting :roomnum roomnumg :rstate rstate :nextstate nextstate)
+         (log/debug :free-room-movers :setting :roomnum roomnumg :rstate rstate :nextstate nextstate)
          rstate))))
          ;(sp/setval [:rooms roomnum :state] nextstate x)))))
     ;(sp/setval [:movers sp/ALL (sp/pred #(= roomnum (:at-room %))) :at-room] nil))

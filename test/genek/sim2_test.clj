@@ -654,7 +654,7 @@
     0)
   0)
 
-(deftest complete1
+(deftest complete-sim-1
   (let [state (sim/create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 1))
         states (sim/simulate-until-done state)]
     (def states states)

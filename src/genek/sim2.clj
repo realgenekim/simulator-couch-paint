@@ -79,14 +79,14 @@
   (let [rooms-moving (rooms-being-moved state)
         rooms-painting (rooms-being-painted state)
         combined (flatten (conj rooms-moving rooms-painting))]
-    (log/warn :advance-state/entering :rooms-moving rooms-moving)
-    (log/warn :advance-state/entering :rooms-painting rooms-painting)
-    (log/warn :advance-state/entering :rooms-combined combined)
-    (log/warn :advance-state/entering :state state)
+    (log/debug :advance-state/entering :rooms-moving rooms-moving)
+    (log/debug :advance-state/entering :rooms-painting rooms-painting)
+    (log/debug :advance-state/entering :rooms-combined combined)
+    (log/debug :advance-state/entering :state state)
     ; intentially shadow state var
     (reduce (fn [state rs]
-              (log/warn :advance-state :reduce/entering :state :s state)
-              (log/warn :advance-state :reduce/entering :rooms-being-moved rs)
+              (log/debug :advance-state :reduce/entering :state :s state)
+              (log/debug :advance-state :reduce/entering :rooms-being-moved rs)
               (if-not (empty? rs)
                 ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
                 ; get the room number
@@ -208,7 +208,7 @@
         new-rooms+movers (->> room+movers
                            (map #(vecmap->room-assignments :mover %))
                            (remove nil?))]
-    (log/warn :create-mover-assignments :new-room-movers
+    (log/debug :create-mover-assignments :new-room-movers
       (with-out-str (clojure.pprint/pprint new-rooms+movers)))
     new-rooms+movers))
 
@@ -217,11 +217,11 @@
             moving assignments: [{:room .. :mover} ...] : these are moving assigments, created by create-mover-assignments
     output: state "
   [state assignments] [::e/s-state ::s-moving-assignments => ::e/s-state]
-  (log/warn :apply-moving-assignments :assignments assignments)
+  (log/debug :apply-moving-assignments :assignments assignments)
   (let [newstate (reduce
                    utils/update-rooms-movers
                    state [assignments])]
-    #_(log/warn :apply-moving-assignments :new-room-movers
+    #_(log/debug :apply-moving-assignments :new-room-movers
         (with-out-str (clojure.pprint/pprint new-rooms+movers)))
     newstate))
 
@@ -243,7 +243,7 @@
                          (map :id))
         ; ^^ list of rooms that are done (0 1 2)
         ; now we need to
-        _           (log/info :free-movers :done-rooms done-rooms)
+        _           (log/debug :free-movers :done-rooms (vec done-rooms))
         newstate    (utils/free-room-movers state done-rooms)]
     newstate))
 
@@ -306,7 +306,7 @@
                       (map :id))
         ; ^^ list of rooms that are done (0 1 2)
         ; now we need to
-        _           (log/warn :free-painters :done-rooms done-rooms)
+        _           (log/debug :free-painters :done-rooms done-rooms)
         newstate    (utils/free-room-painters state done-rooms)]
     newstate))
 

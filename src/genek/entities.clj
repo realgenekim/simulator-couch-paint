@@ -1,7 +1,8 @@
 (ns genek.entities
   (:require
     [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]))
+    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
+    [taoensso.timbre :as log]))
 
 
 ; mover or painter record
@@ -115,7 +116,7 @@
                     (map :state)
                     (filter #(= % :finished))
                     count)]
-    (println :all-rooms-finished :nfinished nfinished :count (count (-> state :rooms)))
+    (log/debug :all-rooms-finished :nfinished nfinished :count (count (-> state :rooms)))
     (= nfinished (count (-> state :rooms)))))
 
 
