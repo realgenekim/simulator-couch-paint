@@ -488,7 +488,75 @@
                   :rooms
                   first
                   :state)))))
-      0)))
+      0))
+
+ (testing "mult painters"
+   (let [state {:turn 26,
+                :rooms [{:id 0,
+                         :role :room,
+                         :state :painting
+                         :moving1-time-remaining 0,
+                         :painting-time-remaining 0,
+                         :moving2-time-remaining 10}
+                        {:id 1,
+                         :role :room,
+                         :state :painting
+                         :moving1-time-remaining 0,
+                         :painting-time-remaining 10,
+                         :moving2-time-remaining 10}
+                        {:id 2,
+                         :role :room,
+                         :state :painting
+                         :moving1-time-remaining 0,
+                         :painting-time-remaining 10,
+                         :moving2-time-remaining 10}
+                        {:id 3,
+                         :role :room,
+                         :state :waiting-for-painters,
+                         :moving1-time-remaining 0,
+                         :painting-time-remaining 10,
+                         :moving2-time-remaining 10}],
+                :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+                :painters [{:id 0, :role :painter, :at-room 0}
+                           {:id 1, :role :painter, :at-room 1}
+                           {:id 2, :role :painter, :at-room 2}
+                           {:id 3, :role :painter, :at-room nil}]}]
+     (let [newstate (-> state
+                      sim/assign-movers
+                      sim/free-movers
+                      sim/assign-painters
+                      sim/free-painters
+                      sim/advance-state
+                      sim/next-turn)]
+       (def newstate newstate)
+
+       ; first room done
+       (is (= nil
+             (->> newstate
+               :painters
+               first
+               :at-room)))
+
+       ; second room 2: 9 painting remaining
+       (is (= 9
+             (->> newstate
+               :rooms
+               second
+               :painting-time-remaining)))
+       0)
+     0)))
+
+(comment
+  (let [newstate (-> newstate
+                   sim/assign-movers
+                   sim/free-movers
+                   sim/assign-painters
+                   sim/free-painters
+                   sim/advance-state
+                   sim/next-turn)]
+    (def newstate newstate)
+    newstate)
+  0)
 
 
 (deftest next-actions

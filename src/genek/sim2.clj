@@ -27,9 +27,14 @@
 
 (defonce *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
 
+(defn init-state!
+  []
+  (reset! *state [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 3))]))
+
+
 (comment
   @*state
-  (def *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
+  (init-state!)
   0)
 
 (defn atom?
@@ -76,8 +81,9 @@
     (println :advance-state/entering :rooms-painting rooms-painting)
     (println :advance-state/entering :rooms-combined combined)
     (println :advance-state/entering :state state)
-    (reduce (fn [s rs]
-              (println :advance-state :reduce/entering :state :s s)
+    ; intentially shadow state var
+    (reduce (fn [state rs]
+              (println :advance-state :reduce/entering :state :s state)
               (println :advance-state :reduce/entering :rooms-being-moved rs)
               (if-not (empty? rs)
                 ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
@@ -98,12 +104,12 @@
                                   (update-in oldroom [:painting-time-remaining] dec)
                                   :restoring-furniture
                                   (update-in oldroom [:moving2-time-remaining] dec))
-                      newrooms   (utils/update-by-id (-> state :rooms) newroom)
-                      new-state (-> s
+                      newrooms  (utils/update-by-id (-> state :rooms) newroom)
+                      new-state (-> state
                                   (assoc :rooms newrooms))]
                   (recur new-state (rest rs)))
                 ; termination case
-                s))
+                state))
       state
       [combined])))
 

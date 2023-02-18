@@ -167,32 +167,34 @@
 
 
 (defn rooms
+  " main view: will show all details of room, as well as any movers/painters present "
   [state]
-  (apply
-    ui/vertical-layout
-    (for [r (-> state :rooms)]
-      (ui/vertical-layout
-        (ui/horizontal-layout
-          (ui/label (format "Room %d:"
-                      (-> r :id)))
-          (room-state r))
+  (let [{:keys [rooms movers painters]} state]
+    (apply
+      ui/vertical-layout
+      (for [r rooms]
+        (ui/vertical-layout
+          (ui/horizontal-layout
+            (ui/label (format "Room %d:"
+                        (-> r :id)))
+            (room-state r))
 
-        (ui/horizontal-layout
-          (ui/label (format "                :moving1-time-remaining: %d"
-                      (-> r :moving1-time-remaining)))
-          (time-remaining-bar (-> r :moving1-time-remaining)))
+          (ui/horizontal-layout
+            (ui/label (format "                :moving1-time-remaining: %d"
+                        (-> r :moving1-time-remaining)))
+            (time-remaining-bar (-> r :moving1-time-remaining)))
 
-        (ui/horizontal-layout
-          (ui/label (format "                :painting-time-remaining: %d"
-                      (-> r :painting-time-remaining)))
-          (time-remaining-bar (-> r :painting-time-remaining)))
+          (ui/horizontal-layout
+            (ui/label (format "                :painting-time-remaining: %d"
+                        (-> r :painting-time-remaining)))
+            (time-remaining-bar (-> r :painting-time-remaining)))
 
-        (ui/horizontal-layout
-          (ui/label (format "                :moving2-time-remaining: %d"
-                      (-> r :moving2-time-remaining)))
-          (time-remaining-bar (-> r :moving2-time-remaining)))
+          (ui/horizontal-layout
+            (ui/label (format "                :moving2-time-remaining: %d"
+                        (-> r :moving2-time-remaining)))
+            (time-remaining-bar (-> r :moving2-time-remaining)))
 
-        (ui/spacer 25)))))
+          (ui/spacer 25))))))
 
 (defn movers
   [state]
