@@ -6,7 +6,23 @@
     [membrane.component :refer
          [defui defeffect make-app]]))
 
-(def *mystate genek.sim2/*state)
+(def *sim-state genek.sim2/*state)
+
+; :frame: either frame number or :last-frame
+(defonce *app-state (atom nil))
+
+(defn init-state!
+  []
+  (reset! *app-state {:frame :last-frame}))
+
+(comment
+  (init-state!)
+  0)
+
+(defn selector
+  [curr-page total-pages]
+  (ui/label "hi!"))
+
 
 (defn turn
   [states]
@@ -60,16 +76,25 @@
                         (str (-> r :at-room))
                         "---"))))))))
 
+(defn render-view
+  [sim-state *app-state]
+  (let [state (last sim-state)]
+    (ui/vertical-layout
+      ; curr-page total-pages
+      (selector (-> @*app-state :frame) (count sim-state))
+      (turn sim-state)
+      (rooms sim-state)
+      (movers sim-state)
+      (painters sim-state))))
 
-(defn dev-view []
+
+(defn dev-view
   " helper: put anything you're working in here in dev
     (for prod app, it'll just be another view, composing all your components "
-  (let [states @*mystate]
-    (ui/vertical-layout
-      (turn states)
-      (rooms states)
-      (movers states)
-      (painters states))))
+  []
+  (let [states @*sim-state]
+    (selector (-> @*app-state :frame) (count states))))
+    ;(render-view @*sim-state *app-state)))
 
 (comment
   (skia/run #'dev-view)
