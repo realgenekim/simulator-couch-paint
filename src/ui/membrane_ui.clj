@@ -50,11 +50,11 @@
 
 
 (defn turn
-  [states]
+  [state]
   (ui/vertical-layout
     (ui/horizontal-layout
       (ui/label (format "Turn: %d"
-                  (-> states last :turn))))
+                  (-> state :turn))))
     (ui/spacer 25)))
 
 
@@ -103,11 +103,12 @@
 
 (defn render-view
   [sim-state *app-state]
-  (let [state (last sim-state)]
+  (let [framenum (-> @*app-state :frame)
+        state (nth sim-state framenum)]
     (ui/vertical-layout
       ; curr-page total-pages
       (selector (-> @*app-state :frame) (count sim-state))
-      (turn sim-state)
+      (turn state)
       (rooms sim-state)
       (movers sim-state)
       (painters sim-state))))
@@ -123,7 +124,10 @@
 
 (comment
   (skia/run #'dev-view)
-  ,)
+  (def w (skia/run #'dev-view))
+  ((:membrane.skia/repaint v))
+
+  0)
 
 (comment
   genek.sim2/*state
