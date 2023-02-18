@@ -147,6 +147,20 @@
                   (-> state :turn))))
     (ui/spacer 25)))
 
+(def states-text { :initial "start"
+                  :waiting-for-movers1 "wait"
+                  ;:removing-furniture "🛋 moving"
+                  :removing-furniture "moving"
+                  :waiting-for-painters "wait"
+                  :painting "painting"
+                  :waiting-for-movers2 "wait"
+                  :restoring-furniture "moving"
+                  :finished "done!"})
+
+(comment
+  (get states-text :initial)
+  0)
+
 (defn room-state
   " show all room states, and highlight the current one
     [:initial   :waiting-for-movers1   :removing-furniture   :waiting-for-painters   :painting   :waiting-for-movers2   :restoring-furniture   :finished])"
@@ -155,9 +169,11 @@
     ui/horizontal-layout
     (for [st e/room-states]
       (if (not= st (:state room))
-        (ui/label (str st))
+        ;(ui/label (str st))
+        (ui/label (str (get states-text st) " "))
         (ui/with-color [1 0 0]
-          (ui/label (str st)))))))
+          ;(ui/label (str st))
+          (ui/label (str (get states-text st) " ")))))))
 
 (defn time-remaining-bar
   " just time remaining as string of chars "
