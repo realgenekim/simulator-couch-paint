@@ -15,6 +15,8 @@
 ;    - last frame
 ;    - handle inc/dec :last-frame
 ; X and a way to animate all the frames.
+; - show all stages [:start :waiting-for-movers1 ...]
+;   - highlight which stage we're in (RED)
 
 (def *sim-state genek.sim2/*state)
 
@@ -77,9 +79,6 @@
         (if-let [w (resolve 'w)]
           ((:membrane.skia/repaint w)))
         (recur (inc framenum) total-pages)))))
-
-
-
 
 
 (defn selector
@@ -148,14 +147,15 @@
     ui/vertical-layout
     (for [r (-> state :rooms)]
       (ui/vertical-layout
-        (ui/label (format "Room %d: %s"
-                    (-> r :id)
+        (ui/label (format "Room %d:"
+                    (-> r :id)))
+        (ui/label (format "                %s"
                     (-> r :state)))
-        (ui/label (format "    :moving1-time-remaining: %d"
+        (ui/label (format "                :moving1-time-remaining: %d"
                     (-> r :moving1-time-remaining)))
-        (ui/label (format "    :painting-time-remaining: %d"
+        (ui/label (format "                :painting-time-remaining: %d"
                     (-> r :painting-time-remaining)))
-        (ui/label (format "    :moving2-time-remaining: %d"
+        (ui/label (format "                :moving2-time-remaining: %d"
                     (-> r :moving2-time-remaining)))
         (ui/spacer 25)))))
 
