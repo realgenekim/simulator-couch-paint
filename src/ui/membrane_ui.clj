@@ -152,8 +152,9 @@
 
 (def states-text { :initial "start"
                   :waiting-for-movers1 "wait"
-                  :removing-furniture "🛋 moving"
-                  ;:removing-furniture "moving"
+                  :removing-furniture [{:text "🛋 "
+                                        :style #:text-style {:font-size 9}}
+                                       "moving"]
                   :waiting-for-painters "wait"
                   :painting "painting"
                   :waiting-for-movers2 "wait"
@@ -164,31 +165,31 @@
   (get states-text :initial)
   0)
 
+(defn make-red [text]
+  (cond
+    (string? text)
+    {:text text
+     :style #:text-style {:color [1 0 0]}}
+
+    (map? text)
+    (assoc-in text [:style :text-style/color] [1 0 0])
+
+    :else
+    (map make-red text)))
+
 (defn room-state
   " show all room states, and highlight the current one
     [:initial   :waiting-for-movers1   :removing-furniture   :waiting-for-painters   :painting   :waiting-for-movers2   :restoring-furniture   :finished])"
   [room]
-  (apply
-    ui/horizontal-layout
-    (for [st e/room-states]
-      (ui/vertical-layout
-        (ui/spacer 0 10)
-        (if (not= st (:state room))
-          ;(ui/label (str st))
-          ;(para/paragraph "🛋")
-          ;(ui/label "🛋️"
-          ;  (ui/font "Apple Color Emoji" nil)
-          (ui/horizontal-layout
-            ;(para/paragraph "🛋")
-            (para/paragraph (str (get states-text st) " ")))
-          #_(ui/label (str (get states-text st) " ")
-              (ui/font "Apple Color Emoji" nil))
-          (ui/with-color [1 0 0]
-            ;(ui/label (str st))
-            ;(ui/label (str (get states-text st) " "))
-            (para/paragraph
-              {:text (str (get states-text st) " ")
-               :style #:text-style {:color [1 0 0]}})))))))
+  (ui/translate
+   0 3
+   (para/paragraph
+    (interpose
+     " "
+     (for [st e/room-states]
+       (if (not= st (:state room))
+         (get states-text st)
+         (make-red (get states-text st))))))))
 
 (defn time-remaining-bar
   " just time remaining as string of chars "
@@ -251,7 +252,9 @@
     (apply
       ui/vertical-layout
       (for [r rooms]
-        (let [relem  (room r movers painters)
+        (let [relem (ui/padding
+                     4
+                     (room r movers painters))
               bounds (ui/bounds relem)]
           [(ui/with-style :membrane.ui/style-stroke
              (ui/rectangle (first bounds) (- (second bounds) 2)))
