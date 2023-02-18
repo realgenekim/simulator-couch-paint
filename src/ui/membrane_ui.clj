@@ -165,6 +165,21 @@
   (ui/label
      (apply str (repeat n "*"))))
 
+(defn workers-present
+  " show any movers/painters in room"
+  [r movers painters]
+  (let [rid (:id r)
+        workers (->> (concat movers painters)
+                  (filter #(= rid (:at-room %)))
+                  vec)
+        msg     (->> workers
+                  (mapv (fn [x]
+                          (format "%s %d" (:role x) (:id x)))))]
+    (ui/horizontal-layout
+      ;(ui/label (str workers))
+      (if-not (empty? msg)
+        (ui/label msg)))))
+
 
 (defn rooms
   " main view: will show all details of room, as well as any movers/painters present "
@@ -194,6 +209,11 @@
                         (-> r :moving2-time-remaining)))
             (time-remaining-bar (-> r :moving2-time-remaining)))
 
+          (ui/vertical-layout
+            (ui/spacer 70 20)
+            (ui/horizontal-layout
+              (ui/spacer 70 20)
+              (workers-present r movers painters)))
           (ui/spacer 25))))))
 
 (defn movers
