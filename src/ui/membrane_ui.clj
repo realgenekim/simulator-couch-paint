@@ -6,6 +6,9 @@
     [membrane.component :refer
          [defui defeffect make-app]]))
 
+; someday
+; - learn about focus
+
 (def *sim-state genek.sim2/*state)
 
 ; :frame: either frame number or :last-frame
@@ -21,7 +24,24 @@
 
 (defn selector
   [curr-page total-pages]
-  (ui/label "hi!"))
+  (ui/on :key-press
+    (fn [k]
+      (println :selector :key-press k :type (type k))
+      (case k
+        "j" [[::next-frame]]
+        "k" [[::prev-frame]]
+        "$" [[::last-frame]]
+        nil))
+
+    (ui/horizontal-layout
+      (ui/button "<<"
+        (fn []
+          [[::prev-frame]]))
+      (ui/label (format "curr-page: %s, total-pages %s"
+                  (str curr-page) (str total-pages)))
+      (ui/button ">>"
+        (fn []
+          [[::next-frame]])))))
 
 
 (defn turn
