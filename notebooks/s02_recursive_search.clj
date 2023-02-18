@@ -17,10 +17,12 @@
 
 (sim/next-turn! sim/*state newstate)
 
-(doseq [i (range 5)]
+(doseq [i (range 50)]
   (let [newstate (-> (-> @sim/*state last)
                    sim/assign-movers
                    sim/free-movers
+                   sim/assign-painters
+                   sim/free-painters
                    sim/advance-state)]
     (sim/next-turn! sim/*state newstate)))
   ;(let [newstate (sim/assign-movers (-> @sim/*state last))]

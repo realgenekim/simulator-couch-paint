@@ -14,7 +14,7 @@
 ;    - prev/next
 ;    - last frame
 ;    - handle inc/dec :last-frame
-; - and a way to animate all the frames.
+; X and a way to animate all the frames.
 
 (def *sim-state genek.sim2/*state)
 
@@ -143,10 +143,10 @@
 
 
 (defn rooms
-  [states]
+  [state]
   (apply
     ui/vertical-layout
-    (for [r (-> states last :rooms)]
+    (for [r (-> state :rooms)]
       (ui/vertical-layout
         (ui/label (format "Room %d: %s"
                     (-> r :id)
@@ -160,11 +160,11 @@
         (ui/spacer 25)))))
 
 (defn movers
-  [states]
+  [state]
   (apply
     ui/vertical-layout
     (interpose (ui/spacer 10)
-      (for [r (-> states last :movers)]
+      (for [r (-> state :movers)]
         (let [roomnum (-> r :at-room)]
           (ui/label (format "Mover %d -- In Room: %s"
                       (-> r :id)
@@ -173,11 +173,11 @@
                         "---"))))))))
 
 (defn painters
-  [states]
+  [state]
   (apply
     ui/vertical-layout
     (interpose (ui/spacer 10)
-      (for [r (-> states last :painters)]
+      (for [r (-> state :painters)]
         (let [roomnum (-> r :at-room)]
           (ui/label (format "Painter %d -- In Room: %s"
                       (-> r :id)
@@ -208,9 +208,9 @@
       ; curr-page total-pages
       (selector (-> @*app-state :frame) (count sim-state))
       (turn state)
-      (rooms sim-state)
-      (movers sim-state)
-      (painters sim-state))))
+      (rooms state)
+      (movers state)
+      (painters state))))
 
 
 (defn dev-view
