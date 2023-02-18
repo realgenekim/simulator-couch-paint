@@ -29,7 +29,7 @@
 
 (defn init-state!
   []
-  (reset! *state [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 3))]))
+  (reset! *state [(create-state (e/create-rooms 8) (e/create-movers 2) (e/create-painters 3))]))
 
 
 (comment

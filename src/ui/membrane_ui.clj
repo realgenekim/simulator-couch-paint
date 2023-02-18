@@ -210,11 +210,11 @@
             (time-remaining-bar (-> r :moving2-time-remaining)))
 
           (ui/vertical-layout
-            (ui/spacer 70 20)
+            #_(ui/spacer 70 20)
             (ui/horizontal-layout
-              (ui/spacer 70 20)
+              (ui/spacer 70 10)
               (workers-present r movers painters)))
-          (ui/spacer 25))))))
+          #_(ui/spacer 25))))))
 
 (defn movers
   [state]
@@ -281,7 +281,7 @@
 (comment
   (skia/run #'dev-view)
   (def w (skia/run #'dev-view))
-  ((:membrane.skia/repaint v))
+  ((:membrane.skia/repaint w))
   @*app-state
 
   0)
