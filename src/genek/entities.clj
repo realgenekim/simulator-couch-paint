@@ -105,8 +105,16 @@
         (create-painter r))
     vec))
 
-;
-;
+;  termination condition
+(>defn all-rooms-finished?
+  " returns true if all rooms are :finished "
+  [state] [::s-state => boolean?]
+  (let [nfinished (->> (-> state :rooms)
+                    (map :state)
+                    (filter #(= % :finished))
+                    count)]
+    (println :all-rooms-finished :nfinished nfinished :count (count (-> state :rooms)))
+    (= nfinished (count (-> state :rooms)))))
 
 
 

@@ -615,3 +615,42 @@
 
   0)
 
+(deftest done?
+  (let [
+        state {:turn     10,
+               :rooms    [{:id                      0,
+                           :role                    :room,
+                           :state                   :finished
+                           :moving1-time-remaining  0,
+                           :painting-time-remaining 10,
+                           :moving2-time-remaining  10}
+                          {:id                      1,
+                           :role                    :room,
+                           :state                   :finished
+                           :moving1-time-remaining  1,
+                           :painting-time-remaining 10,
+                           :moving2-time-remaining  10}
+                          {:id                      2,
+                           :role                    :room,
+                           :state                   :finished
+                           :moving1-time-remaining  10,
+                           :painting-time-remaining 10,
+                           :moving2-time-remaining  10}
+                          {:id                      3,
+                           :role                    :room,
+                           :state                   :finished
+                           :moving1-time-remaining  10,
+                           :painting-time-remaining 10,
+                           :moving2-time-remaining  10}],
+               :movers   (vector {:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}),
+               :painters (vector {:id 0, :role :painter, :at-room nil}
+                          {:id 1, :role :painter, :at-room nil
+                           {:id 2, :role :painter, :at-room nil}
+                           {:id 3, :role :painter, :at-room nil}})}]
+
+    (is (true? (e/all-rooms-finished? state)))
+    (is (false? (e/all-rooms-finished? (-> state
+                                         (assoc-in [:rooms 0 :state] :waiting-for-movers2)))))
+    0)
+  0)
+
