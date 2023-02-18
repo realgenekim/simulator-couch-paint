@@ -2,6 +2,7 @@
   (:require
     [membrane.ui :as ui]
     [membrane.skia :as skia]
+    [genek.entities :as e]
     [membrane.basic-components :as basic]
     [membrane.component :refer
          [defui defeffect make-app]]))
@@ -140,6 +141,18 @@
                   (-> state :turn))))
     (ui/spacer 25)))
 
+(defn room-state
+  " show all room states, and highlight the current one
+    [:initial   :waiting-for-movers1   :removing-furniture   :waiting-for-painters   :painting   :waiting-for-movers2   :restoring-furniture   :finished])"
+  [room]
+  (apply
+    ui/horizontal-layout
+    (for [st e/room-states]
+      (if (not= st (:state room))
+        (ui/label (str st))
+        (ui/with-color [1 0 0]
+          (ui/label (str st)))))))
+
 
 (defn rooms
   [state]
@@ -147,8 +160,10 @@
     ui/vertical-layout
     (for [r (-> state :rooms)]
       (ui/vertical-layout
-        (ui/label (format "Room %d:"
-                    (-> r :id)))
+        (ui/horizontal-layout
+          (ui/label (format "Room %d:"
+                      (-> r :id)))
+          (room-state r))
         (ui/label (format "                %s"
                     (-> r :state)))
         (ui/label (format "                :moving1-time-remaining: %d"
