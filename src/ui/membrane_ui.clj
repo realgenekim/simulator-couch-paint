@@ -177,9 +177,10 @@
                           (format "%s %d" (:role x) (:id x)))))]
     (ui/horizontal-layout
       ;(ui/label (str workers))
-      (if-not (empty? msg)
-        (ui/label msg)
-        (ui/label "  ")))))
+      (ui/with-color [0 0 1]
+        (if-not (empty? msg)
+          (ui/label msg)
+          (ui/label "  "))))))
 
 (defn room
   [r movers painters]
@@ -215,15 +216,15 @@
 (defn rooms
   " main view: will show all details of room, as well as any movers/painters present "
   [state]
-  (let [elem
-        (let [{:keys [rooms movers painters]} state]
-          (apply
-            ui/vertical-layout
-            (for [r rooms]
-              (room r movers painters))))
-        bounds (ui/bounds elem)]
-    ;(println :rooms :bounds bounds)
-    elem))
+  (let [{:keys [rooms movers painters]} state]
+    (apply
+      ui/vertical-layout
+      (for [r rooms]
+        (let [relem  (room r movers painters)
+              bounds (ui/bounds relem)]
+          [(ui/with-style :membrane.ui/style-stroke
+             (ui/rectangle (first bounds) (- (second bounds) 2)))
+           relem])))))
 
 (defn movers
   [state]
