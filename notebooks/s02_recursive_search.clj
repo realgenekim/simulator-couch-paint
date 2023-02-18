@@ -17,7 +17,7 @@
 
 (sim/next-turn! sim/*state newstate)
 
-(doseq [i (range 50)]
+(doseq [i (range 5)]
   (let [newstate (-> (-> @sim/*state last)
                    sim/assign-movers
                    sim/free-movers

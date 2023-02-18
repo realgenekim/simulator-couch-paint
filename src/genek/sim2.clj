@@ -66,7 +66,7 @@
 (>defn advance-state
   " IMPORTANT: take care of things like
     - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
-    - change state of rooms
+    - change state of room
     - unassigning movers and painters (XXX: isn't this done elsewhere?) "
   [state] [::e/s-state => ::e/s-state]
   (let [rooms-moving (rooms-being-moved state)
