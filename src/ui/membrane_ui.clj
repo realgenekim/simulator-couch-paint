@@ -24,24 +24,29 @@
 
 (defn selector
   [curr-page total-pages]
-  (ui/on :key-press
-    (fn [k]
-      (println :selector :key-press k :type (type k))
-      (case k
-        "j" [[::next-frame]]
-        "k" [[::prev-frame]]
-        "$" [[::last-frame]]
-        nil))
+  (ui/on
+    ::next-frame (fn [x]
+                   (println ::next-frame :arg x)
+                   (swap! *app-state update-in [:frame] inc)
+                   ;(reset! *app-state {:frame 5})
+                   nil)
+    :key-press (fn [k]
+                 (println :selector :key-press k :type (type k))
+                 (case k
+                   "j" [[::next-frame :hello]]
+                   "k" [[::prev-frame]]
+                   "$" [[::last-frame]]
+                   nil))
 
     (ui/horizontal-layout
       (ui/button "<<"
         (fn []
-          [[::prev-frame]]))
+          [[::prev-frame 0]]))
       (ui/label (format "curr-page: %s, total-pages %s"
                   (str curr-page) (str total-pages)))
       (ui/button ">>"
         (fn []
-          [[::next-frame]])))))
+          [[::next-frame 0]])))))
 
 
 (defn turn
@@ -113,8 +118,8 @@
     (for prod app, it'll just be another view, composing all your components "
   []
   (let [states @*sim-state]
-    (selector (-> @*app-state :frame) (count states))))
-    ;(render-view @*sim-state *app-state)))
+    ;(selector (-> @*app-state :frame) (count states))
+    (render-view @*sim-state *app-state)))
 
 (comment
   (skia/run #'dev-view)
