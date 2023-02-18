@@ -10,7 +10,7 @@
 ; - learn about focus
 
 ; next
-; -  I’ll have ability to nav through all the frames
+; X  I’ll have ability to nav through all the frames
 ;    - prev/next
 ;    - last frame
 ;    - handle inc/dec :last-frame
@@ -58,6 +58,27 @@
   []
   (swap! *app-state assoc-in [:frame] 0))
 
+(defn animate-all-frames!
+  " start from zero, and then on a timer, advance frames to the end
+    run in a future; pass first frame, recurse to end (total-pages)
+
+    input: framenum"
+  [framenum total-pages]
+  (first-frame!)
+  (loop [framenum framenum
+         total-page total-pages]
+    ; termination case
+    (println :animate-all-frames!/entering :framenum framenum :total-pages total-pages)
+    (if (< framenum total-pages)
+      (do
+        (Thread/sleep 50)
+        (next-frame! framenum total-pages)
+        ; see if we can force repaint
+        (if-let [w (resolve 'w)]
+          ((:membrane.skia/repaint w)))
+        (recur (inc framenum) total-pages)))))
+
+
 
 
 
@@ -80,6 +101,12 @@
                     (println ::first-frame)
                     (first-frame!)
                     nil)
+    ::animate-all-frames (fn []
+                           (println ::animate-all-frames)
+                           ; run in future
+                           (future
+                             (animate-all-frames! 0 total-pages))
+                           nil)
     :key-press (fn [k]
                  (println :selector :key-press k :type (type k))
                  (case k
@@ -89,6 +116,7 @@
                    ;["^" "0"] [[::first-frame]]
                    "^" [[::first-frame]]
                    "0" [[::first-frame]]
+                   "A" [[::animate-all-frames]]
                    nil))
 
     (ui/horizontal-layout
@@ -99,7 +127,10 @@
                   (str curr-page) (str total-pages)))
       (ui/button ">>"
         (fn []
-          [[::next-frame]])))))
+          [[::next-frame]]))
+      (ui/button "Animate!"
+        (fn []
+          [[::animate-all-frames]])))))
 
 
 (defn turn
