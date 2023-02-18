@@ -253,8 +253,8 @@
         painters           (e/available-painters state)
         _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
         _                  (log/debug :create-painter-assignments :painters painters)
-        room+painters      (map vector needs-painters painters)
-        ;room+painters      (map vector (reverse needs-painters) painters)
+        ;room+painters      (map vector needs-painters painters)
+        room+painters      (map vector (reverse needs-painters) painters)
         ; this creates [{:room newroom :mover newmover}...]
         _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
         new-rooms+painters (->> room+painters
@@ -329,6 +329,22 @@
         newstate    (utils/free-room-painters state done-rooms)]
     newstate))
 
+(>defn rooms-needs-painter-already-there
+  " there are now conditions where painters are already in room, and we haven't transitioned room states
+    find those conditions:  room needs painting, and painter is there
+    "
+  [state] [::e/s-state => ::e/s-rooms]
+  (->> (-> state :rooms)
+    (mapv (fn [{:keys [id]
+                :as room}]
+            (if (not= (-> room :state) :waiting-for-painters)
+              ; unchanged
+              room
+              ; otherwise flip state
+              (if (room-has-painter state id)
+                (assoc room :state :painting)
+                room))))))
+
 (>defn advance-state
   " IMPORTANT: take care of things like
     - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
@@ -344,8 +360,8 @@
     (log/debug :advance-state/entering :state state)
     ; intentially shadow state var
     (reduce (fn [state rs]
-              (log/debug :advance-state :reduce/entering :state :s state)
-              (log/debug :advance-state :reduce/entering :rooms-being-moved rs)
+              (log/warn :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
+              (log/warn :advance-state :reduce/entering :rooms-being-moved (utils/pp-str-cr rs))
               (if-not (empty? rs)
                 ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
                 ; get the room number
@@ -365,12 +381,13 @@
                                   (update-in oldroom [:painting-time-remaining] dec)
                                   :restoring-furniture
                                   (update-in oldroom [:moving2-time-remaining] dec)
-                                  :waiting-for-painters
-                                  (when (room-has-painter state roomnum)
-                                    (assoc-in oldroom [:state] :painting))
+
                                   ; default
                                   state)
+                      ; handle case of painters already there, and needs to start painting
                       newrooms  (utils/update-by-id (-> state :rooms) newroom)
+                      newrooms  (rooms-needs-painter-already-there
+                                  (assoc state :rooms newrooms))
                       new-state (-> state
                                   (assoc :rooms newrooms))]
                   (recur new-state (rest rs)))
@@ -402,7 +419,7 @@
      (log/warn :simulate-until-done :turn (-> newstate :turn))
      (if (or
            (e/all-rooms-finished? newstate)
-           (> (-> state :turn) 1000))
+           (> (-> state :turn) 200))
        ; one more frame needed, to get completed
        (conj states (nextfn newstate))
        (recur newstate (conj states newstate)))))

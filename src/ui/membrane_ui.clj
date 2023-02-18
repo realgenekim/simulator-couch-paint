@@ -4,6 +4,7 @@
     [membrane.ui :as ui]
     [membrane.skia :as skia]
     [genek.entities :as e]
+    [taoensso.timbre :as log]
     [membrane.basic-components :as basic]
     [membrane.component :refer
      [defui defeffect make-app]]))
@@ -18,8 +19,10 @@
 ;    - last frame
 ;    - handle inc/dec :last-frame
 ; X and a way to animate all the frames.
-; - show all stages [:start :waiting-for-movers1 ...]
-;   - highlight which stage we're in (RED)
+; X show all stages [:start :waiting-for-movers1 ...]
+;   X highlight which stage we're in (RED)
+; - create pane on the left, with buttons: "start FIFO" "start LIFO"
+; - slider
 
 ; Adrian, to run:
 ; go into ns notebooks/s02-recursive-search.clj, and load the namespace -- it will
@@ -55,7 +58,7 @@
   ; cases:
   ;  handle underflow: if 0, leave at zero
   ;  handle :last-frame: (dec total-pages)
-  (println :prev-frame! :curr-page curr-page :total-pages total-pages)
+  (log/warn :prev-frame! :curr-page curr-page :total-pages total-pages)
   (case curr-page
     0 nil
     :last-frame (swap! *app-state assoc-in [:frame] (dec total-pages))
@@ -79,7 +82,7 @@
   (loop [framenum framenum
          total-page total-pages]
     ; termination case
-    (println :animate-all-frames!/entering :framenum framenum :total-pages total-pages)
+    (log/debug :animate-all-frames!/entering :framenum framenum :total-pages total-pages)
     (if (< framenum total-pages)
       (do
         (Thread/sleep 50)
@@ -94,29 +97,29 @@
   [curr-page total-pages]
   (ui/on
     ::next-frame (fn []
-                   (println ::next-frame)
+                   (log/warn ::next-frame)
                    (next-frame! curr-page total-pages)
                    nil)
     ::prev-frame (fn []
-                   (println ::prev-frame)
+                   (log/warn ::prev-frame)
                    (prev-frame! curr-page total-pages)
                    nil)
     ::last-frame (fn []
-                   (println ::last-frame)
+                   (log/warn ::last-frame)
                    (last-frame!)
                    nil)
     ::first-frame (fn []
-                    (println ::first-frame)
+                    (log/warn ::first-frame)
                     (first-frame!)
                     nil)
     ::animate-all-frames (fn []
-                           (println ::animate-all-frames)
+                           (log/warn ::animate-all-frames)
                            ; run in future
                            (future
                              (animate-all-frames! 0 total-pages))
                            nil)
     :key-press (fn [k]
-                 (println :selector :key-press k :type (type k))
+                 (log/warn :selector :key-press k :type (type k))
                  (case k
                    "j" [[::next-frame]]
                    "k" [[::prev-frame]]
@@ -278,7 +281,7 @@
   (apply
     ui/vertical-layout
     (interpose (ui/spacer 10)
-      (for [r (-> state :painters)]
+      (for [r (-> state) :painters]
         (let [roomnum (-> r :at-room)]
           (ui/label (format "Painter %d -- In Room: %s"
                       (-> r :id)
@@ -290,7 +293,7 @@
   " get frame, and prevent overflow "
   [n frames]
   (let [maxn (count frames)]
-    ;(println :get-frame :n n :maxn maxn)
+    ;(log/debug :get-frame :n n :maxn maxn)
     (if (>= n maxn)
       (last frames)
       (nth frames n))))
@@ -328,6 +331,9 @@
   (def w (skia/run #'dev-view))
   ((:membrane.skia/repaint w))
   @*app-state
+
+  (dev-view)
+  (skia/save-image "/tmp/devvew.png" (dev-view))
 
   0)
 

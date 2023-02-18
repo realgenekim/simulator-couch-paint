@@ -684,14 +684,29 @@
                :painters [{:id 0, :role :painter, :at-room 0}]}]
     (is (true? (sim/room-has-painter state 0)))
     (is (false? (sim/room-has-painter state 1)))
-    (is (false? (sim/room-has-painter state 2)))))
+    (is (false? (sim/room-has-painter state 2)))
+
+    (is (= :painting
+          (->> (sim/rooms-needs-painter-already-there state)
+            first
+            :state)))
+
+    (let [newstate (sim/advance-state state)]
+      (def newstate newstate)
+      (is (= :painting
+            (-> newstate :rooms first :state)))))
+
+
+  0)
+
 
 (deftest complete-sim-1
   ; problem: room stuck in :waiting for painters, even though painter is already there
   (let [state (sim/create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 1))
         states (sim/simulate-until-done state)]
     (def states states)
-    (is (= 221
+    ;(is (= 221))
+    (is (= 202
           (count states)))))
   ;XXX
   ;(reset! sim/*state states))

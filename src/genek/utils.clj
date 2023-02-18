@@ -12,6 +12,12 @@
   (with-out-str
     (clojure.pprint/pprint x)))
 
+(defn pp-str-cr
+  [x]
+  (str "\n"
+    (with-out-str
+      (clojure.pprint/pprint x))))
+
 ; https://stackoverflow.com/questions/40370240/easy-way-to-change-specific-list-item-in-list
 
 (defn list-update-in [l i x]
