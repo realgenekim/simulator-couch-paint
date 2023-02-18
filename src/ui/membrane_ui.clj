@@ -9,6 +9,13 @@
 ; someday
 ; - learn about focus
 
+; next
+; -  I’ll have ability to nav through all the frames
+;    - prev/next
+;    - last frame
+;    - handle inc/dec :last-frame
+; - and a way to animate all the frames.
+
 (def *sim-state genek.sim2/*state)
 
 ; :frame: either frame number or :last-frame
@@ -22,31 +29,77 @@
   (init-state!)
   0)
 
+(defn next-frame!
+  [curr-page total-pages]
+  ; cases:
+  ;  handle overflow:  more than total-pages
+  ;  handle :last-frame: leave unchanged
+  (cond
+    (= :last-frame curr-page) nil
+    (= (dec total-pages) curr-page) nil
+    :else (swap! *app-state update-in [:frame] inc)))
+
+(defn prev-frame!
+  [curr-page total-pages]
+  ; cases:
+  ;  handle underflow: if 0, leave at zero
+  ;  handle :last-frame: (dec total-pages)
+  (println :prev-frame! :curr-page curr-page :total-pages total-pages)
+  (case curr-page
+    0 nil
+    :last-frame (swap! *app-state assoc-in [:frame] (dec total-pages))
+    (swap! *app-state update-in [:frame] dec)))
+
+(defn last-frame!
+  []
+  (swap! *app-state assoc-in [:frame] :last-frame))
+
+(defn first-frame!
+  []
+  (swap! *app-state assoc-in [:frame] 0))
+
+
+
+
 (defn selector
   [curr-page total-pages]
   (ui/on
-    ::next-frame (fn [x]
-                   (println ::next-frame :arg x)
-                   (swap! *app-state update-in [:frame] inc)
-                   ;(reset! *app-state {:frame 5})
+    ::next-frame (fn []
+                   (println ::next-frame)
+                   (next-frame! curr-page total-pages)
                    nil)
+    ::prev-frame (fn []
+                   (println ::prev-frame)
+                   (prev-frame! curr-page total-pages)
+                   nil)
+    ::last-frame (fn []
+                   (println ::last-frame)
+                   (last-frame!)
+                   nil)
+    ::first-frame (fn []
+                    (println ::first-frame)
+                    (first-frame!)
+                    nil)
     :key-press (fn [k]
                  (println :selector :key-press k :type (type k))
                  (case k
-                   "j" [[::next-frame :hello]]
+                   "j" [[::next-frame]]
                    "k" [[::prev-frame]]
                    "$" [[::last-frame]]
+                   ;["^" "0"] [[::first-frame]]
+                   "^" [[::first-frame]]
+                   "0" [[::first-frame]]
                    nil))
 
     (ui/horizontal-layout
       (ui/button "<<"
         (fn []
-          [[::prev-frame 0]]))
+          [[::prev-frame]]))
       (ui/label (format "curr-page: %s, total-pages %s"
                   (str curr-page) (str total-pages)))
       (ui/button ">>"
         (fn []
-          [[::next-frame 0]])))))
+          [[::next-frame]])))))
 
 
 (defn turn
@@ -101,10 +154,25 @@
                         (str (-> r :at-room))
                         "---"))))))))
 
+(defn get-frame
+  " get frame, and prevent overflow "
+  [n frames]
+  (let [maxn (count frames)]
+    ;(println :get-frame :n n :maxn maxn)
+    (if (>= n maxn)
+      (last frames)
+      (nth frames n))))
+
+(comment
+  (get-frame 100 @*sim-state)
+  0)
+
 (defn render-view
   [sim-state *app-state]
   (let [framenum (-> @*app-state :frame)
-        state (nth sim-state framenum)]
+        state    (case framenum
+                   :last-frame (last sim-state)
+                   (get-frame framenum sim-state))]
     (ui/vertical-layout
       ; curr-page total-pages
       (selector (-> @*app-state :frame) (count sim-state))
@@ -126,6 +194,7 @@
   (skia/run #'dev-view)
   (def w (skia/run #'dev-view))
   ((:membrane.skia/repaint v))
+  @*app-state
 
   0)
 
