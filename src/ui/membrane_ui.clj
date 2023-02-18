@@ -178,7 +178,9 @@
     (ui/horizontal-layout
       ;(ui/label (str workers))
       (if-not (empty? msg)
-        (ui/label msg)))))
+        (ui/label msg)
+        (ui/label "  ")))))
+
 
 
 (defn rooms
@@ -214,7 +216,7 @@
             (ui/horizontal-layout
               (ui/spacer 70 10)
               (workers-present r movers painters)))
-          #_(ui/spacer 25))))))
+          (ui/spacer 10))))))
 
 (defn movers
   [state]
