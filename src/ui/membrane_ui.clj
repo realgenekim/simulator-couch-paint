@@ -1,11 +1,13 @@
 (ns ui.membrane-ui
   (:require
+    [membrane.skia.paragraph :as para]
     [membrane.ui :as ui]
     [membrane.skia :as skia]
     [genek.entities :as e]
     [membrane.basic-components :as basic]
     [membrane.component :refer
-         [defui defeffect make-app]]))
+     [defui defeffect make-app]]))
+
 
 ; someday
 ; - learn about focus
@@ -149,8 +151,8 @@
 
 (def states-text { :initial "start"
                   :waiting-for-movers1 "wait"
-                  ;:removing-furniture "🛋 moving"
-                  :removing-furniture "moving"
+                  :removing-furniture "🛋 moving"
+                  ;:removing-furniture "moving"
                   :waiting-for-painters "wait"
                   :painting "painting"
                   :waiting-for-movers2 "wait"
@@ -168,12 +170,24 @@
   (apply
     ui/horizontal-layout
     (for [st e/room-states]
-      (if (not= st (:state room))
-        ;(ui/label (str st))
-        (ui/label (str (get states-text st) " "))
-        (ui/with-color [1 0 0]
+      (ui/vertical-layout
+        (ui/spacer 0 10)
+        (if (not= st (:state room))
           ;(ui/label (str st))
-          (ui/label (str (get states-text st) " ")))))))
+          ;(para/paragraph "🛋")
+          ;(ui/label "🛋️"
+          ;  (ui/font "Apple Color Emoji" nil)
+          (ui/horizontal-layout
+            ;(para/paragraph "🛋")
+            (para/paragraph (str (get states-text st) " ")))
+          #_(ui/label (str (get states-text st) " ")
+              (ui/font "Apple Color Emoji" nil))
+          (ui/with-color [1 0 0]
+            ;(ui/label (str st))
+            ;(ui/label (str (get states-text st) " "))
+            (para/paragraph
+              {:text (str (get states-text st) " ")
+               :style #:text-style {:color [1 0 0]}})))))))
 
 (defn time-remaining-bar
   " just time remaining as string of chars "
