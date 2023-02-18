@@ -271,6 +271,52 @@
       (with-out-str (clojure.pprint/pprint new-rooms+painters)))
     new-rooms+painters))
 
+
+(>defn- create-painter-assignments2
+  " for every room that needs mover/painter, identify a mover to be assigned
+    input: state
+    output: [{:room .. :mover} ...] "
+  [state] [::e/s-state => ::s-moving-assignments]
+  (let [needs-painters     (e/rooms-needing-painters (-> state :rooms))
+        painters           (e/available-painters state)
+        _                  (log/warn :create-painter-assignments :needs-movers needs-painters)
+        _                  (log/warn :create-painter-assignments :painters painters)
+        ;room+painters      (map vector needs-painters painters)
+        room+painters      (map vector (reverse needs-painters) painters)
+        ; this creates [{:room newroom :mover newmover}...]
+        _                  (log/warn :create-painter-assignments :rooms+painters room+painters)
+        new-rooms+painters (->> room+painters
+                             (map #(vecmap->room-assignments :painter %))
+                             (remove nil?))]
+    (log/warn :create-painter-assignments :new-room-movers
+      (with-out-str (clojure.pprint/pprint new-rooms+painters)))
+    new-rooms+painters))
+
+(comment
+  (def state
+    {:turn 26,
+     :rooms [{:id 0,
+              :role :room,
+              :state :waiting-for-movers1
+              :moving1-time-remaining 10,
+              :painting-time-remaining 10,
+              :moving2-time-remaining 10}
+             {:id 1,
+              :role :room,
+              :state :waiting-for-painters,
+              :moving1-time-remaining 0,
+              :painting-time-remaining 10,
+              :moving2-time-remaining 10}],
+     :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+     :painters [{:id 0, :role :painter, :at-room nil}
+                {:id 1, :role :painter, :at-room nil}
+                {:id 2, :role :painter, :at-room nil}
+                {:id 3, :role :painter, :at-room nil}]})
+
+  (e/rooms-needing-painters (e/state->rooms state))
+  (e/rooms-needing-painters (e/state->rooms state) {:strict false})
+  0)
+
 (>defn- apply-painting-assignments
   " input:  state
             moving assignments: [{:room .. :mover} ...] : these are moving assigments, created by create-mover-assignments

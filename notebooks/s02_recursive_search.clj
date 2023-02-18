@@ -26,6 +26,7 @@
 ; ## Results
 ;
 ; - FIFO: 175 turns
+; - LIFO: 175 turns -- same, because painters never wait...
 
 #_(doseq [i (range 200)]
     (let [newstate (-> (-> @sim/*state last)

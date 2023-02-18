@@ -661,4 +661,37 @@
     (is (= 224
           (count states)))))
 
+(deftest parking-painters
+  (let [state {:turn     26,
+               :rooms    [{:id                      0,
+                           :role                    :room,
+                           :state                   :waiting-for-movers1
+                           :moving1-time-remaining  10,
+                           :painting-time-remaining 10,
+                           :moving2-time-remaining  10}
+                          {:id                      1,
+                           :role                    :room,
+                           :state                   :waiting-for-painters,
+                           :moving1-time-remaining  0,
+                           :painting-time-remaining 10,
+                           :moving2-time-remaining  10}],
+               :movers   [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+               :painters [{:id 0, :role :painter, :at-room nil}
+                          {:id 1, :role :painter, :at-room nil}
+                          {:id 2, :role :painter, :at-room nil}
+                          {:id 3, :role :painter, :at-room nil}]}]
+    ; old mode
+    (is (= [1]
+          (->> (e/rooms-needing-painters (e/state->rooms state))
+            (mapv :id))))
+    (is (= [0 1]
+          (->> (e/rooms-needing-painters (e/state->rooms state) {:strict false})
+            (mapv :id))))
+
+
+
+
+
+    0)
+  0)
 

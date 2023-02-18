@@ -120,6 +120,14 @@
     (= nfinished (count (-> state :rooms)))))
 
 
+;
+; convenience
+;
+
+(>defn state->rooms
+  [s] [::s-state => ::s-rooms]
+  (-> s :rooms))
+
 
 ;
 ; find
@@ -135,13 +143,36 @@
                 (get state-needs-mover? state))))))
 
 (>defn rooms-needing-painters
-  " input: all rooms
-    output: all rooms that need movers"
-  [rooms] [::s-rooms => ::s-rooms]
-  (->> rooms
-    (filter (fn [r]
-              (let [state (-> r :state)]
-                (get state-needs-painter? state))))))
+  " input: rooms: all rooms
+           opts : {:strict :only when state  needs it now (default)
+                   :loose  : any state when operations isn't done (can cause deadlock)}
+    output: all rooms that need painters "
+  ([rooms {:keys [strict]
+           :or   {strict true}
+           :as   opts}] [::s-rooms map? => ::s-rooms]
+   (log/warn :rooms-needing-painting :opts opts)
+   (if strict
+     (->> rooms
+       (filter (fn [r]
+                 (let [state (-> r :state)]
+                   (get state-needs-painter? state)))))
+     ;else
+     (->> rooms
+       (filter (fn [r]
+                 (let [state (-> r :state)
+                       needs #{:initial
+                               :waiting-for-movers1
+                               :removing-furniture
+                               :waiting-for-painters}]
+                   (needs state)))))))
+  ([rooms] [::s-rooms => ::s-rooms]
+   (rooms-needing-painters rooms {:strict true})))
+
+(comment
+  0)
+
+
+
 
 (>defn rooms-done-with-movers
   " input: all rooms
