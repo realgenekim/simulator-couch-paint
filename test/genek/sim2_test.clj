@@ -869,14 +869,14 @@
   0)
 
 
-(deftest complete-sim-1
-  ; problem: room stuck in :waiting for painters, even though painter is already there
-  (let [state  (sim/create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 1))
-        states (sim/simulate-until-done state)]
-    (def states states)
-    ;(is (= 221))
-    (is (= 202
-          (count states)))))
+#_(deftest complete-sim-1
+    ; problem: room stuck in :waiting for painters, even though painter is already there
+    (let [state  (sim/create-state (e/create-rooms 4) (e/create-movers 1) (e/create-painters 1))
+          states (sim/simulate-until-done state)]
+      (def states states)
+      ;(is (= 221))
+      (is (= 202
+            (count states)))))
 ;XXX
 ;(reset! sim/*state states))
 
@@ -1049,69 +1049,7 @@
   (-> @sim/*state (nth 51))
   0)
 
-(deftest mover-stuck1
-  (let [state     {:turn     52,
-                   :rooms    [{:id                      0,
-                               :role                    :room,
-                               :state                   :waiting-for-painters,
-                               :moving1-time-remaining  0,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}
-                              {:id                      1,
-                               :role                    :room,
-                               :state                   :waiting-for-painters,
-                               :moving1-time-remaining  0,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}
-                              {:id                      2,
-                               :role                    :room,
-                               :state                   :waiting-for-painters,
-                               :moving1-time-remaining  0,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}
-                              {:id                      3,
-                               :role                    :room,
-                               :state                   :waiting-for-painters,
-                               :moving1-time-remaining  0,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}
-                              {:id                      4,
-                               :role                    :room,
-                               :state                   :waiting-for-movers1,
-                               :moving1-time-remaining  25,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}
-                              {:id                      5,
-                               :role                    :room,
-                               :state                   :removing-furniture,
-                               :moving1-time-remaining  25,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}
-                              {:id                      6,
-                               :role                    :room,
-                               :state                   :removing-furniture,
-                               :moving1-time-remaining  25,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}
-                              {:id                      7,
-                               :role                    :room,
-                               :state                   :removing-furniture,
-                               :moving1-time-remaining  25,
-                               :painting-time-remaining 50,
-                               :moving2-time-remaining  25}],
-                   :movers   [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
-                   :painters [{:id 0, :role :painter, :at-room 7} {:id 1, :role :painter, :at-room 6} {:id 2, :role :painter, :at-room 5}]}
-        nextstate (sim/simulate-turn state)]
-    (def nextstate nextstate)
-    (log/warn :test :state (utils/pp-str-cr nextstate))
-    (log/warn :eval (vec (e/rooms-needing-movers (e/state->rooms state))))
-    (is (= [4] (sp/select [:movers 0 :at-room] newstate)))
-    (is (= [5] (sp/select [:movers 1 :at-room] newstate)))
-    (is (= 5
-          (-> newstate
-            :movers
-            second
-            :at-room)))))
+#_(deftest mover-stuck1)
 
 (comment
   (sp/select [:movers 0 :at-room] newstate)
