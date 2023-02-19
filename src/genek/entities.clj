@@ -182,7 +182,7 @@
                                                      (needs state))))))]
      (log/warn :rooms-needing-painting :retval (vec retval))
      retval))
-  ([rooms] [::s-rooms => ::s-rooms]
+  ([rooms] [::s-state => ::s-rooms]
    (rooms-needing-painters rooms {:strict true})))
 
 (comment

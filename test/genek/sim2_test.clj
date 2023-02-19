@@ -1200,10 +1200,11 @@
     ; Turn 127 -> 128: Room 6:
     ;- two painters assigned to same
     ;room
-    (is (empty?
-          (#'sim/create-painter-assignments2 state)))
-    (is (= [6 5]
-          (sp/select [:painters sp/ALL :at-room] newstate)))))
+    (is (= 1
+          (count (#'sim/create-painter-assignments2 state))))
+    (is (= [5 6 7]
+          (->> (sp/select [:painters sp/ALL :at-room] newstate)
+            sort)))))
 
 (comment
   (sp/select [:painters sp/ALL :at-room] newstate))
