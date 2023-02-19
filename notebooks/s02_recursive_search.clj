@@ -17,14 +17,14 @@
 
 (def newstates
   ;(sim/simulate-until-done (-> @sim/*state last) {:maxturns 200})
-  (sim/simulate-until-done (-> @sim/*state last) {:maxturns 40}))
+  (sim/simulate-until-done (-> @sim/*state last) {:maxturns 500}))
 
 (reset! sim/*state newstates)
 
 ; ## Results
 ;
 ; - FIFO: 175 turns
-; - LIFO: 175 turns -- same, because painters never wait...
+; - LIFO: 173 turns -- same, because painters never wait...
 
 #_(doseq [i (range 200)]
     (let [newstate (-> (-> @sim/*state last)

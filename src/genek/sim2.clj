@@ -438,8 +438,8 @@
      (if (or
            (e/all-rooms-finished? newstate)
            (and maxturns
-             (> (-> state :turn) maxturns))
-           (> (-> state :turn) 200))
+             (> (-> state :turn) maxturns)))
+           ;(> (-> state :turn) 200))
        ; one more frame needed, to get completed
        (conj states (simulate-turn newstate))
 

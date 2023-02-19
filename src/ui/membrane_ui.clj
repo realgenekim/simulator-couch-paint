@@ -40,7 +40,14 @@
 
 (defn init-state!
   []
-  (reset! *app-state {:frame :last-frame}))
+  ;(reset! *app-state {:frame :last-frame})
+  (swap! *app-state
+    assoc
+    :frame 0
+    :sim-state @*sim-state
+    :*sim-state *sim-state)
+  nil)
+
 
 (comment
   (init-state!)
@@ -297,8 +304,9 @@
 (defn get-frame
   " get frame, and prevent overflow "
   [n frames]
+  ;(log/warn :get-frame :n n :maxn maxn)
+  (log/warn :get-frame :n n :type (type frames))
   (let [maxn (count frames)]
-    ;(log/debug :get-frame :n n :maxn maxn)
     (if (>= n maxn)
       (last frames)
       (nth frames n))))
@@ -307,13 +315,21 @@
   (get-frame 100 @*sim-state)
   0)
 
+(defn parse-framenum
+  " handle :last-frame: return an int "
+  [framenum sim-state]
+  (case framenum
+    :last-frame (count sim-state)
+    framenum))
+
+
 (defui my-slider
   [{:keys [frame sim-state]}]
   (ui/vertical-layout
     (ui/label "hello!")
     (ui/label (str frame))
 
-    (basic/number-slider {:num frame
+    (basic/number-slider {:num (parse-framenum frame sim-state)
                           :min 0
                           :max (dec (count sim-state))
                           :integer? true})))
@@ -337,38 +353,33 @@
        (ui/label "hello2")
        view])))
 
-
-(defui render-view
-  [{:keys [frame sim-state]
-    :as   m}]
-  (let [framenum (-> @*app-state :frame)
-        state    (case framenum
-                   :last-frame (last sim-state)
-                   (get-frame framenum sim-state))]
-    (outer-pane {:view
-                 (ui/vertical-layout
-                   ; curr-page total-pages
-                   (my-slider {:frame     frame
-                               :sim-state sim-state})
-                   (selector (-> @*app-state :frame) (count sim-state))
-                   (turn state)
-                   (rooms state)
-                   (movers state)
-                   (painters state))})))
-
-
-
-
 (comment
   (def w3 (skia/run (make-app #'outer-pane {})))
   0)
 
 
-
+(defui render-view
+  [{:keys [frame sim-state *sim-state]
+    :as   m}]
+  (let [
+        state    (case frame
+                   :last-frame (last sim-state)
+                   (get-frame frame sim-state))]
+    (outer-pane {:view
+                 (ui/vertical-layout
+                   ; curr-page total-pages
+                   (my-slider {:frame     frame
+                               :sim-state sim-state})
+                   (selector frame (count sim-state))
+                   (turn state)
+                   (rooms state)
+                   (movers state)
+                   (painters state))})))
 
 (comment
   ; this allows getting away from global state, which we used for dev-view
   ;(def dev-app2 (make-app #'my-slider *app-state))
+  (init-state!)
   (def dev-app2 (make-app #'render-view *app-state))
   (def w2 (skia/run dev-app2))
   0)

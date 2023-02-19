@@ -59,9 +59,9 @@
 (def state-needs-painter?
   {:waiting-for-painters true})
 
-(def MOVING1-OP-TURNS 10)
+(def MOVING1-OP-TURNS 25)
 (def PAINTING-OP-TURNS 50)
-(def MOVING2-OP-TURNS 10)
+(def MOVING2-OP-TURNS 25)
 
 
 (>defn create-room
