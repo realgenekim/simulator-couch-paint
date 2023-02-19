@@ -337,6 +337,7 @@
     ; handle :last-frame
     (let [fnum (parse-framenum frame sim-state)]
       (basic/number-slider {:num fnum
+                            :$num $frame
                             :min 0
                             :max (dec (count sim-state))
                             :integer? true}))))
