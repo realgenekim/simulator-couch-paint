@@ -102,7 +102,7 @@
     (log/debug :animate-all-frames!/entering :framenum framenum :total-pages total-pages)
     (if (< framenum total-pages)
       (do
-        (Thread/sleep 50)
+        (Thread/sleep 40)
         (next-frame! framenum total-pages)
         ; see if we can force repaint
         (if-let [w (resolve `w2)]
@@ -234,9 +234,9 @@
         msg     (->> workers
                   (mapv (fn [x]
                           ; strip out colon from :mover
-                          (log/warn :workers-present :role (:role x))
-                          (log/warn :workers-present :role (:role x)
-                            (worker-str x))
+                          ;(log/debug :workers-present :role (:role x))
+                          ;(log/debug :workers-present :role (:role x)
+                            (worker-str x)
                           (format "%s %d" (worker-str x) (:id x))))
                   (clojure.string/join " "))]
     (ui/horizontal-layout
@@ -362,25 +362,26 @@
 
 (defui outer-pane
   [{:keys [view]}]
-  (ui/horizontal-layout
+  (ui/vertical-layout
+    (ui/spacer 20 20)
     (ui/horizontal-layout
-      [
-       (ui/spacer 100)
-       (ui/vertical-layout
-         (basic/button {:text     "Initialize (FIFO)"
-                        :on-click #(do
-                                     (log/warn :outer-pane :click)
-                                     (init-state! {:sim {:painter-fifo true}}))})
-         (basic/button {:text     "Initialize (LIFO)"
-                        :on-click #(do
-                                     (log/warn :outer-pane :click)
-                                     (init-state! {:sim {:painter-fifo false}}))}))])
+      (ui/horizontal-layout
+        (ui/spacer 20 20)
+        (basic/button {:text     "Initialize (FIFO)"
+                       :on-click #(do
+                                    (log/warn :outer-pane :click)
+                                    (init-state! {:sim {:painter-fifo true}}))})
+        (basic/button {:text     "Initialize (LIFO)"
+                       :on-click #(do
+                                    (log/warn :outer-pane :click)
+                                    (init-state! {:sim {:painter-fifo false}}))})))
+    (ui/spacer 20 20)
 
     (ui/horizontal-layout
       ;[(ui/spacer 100)
       ; (ui/label "hello2")
-      ; (ui/spacer 100)
-       view)))
+      (ui/spacer 20)
+      view)))
 
 (comment
   (def w3 (skia/run (make-app #'outer-pane {})))
