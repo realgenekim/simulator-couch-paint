@@ -366,8 +366,8 @@
     (log/debug :advance-state/entering :state state)
     ; intentially shadow state var
     (reduce (fn [state rs]
-              (log/warn :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
-              (log/warn :advance-state :reduce/entering :rooms-being-worked (utils/pp-str-cr rs))
+              (log/debug :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
+              (log/debug :advance-state :reduce/entering :rooms-being-worked (utils/pp-str-cr rs))
               (if-not (empty? rs)
                 ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
                 ; get the room number
