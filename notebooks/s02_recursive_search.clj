@@ -16,7 +16,8 @@
 
 
 (def newstates
-  (sim/simulate-until-done (-> @sim/*state last) {}))
+  ;(sim/simulate-until-done (-> @sim/*state last) {:maxturns 200})
+  (sim/simulate-until-done (-> @sim/*state last) {:maxturns 40}))
 
 (reset! sim/*state newstates)
 

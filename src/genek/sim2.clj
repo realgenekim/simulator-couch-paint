@@ -53,8 +53,9 @@
   (s/coll-of ::s-index))
 
 ; TODO: return full room, not id, so we can assoc in new value in advance state
-(>defn rooms-being-worked
-  " given state, return vector of all rooms being moved "
+(>defn workers-working
+  " given state, return vector of all all workers workign
+    [{:id :role :at-room}] "
   [kworkers state] [keyword? map? => ::e/s-movers]
   (->> state
     kworkers
@@ -67,14 +68,14 @@
 
 ; TODO: move this to entities
 
-(def rooms-being-moved (partial rooms-being-worked :movers))
-(def rooms-being-painted (partial rooms-being-worked :painters))
+(def workers-moving (partial workers-working :movers))
+(def workers-painting (partial workers-working :painters))
 
 (>defn room-has-painter
   " does the room have a painter there? "
   [state roomnum] [::e/s-state nat-int? => boolean?]
-  (let [rooms (into #{} (->> (rooms-being-painted state)
-                          (map :id)))]
+  (let [rooms (into #{} (->> (workers-painting state)
+                          (map :at-room)))]
     (boolean (rooms roomnum))))
 
 ; ^^^^^ MOVE
@@ -334,16 +335,21 @@
     find those conditions:  room needs painting, and painter is there
     "
   [state] [::e/s-state => ::e/s-rooms]
-  (->> (-> state :rooms)
-    (mapv (fn [{:keys [id]
-                :as room}]
-            (if (not= (-> room :state) :waiting-for-painters)
-              ; unchanged
-              room
-              ; otherwise flip state
-              (if (room-has-painter state id)
-                (assoc room :state :painting)
-                room))))))
+  ; for each room
+  ;  if state is :waiting-for-painters, and room has a painter there
+  ;    then flip state to painting
+  (let [retval (->> (-> state :rooms)
+                 (mapv (fn [{:keys [id]
+                             :as   room}]
+                         (if (not= (-> room :state) :waiting-for-painters)
+                           ; unchanged
+                           room
+                           ; otherwise flip state
+                           (if (room-has-painter state id)
+                             (assoc room :state :painting)
+                             room)))))]
+    (log/warn :rooms-needs-painter-already-there :retval retval)
+    retval))
 
 (>defn advance-state
   " IMPORTANT: take care of things like
@@ -351,8 +357,8 @@
     - change state of room
     - unassigning movers and painters (XXX: isn't this done elsewhere?) "
   [state] [::e/s-state => ::e/s-state]
-  (let [rooms-moving (rooms-being-moved state)
-        rooms-painting (rooms-being-painted state)
+  (let [rooms-moving (workers-moving state)
+        rooms-painting (workers-painting state)
         combined (flatten (conj rooms-moving rooms-painting))]
     (log/debug :advance-state/entering :rooms-moving rooms-moving)
     (log/debug :advance-state/entering :rooms-painting rooms-painting)
@@ -361,7 +367,7 @@
     ; intentially shadow state var
     (reduce (fn [state rs]
               (log/warn :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
-              (log/warn :advance-state :reduce/entering :rooms-being-moved (utils/pp-str-cr rs))
+              (log/warn :advance-state :reduce/entering :rooms-being-worked (utils/pp-str-cr rs))
               (if-not (empty? rs)
                 ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
                 ; get the room number
@@ -386,17 +392,35 @@
                                   state)
                       ; handle case of painters already there, and needs to start painting
                       newrooms  (utils/update-by-id (-> state :rooms) newroom)
-                      newrooms  (rooms-needs-painter-already-there
-                                  (assoc state :rooms newrooms))
+                      ;newrooms  (rooms-needs-painter-already-there
+                      ;            (assoc state :rooms newrooms))
                       new-state (-> state
                                   (assoc :rooms newrooms))]
                   (recur new-state (rest rs)))
                 ; termination case
                 state))
-      state
+      ; change states to :painting if painter is there
+      (assoc state :rooms
+                   (rooms-needs-painter-already-there state))
       [combined])))
 
+(comment
+  (->
+    (last @*state)
+    advance-state)
+  0)
 
+
+(>defn simulate-turn
+  "execute all steps in a turn: takes a state, returns a state"
+  [state] [::e/s-state => ::e/s-state]
+  (-> state
+    assign-movers
+    free-movers
+    assign-painters
+    free-painters
+    advance-state
+    next-turn))
 
 ; main interface
 (>defn simulate-until-done
@@ -408,14 +432,7 @@
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (reset! *state states)
-   (let [nextfn #(-> %
-                   assign-movers
-                   free-movers
-                   assign-painters
-                   free-painters
-                   advance-state
-                   next-turn)
-         newstate (nextfn state)]
+   (let [newstate (simulate-turn state)]
      ; if done return, else recurse
      (log/warn :simulate-until-done :turn (-> newstate :turn))
      (if (or
@@ -424,14 +441,14 @@
              (> (-> state :turn) maxturns))
            (> (-> state :turn) 200))
        ; one more frame needed, to get completed
-       (conj states (nextfn newstate))
+       (conj states (simulate-turn newstate))
 
        (recur newstate (conj states newstate) opts))))
   ; 2 arity: create new states
   ([state opts] [::e/s-state map? => ::e/s-states]
    (simulate-until-done state [] opts))
   ([state] [::e/s-state => ::e/s-states]
-   (simulate-until-done state [] {})))
+   (simulate-until-done state {})))
 
 
 

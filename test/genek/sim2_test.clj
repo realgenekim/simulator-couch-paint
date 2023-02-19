@@ -220,7 +220,7 @@
 
         (testing "rooms being moved"
           (is (= [0]
-                (->> (sim/rooms-being-moved new-state)
+                (->> (sim/workers-moving new-state)
                   (mapv :id)))))
 
         (testing "update rooms being moved"
@@ -688,14 +688,180 @@
     (is (false? (sim/room-has-painter state 1)))
     (is (false? (sim/room-has-painter state 2)))
 
+    ; room 0 should flip to :painting
     (is (= :painting
           (->> (sim/rooms-needs-painter-already-there state)
             first
+            :state)))
+    ; not others
+    (is (= :waiting-for-painters
+          (->> (sim/rooms-needs-painter-already-there state)
+            second
             :state)))
 
     (let [newstate (sim/advance-state state)]
       (def newstate newstate)
       (is (= :painting
+            (-> newstate :rooms first :state)))))
+
+
+  (let [state {:turn 10,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 1,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 2,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 10,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 3,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 10,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 4,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 10,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 5,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 6,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 7,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}],
+               :movers [{:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}],
+               :painters [{:id 0, :role :painter, :at-room 7} {:id 1, :role :painter, :at-room 6} {:id 2, :role :painter, :at-room 5}]}
+        newstate (sim/simulate-turn state)]
+
+
+     ; room 0 should still be waiting
+     (def newstate newstate)
+     (is (= :waiting-for-painters
+           (->> (sim/simulate-turn newstate)
+             :rooms
+             first
+             :state)))
+     ; room 7 should flip
+     (is (= [5 6 7]
+           (->> (sim/rooms-needs-painter-already-there newstate)
+             (filter #(= :painting (:state %)))
+             (mapv :id))))
+     ; not others
+     #_(is (= :waiting-for-painters
+             (->> (sim/rooms-needs-painter-already-there state)
+               second
+               :state)))
+
+     #_(let [newstate (sim/advance-state state)]
+         (def newstate newstate)
+         (is (= :painting
+               (-> newstate :rooms first :state)))))
+  0)
+
+
+
+
+(deftest painting2
+
+  (let [state {:turn 10,
+               :rooms [{:id 6,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 7,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}],
+               :movers [{:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}],
+               :painters [{:id 0, :role :painter, :at-room 7} {:id 1, :role :painter, :at-room 6} {:id 2, :role :painter, :at-room 5}]}]
+    (is (= [6 7]
+          (->> (sim/rooms-needs-painter-already-there state)
+            (mapv :id)))))
+
+  (let [state {:turn 10,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 1,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 2,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 10,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 3,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 10,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 4,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 10,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 5,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 6,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}
+                       {:id 7,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 10}],
+               :movers [{:id 0, :role :mover, :at-room 0} {:id 1, :role :mover, :at-room 1}],
+               :painters [{:id 0, :role :painter, :at-room 7} {:id 1, :role :painter, :at-room 6} {:id 2, :role :painter, :at-room 5}]}]
+    (let [newstate (sim/simulate-turn state)]
+      (def newstate newstate)
+      ; room must still be waiting!
+      (is (= :waiting-for-painters
             (-> newstate :rooms first :state)))))
 
 
@@ -797,7 +963,11 @@
       1
       (def newstate newstate)
       (is (map? newstate))
-      (is (= :painting
+      (is (= [5 6 7]
+            (->> (e/state->rooms newstate)
+              (filter #(= :painting (:state %)))
+              (mapv :id))))
+      (is (= :waiting-for-painters
             (-> newstate :rooms first :state)))))
 
   (comment
