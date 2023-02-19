@@ -57,7 +57,7 @@
 
 
 (comment
-  (init-state!)
+  (init-state! {})
   0)
 
 (defn next-frame!
@@ -172,7 +172,7 @@
                   (-> state :turn))))
     (ui/spacer 25)))
 
-(def states-text {:initial              "start"
+(def states-text {:initial              ""
                   :waiting-for-movers1  "wait"
                   :removing-furniture   "moving"
                   ;:removing-furniture   [{:text  "🛋 "
@@ -209,7 +209,8 @@
    (para/paragraph
     (interpose
      " "
-     (for [st e/room-states]
+      ; skip "start"
+     (for [st (rest e/room-states)]
        (if (not= st (:state room))
          (get states-text st)
          (make-red (get states-text st))))))))
@@ -291,7 +292,7 @@
                      4
                      (room r movers painters))
               bounds (ui/bounds relem)]
-          (log/warn :rooms :bounds (str bounds))
+          ;(log/warn :rooms :bounds (str bounds))
           [(ui/with-style :membrane.ui/style-stroke
              (ui/rectangle (first bounds) (- (second bounds) 2)))
            relem])))))

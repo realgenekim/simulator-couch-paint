@@ -482,7 +482,7 @@
        (recur newstate (conj states newstate) opts))))
   ; 2 arity: create new states
   ([state opts] [::e/s-state map? => ::e/s-states]
-   (simulate-until-done state [] opts))
+   (simulate-until-done state [state] opts))
   ([state] [::e/s-state => ::e/s-states]
    (simulate-until-done state {})))
 
