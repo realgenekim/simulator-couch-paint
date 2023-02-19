@@ -248,11 +248,15 @@
 (defn room
   [r movers painters]
   (ui/vertical-layout
+    ; keep all boxes the same width
     (ui/horizontal-layout
       (ui/spacer 405 0))
     (ui/horizontal-layout
-      (ui/label (format "Room %d:"
-                  (-> r :id)))
+      ; https://phronmophobic.github.io/membrane/styled-text/index.html
+      (para/paragraph
+        {:text (format "Room %d" (-> r :id))
+         :style #:text-style {:font-size 14
+                              :font-style #:font-style{:weight :bold}}})
       (ui/spacer 50 0)
       (workers-present r movers painters))
 
@@ -288,14 +292,10 @@
     (apply
       ui/vertical-layout
       (for [r rooms]
-        (let [relem (ui/padding
-                     4
-                     (room r movers painters))
-              bounds (ui/bounds relem)]
-          ;(log/warn :rooms :bounds (str bounds))
-          [(ui/with-style :membrane.ui/style-stroke
-             (ui/rectangle (first bounds) (- (second bounds) 2)))
-           relem])))))
+        (ui/bordered [0 0]
+          (ui/padding
+            4
+            (room r movers painters)))))))
 
 (defn movers
   [state]
