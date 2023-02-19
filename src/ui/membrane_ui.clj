@@ -219,6 +219,10 @@
   (ui/label
      (apply str (repeat n "*"))))
 
+(defn worker-str
+  [w]
+  (-> w :role str (subs 1)))
+
 (defn workers-present
   " show any movers/painters in room"
   [r movers painters]
@@ -228,7 +232,12 @@
                   vec)
         msg     (->> workers
                   (mapv (fn [x]
-                          (format "%s %d" (:role x) (:id x)))))]
+                          ; strip out colon from :mover
+                          (log/warn :workers-present :role (:role x))
+                          (log/warn :workers-present :role (:role x)
+                            (worker-str x))
+                          (format "%s %d" (worker-str x) (:id x))))
+                  (clojure.string/join " "))]
     (ui/horizontal-layout
       ;(ui/label (str workers))
       (ui/with-color [0 0 1]
@@ -242,29 +251,34 @@
     (ui/horizontal-layout
       (ui/label (format "Room %d:"
                   (-> r :id)))
-      (room-state r))
+      (ui/spacer 50 0)
+      (workers-present r movers painters))
 
+    (ui/spacer 5)
     (ui/horizontal-layout
-      (ui/label (format "                :moving1-time-remaining: %d"
+      (ui/label (format ":moving1-time-remaining: %d"
                   (-> r :moving1-time-remaining)))
       (time-remaining-bar (-> r :moving1-time-remaining)))
 
     (ui/horizontal-layout
-      (ui/label (format "                :painting-time-remaining: %d"
+      (ui/label (format ":painting-time-remaining: %d"
                   (-> r :painting-time-remaining)))
       (time-remaining-bar (-> r :painting-time-remaining)))
 
     (ui/horizontal-layout
-      (ui/label (format "                :moving2-time-remaining: %d"
+      (ui/label (format ":moving2-time-remaining: %d"
                   (-> r :moving2-time-remaining)))
       (time-remaining-bar (-> r :moving2-time-remaining)))
+
+    (ui/spacer 10)
+    (room-state r)
+    (ui/spacer 10)
 
     (ui/vertical-layout
       #_(ui/spacer 70 20)
       (ui/horizontal-layout
-        (ui/spacer 70 10)
-        (workers-present r movers painters)))
-    (ui/spacer 10)))
+        (ui/spacer 70 10)))))
+
 
 
 (defn rooms
@@ -359,7 +373,7 @@
          (basic/button {:text     "Initialize (LIFO)"
                         :on-click #(do
                                      (log/warn :outer-pane :click)
-                                     (init-state! {:sim {:painter-fifo true}}))}))])
+                                     (init-state! {:sim {:painter-fifo false}}))}))])
 
     (ui/horizontal-layout
       ;[(ui/spacer 100)
@@ -394,7 +408,7 @@
   ; this allows getting away from global state, which we used for dev-view
   ;(def dev-app2 (make-app #'my-slider *app-state))
   ; Adrian: run these forms
-  (init-state!)
+  (init-state! {})
   (def dev-app2 (make-app #'render-view *app-state))
   (def w2 (skia/run dev-app2))
   0)
