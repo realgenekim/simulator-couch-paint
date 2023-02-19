@@ -403,8 +403,9 @@
   " this is responsible for running the sim
     input: initial state
     output: sequence of states, run through state machine"
-  ; 2 arity, build upon state
-  ([state states] [::e/s-state ::e/s-states => ::e/s-states]
+  ; 3 arity, build upon state
+  ([state states {:keys [maxturns]
+                  :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (reset! *state states)
    (let [nextfn #(-> %
@@ -419,13 +420,18 @@
      (log/warn :simulate-until-done :turn (-> newstate :turn))
      (if (or
            (e/all-rooms-finished? newstate)
+           (and maxturns
+             (> (-> state :turn) maxturns))
            (> (-> state :turn) 200))
        ; one more frame needed, to get completed
        (conj states (nextfn newstate))
-       (recur newstate (conj states newstate)))))
-  ; 1 arity: create new states
+
+       (recur newstate (conj states newstate) opts))))
+  ; 2 arity: create new states
+  ([state opts] [::e/s-state map? => ::e/s-states]
+   (simulate-until-done state [] opts))
   ([state] [::e/s-state => ::e/s-states]
-   (simulate-until-done state [])))
+   (simulate-until-done state [] {})))
 
 
 

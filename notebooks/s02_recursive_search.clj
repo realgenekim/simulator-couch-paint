@@ -16,7 +16,7 @@
 
 
 (def newstates
-  (sim/simulate-until-done (-> @sim/*state last)))
+  (sim/simulate-until-done (-> @sim/*state last) {}))
 
 (reset! sim/*state newstates)
 

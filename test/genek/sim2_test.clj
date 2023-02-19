@@ -793,7 +793,13 @@
                           :moving2-time-remaining 10}],
                  :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
                  :painters [{:id 0, :role :painter, :at-room 7} {:id 1, :role :painter, :at-room 6} {:id 2, :role :painter, :at-room 5}]}
-          nextstate (sim/next-turn state)]))
+          newstate (sim/advance-state state)]
+      1
+      (def newstate newstate)
+      (is (map? newstate))
+      (is (= :painting
+            (-> newstate :rooms first :state)))))
+
   (comment
     (-> sim/*state deref last)
     0)
