@@ -345,7 +345,7 @@
     framenum))
 
 
-(defui my-slider
+(defui slider
   [{:keys [frame sim-state]}]
   (ui/vertical-layout
     ;(ui/label "hello!")
@@ -398,8 +398,8 @@
     (outer-pane {:view
                  (ui/vertical-layout
                    ; curr-page total-pages
-                   (my-slider {:frame     frame
-                               :sim-state sim-state})
+                   (slider {:frame        frame
+                            :sim-state sim-state})
                    (selector frame (count sim-state))
                    (turn state)
                    (rooms state)
