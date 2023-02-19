@@ -154,15 +154,34 @@
     (let [roomstate (-> room :state)
           ; update room state, given that we've just assigned a worker
           newroom   (assoc room :state
-                                (case roomstate
-                                  :waiting-for-movers1 :removing-furniture
-                                  :waiting-for-painters :painting
-                                  :waiting-for-movers2 :restoring-furniture
-                                  ; else: this can happen, if we assign a worker ahead of time
+                                (cond
+                                  (and
+                                    (= :waiting-for-movers1 roomstate)
+                                    (= (worker :role) :mover))
+                                  (do
+                                    (log/warn "*** " :vecmap->room-assignments :set :removing-furniture)
+                                    :removing-furniture)
+
+                                  (and
+                                    (= :waiting-for-painters roomstate)
+                                    (= (worker :role) :painter))
+                                  (do
+                                    (log/warn "*** " :vecmap->room-assignments :set :painting)
+                                    :painting)
+
+                                  (and
+                                    (= :waiting-for-movers2 roomstate)
+                                    (= (worker :role) :mover))
+                                  (do
+                                    (log/warn "*** " :vecmap->room-assignments :set :restoring-furniture)
+                                    :restoring-furniture)
+
+                                  :else
                                   roomstate))
-          newmover  (assoc worker :at-room (-> room :id))
+
+          newworker (assoc worker :at-room (-> room :id))
           retval    {:room   newroom
-                     kworker newmover}]
+                     kworker newworker}]
       (log/warn :vecmap->room-assignments :retval retval)
       retval)))
 
@@ -204,6 +223,7 @@
   [state] [::e/s-state => ::e/s-state]
   (let [assignments (create-mover-assignments state)
         newstate    (apply-moving-assignments state assignments)]
+    (log/warn :assign-movers :assignments (vec assignments))
     newstate))
 
 (>defn free-movers
@@ -354,7 +374,7 @@
 (>defn advance-state
   " IMPORTANT: take care of things like
     - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
-    - change state of room
+    - change state of room (TODO: really true?)
     - unassigning movers and painters (XXX: isn't this done elsewhere?) "
   [state] [::e/s-state => ::e/s-state]
   (let [rooms-moving (workers-moving state)
