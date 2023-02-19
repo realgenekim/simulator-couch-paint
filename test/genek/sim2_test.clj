@@ -372,13 +372,13 @@
                             {:id 3, :role :painter, :at-room nil}]}]
       (is (= 1 1))
       (is (= [0 1 2 3]
-            (->> (e/rooms-needing-painters (-> state :rooms))
+            (->> (e/rooms-needing-painters state)
               (mapv :id))))
       (is (= [:painting :painting :painting :painting]
-            (->> (#'sim/create-painter-assignments state)
+            (->> (#'sim/create-painter-assignments2 state)
               (map #(-> % :room :state)))))
       (is (= [0 1 2 3]
-            (->> (#'sim/create-painter-assignments state)
+            (->> (#'sim/create-painter-assignments2 state)
               (map #(-> % :painter :at-room)))))
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
@@ -421,13 +421,13 @@
                             {:id 3, :role :painter, :at-room nil}]}]
       (is (= 1 1))
       (is (= [0 1 2 3]
-            (->> (e/rooms-needing-painters (-> state :rooms))
+            (->> (e/rooms-needing-painters state)
               (mapv :id))))
       (is (= [:painting :painting :painting :painting]
-            (->> (#'sim/create-painter-assignments state)
+            (->> (#'sim/create-painter-assignments2 state)
               (map #(-> % :room :state)))))
       (is (= [0 1 2 3]
-            (->> (#'sim/create-painter-assignments state)
+            (->> (#'sim/create-painter-assignments2 state)
               (map #(-> % :painter :at-room)))))
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
@@ -902,10 +902,10 @@
                           {:id 3, :role :painter, :at-room nil}]}]
     ; old mode
     (is (= [1]
-          (->> (e/rooms-needing-painters (e/state->rooms state))
+          (->> (e/rooms-needing-painters state)
             (mapv :id))))
     (is (= [0 1]
-          (->> (e/rooms-needing-painters (e/state->rooms state) {:strict false})
+          (->> (e/rooms-needing-painters state {:strict false})
             (mapv :id)))))
 
   (testing "painting already there"
@@ -1139,3 +1139,72 @@
   ; => []
 
   0)
+
+(deftest painting-double-booked1
+  (let [state {:turn 128,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 1,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 2,
+                        :role :room,
+                        :state :restoring-furniture,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 1}
+                       {:id 3,
+                        :role :room,
+                        :state :waiting-for-movers2,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 25}
+                       {:id 4,
+                        :role :room,
+                        :state :waiting-for-movers2,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 25}
+                       {:id 5,
+                        :role :room,
+                        :state :painting,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 24,
+                        :moving2-time-remaining 25}
+                       {:id 6,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 1,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 25}
+                       {:id 7,
+                        :role :room,
+                        :state :waiting-for-movers1,
+                        :moving1-time-remaining 25,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 25}],
+               :movers [{:id 0, :role :mover, :at-room 2} {:id 1, :role :mover, :at-room 6}],
+               :painters [{:id 0, :role :painter, :at-room 6}
+                          {:id 1, :role :painter, :at-room nil}
+                          {:id 2, :role :painter, :at-room 5}]}
+        newstate (sim/simulate-turn state)]
+    (def state state)
+    (def newstate newstate)
+    ; Turn 127 -> 128: Room 6:
+    ;- two painters assigned to same
+    ;room
+    (is (empty?
+          (#'sim/create-painter-assignments2 state)))
+    (is (= [6 5]
+          (sp/select [:painters sp/ALL :at-room] newstate)))))
+
+(comment
+  (sp/select [:painters sp/ALL :at-room] newstate))
+0

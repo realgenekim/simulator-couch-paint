@@ -25,6 +25,8 @@
 
   (fs-api/local-connect)
 
+  (fs-api/stop)
+
 
   (do
     ;(plog/configure-logging!)

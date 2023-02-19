@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
+    [com.rpl.specter :as sp]
     [taoensso.timbre :as log]))
 
 
@@ -143,32 +144,54 @@
                 (get state-needs-mover? state))))))
 
 (>defn rooms-needing-painters
-  " input: rooms: all rooms
+  " input: state (not rooms: we need to access movers/painters)
            opts : {:strict :only when state  needs it now (default)
                    :loose  : any state when operations isn't done (can cause deadlock)}
     output: all rooms that need painters "
-  ([rooms {:keys [strict]
+  ([state {:keys [strict]
            ;:or   {strict true}
-           :as   opts}] [::s-rooms map? => ::s-rooms]
+           :as   opts}] [::s-state map? => ::s-rooms]
    (log/debug :rooms-needing-painting :opts opts)
-   (if strict
-     (->> rooms
-       (filter (fn [r]
-                 (let [state (-> r :state)]
-                   (get state-needs-painter? state)))))
-     ;else
-     (->> rooms
-       (filter (fn [r]
-                 (let [state (-> r :state)
-                       needs #{:initial
-                               :waiting-for-movers1
-                               :removing-furniture
-                               :waiting-for-painters}]
-                   (needs state)))))))
+   (let [{:keys [rooms]} state
+         rooms-with-painters-already (->> state
+                                       (sp/select [:painters sp/ALL :at-room])
+                                       (remove nil?)
+                                       (into #{}))
+
+         _                           (log/warn :rooms-needing-painting :rooms-with-painters-already rooms-with-painters-already)
+
+         rooms-with-no-painters      (->> rooms
+                                       (remove (fn [x]
+                                                 (rooms-with-painters-already (:id x)))))
+         retval                      (if strict
+                                       (->> rooms-with-no-painters
+                                         (filter (fn [r]
+                                                   (let [state (-> r :state)]
+                                                     (get state-needs-painter? state)))))
+                                       ;else
+                                       (->> rooms-with-no-painters
+                                         (filter (fn [r]
+                                                   ; remove rooms with painters already
+                                                   (remove (fn [x]
+                                                             (rooms-with-painters-already (:id x))))
+                                                   (let [state (-> r :state)
+                                                         needs #{:initial
+                                                                 :waiting-for-movers1
+                                                                 :removing-furniture
+                                                                 :waiting-for-painters}]
+                                                     (needs state))))))]
+     (log/warn :rooms-needing-painting :retval (vec retval))
+     retval))
   ([rooms] [::s-rooms => ::s-rooms]
    (rooms-needing-painters rooms {:strict true})))
 
 (comment
+  (->> genek.sim2/*state
+    deref
+    last
+    (sp/select [:painters sp/ALL :at-room])
+    (remove nil?)
+    (into #{}))
   0)
 
 
