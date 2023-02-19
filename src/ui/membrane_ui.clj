@@ -96,28 +96,28 @@
 (defn selector
   [curr-page total-pages]
   (ui/on
-    ::next-frame (fn []
-                   (log/warn ::next-frame)
-                   (next-frame! curr-page total-pages)
-                   nil)
-    ::prev-frame (fn []
-                   (log/warn ::prev-frame)
-                   (prev-frame! curr-page total-pages)
-                   nil)
-    ::last-frame (fn []
-                   (log/warn ::last-frame)
-                   (last-frame!)
-                   nil)
-    ::first-frame (fn []
-                    (log/warn ::first-frame)
-                    (first-frame!)
-                    nil)
-    ::animate-all-frames (fn []
-                           (log/warn ::animate-all-frames)
-                           ; run in future
-                           (future
-                             (animate-all-frames! 0 total-pages))
-                           nil)
+    ;::next-frame (fn []
+    ;               (log/warn ::next-frame)
+    ;               (next-frame! curr-page total-pages)
+    ;               nil)
+    ;::prev-frame (fn []
+    ;               (log/warn ::prev-frame)
+    ;               (prev-frame! curr-page total-pages)
+    ;               nil)
+    ;::last-frame (fn []
+    ;               (log/warn ::last-frame)
+    ;               (last-frame!)
+    ;               nil)
+    ;::first-frame (fn []
+    ;                (log/warn ::first-frame)
+    ;                (first-frame!)
+    ;                nil)
+    ;::animate-all-frames (fn []
+    ;                       (log/warn ::animate-all-frames)
+    ;                       ; run in future
+    ;                       (future
+    ;                         (animate-all-frames! 0 total-pages))
+    ;                       nil)
     :key-press (fn [k]
                  (log/warn :selector :key-press k :type (type k))
                  (case k
@@ -281,7 +281,7 @@
   (apply
     ui/vertical-layout
     (interpose (ui/spacer 10)
-      (for [r (-> state) :painters]
+      (for [r (-> state :painters)]
         (let [roomnum (-> r :at-room)]
           (ui/label (format "Painter %d -- In Room: %s"
                       (-> r :id)
@@ -302,6 +302,19 @@
   (get-frame 100 @*sim-state)
   0)
 
+(defui my-slider
+  [{:keys [frame sim-state]
+    :as   m}]
+  (ui/vertical-layout
+    (ui/label "hello!")
+    (ui/label (str frame))
+
+    (basic/number-slider {:num frame
+                          :min 0
+                          :max (dec (count sim-state))
+                          :integer? true})))
+
+
 (defn render-view
   [sim-state *app-state]
   (let [framenum (-> @*app-state :frame)
@@ -310,12 +323,46 @@
                    (get-frame framenum sim-state))]
     (ui/vertical-layout
       ; curr-page total-pages
+      #_(my-slider {:frame (-> @*app-state :frame)
+                    :sim-state (-> @*app-state :sim-state)})
+
       (selector (-> @*app-state :frame) (count sim-state))
       (turn state)
       (rooms state)
       (movers state)
       (painters state))))
 
+
+
+
+(comment
+  ; this allows getting away from global state, which we used for dev-view
+  (def dev-app2 (make-app #'my-slider *app-state))
+  (def w2 (skia/run dev-app2))
+  0)
+
+(comment
+  (swap! *app-state
+    assoc
+    :frame 0
+    :sim-state @*sim-state)
+
+  (swap! *app-state
+    update
+    :sim-state
+    #(subvec % 0 50))
+
+  (first
+    (for [x (range 1000)
+          y (range 1000)
+          :let [intents (seq (ui/mouse-down (dev-view)
+                                [x y]))]
+          :when intents]
+      intents))
+
+
+
+  0)
 
 (defn dev-view
   " helper: put anything you're working in here in dev
@@ -325,10 +372,13 @@
     ;(selector (-> @*app-state :frame) (count states))
     (render-view @*sim-state *app-state)))
 
+
+
 (comment
   (skia/run #'dev-view)
   (init-state!)
   (def w (skia/run #'dev-view))
+  (def w1 (skia/run #'dev-view))
   ((:membrane.skia/repaint w))
   @*app-state
 
@@ -336,6 +386,12 @@
   (skia/save-image "/tmp/devvew.png" (dev-view))
 
   0)
+
+
+
+
+
+
 
 (comment
   genek.sim2/*state
