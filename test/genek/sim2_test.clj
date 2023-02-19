@@ -378,7 +378,7 @@
             (->> (#'sim/create-painter-assignments state)
               (map #(-> % :room :state)))))
       (is (= [0 1 2 3]
-            (->> (#'sim/create-painter-assignments state)
+            (->> (#'sim/create-painter-assignments state {:painter-fifo true})
               (map #(-> % :painter :at-room)))))
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
@@ -427,7 +427,7 @@
             (->> (#'sim/create-painter-assignments state)
               (map #(-> % :room :state)))))
       (is (= [0 1 2 3]
-            (->> (#'sim/create-painter-assignments state)
+            (->> (#'sim/create-painter-assignments state {:painter-fifo true})
               (map #(-> % :painter :at-room)))))
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
@@ -1209,3 +1209,42 @@
 (comment
   (sp/select [:painters sp/ALL :at-room] newstate))
 0
+
+(deftest painting-fifo-lifo
+  (testing "basics painting"
+    (let [state {:turn     26,
+                 :rooms    [{:id                      0,
+                             :role                    :room,
+                             :state                   :waiting-for-painters,
+                             :moving1-time-remaining  0,
+                             :painting-time-remaining 10,
+                             :moving2-time-remaining  10}
+                            {:id                      1,
+                             :role                    :room,
+                             :state                   :waiting-for-painters,
+                             :moving1-time-remaining  0,
+                             :painting-time-remaining 10,
+                             :moving2-time-remaining  10}
+                            {:id                      2,
+                             :role                    :room,
+                             :state                   :waiting-for-painters,
+                             :moving1-time-remaining  0,
+                             :painting-time-remaining 10,
+                             :moving2-time-remaining  10}
+                            {:id                      3,
+                             :role                    :room,
+                             :state                   :waiting-for-painters,
+                             :moving1-time-remaining  0,
+                             :painting-time-remaining 10,
+                             :moving2-time-remaining  10}],
+                 :movers   [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+                 :painters [{:id 0, :role :painter, :at-room nil}
+                            {:id 1, :role :painter, :at-room nil}
+                            {:id 2, :role :painter, :at-room nil}
+                            {:id 3, :role :painter, :at-room nil}]}]
+      (is (= [0 1 2 3]
+            (->> (#'sim/create-painter-assignments state {:painter-fifo true})
+              (map #(-> % :painter :at-room)))))
+      (is (= [3 2 1 0]
+            (->> (#'sim/create-painter-assignments state {:painter-fifo false})
+              (map #(-> % :painter :at-room))))))))

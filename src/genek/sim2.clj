@@ -255,21 +255,25 @@
   " for every room that needs mover/painter, identify a mover to be assigned
     input: state
     output: [{:room .. :mover} ...] "
-  [state] [::e/s-state => ::s-moving-assignments]
-  (let [needs-painters     (e/rooms-needing-painters state {:strict false})
-        painters           (e/available-painters state)
-        _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
-        _                  (log/debug :create-painter-assignments :painters painters)
-        room+painters      (map vector needs-painters painters)
-        ;room+painters      (map vector (reverse needs-painters) painters)
-        ; this creates [{:room newroom :mover newmover}...]
-        _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
-        new-rooms+painters (->> room+painters
-                             (map #(vecmap->room-assignments :painter %))
-                             (remove nil?))]
-    (log/debug :create-painter-assignments :new-room-movers
-      (with-out-str (clojure.pprint/pprint new-rooms+painters)))
-    new-rooms+painters))
+  ([state {:keys [painter-fifo]}] [::e/s-state map? => ::s-moving-assignments]
+   (let [needs-painters     (e/rooms-needing-painters state {:strict false})
+         painters           (e/available-painters state)
+         _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
+         _                  (log/debug :create-painter-assignments :painters painters)
+         _                  (log/warn :create-painter-assignments :painters-fifo painter-fifo)
+         room+painters      (if painter-fifo
+                              (map vector needs-painters painters)
+                              (map vector (reverse needs-painters) painters))
+         ; this creates [{:room newroom :mover newmover}...]
+         _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
+         new-rooms+painters (->> room+painters
+                              (map #(vecmap->room-assignments :painter %))
+                              (remove nil?))]
+     (log/debug :create-painter-assignments :new-room-movers
+       (with-out-str (clojure.pprint/pprint new-rooms+painters)))
+     new-rooms+painters))
+  ([state] [::e/s-state => ::s-moving-assignments]
+   (create-painter-assignments state {})))
 
 (comment
   (def state
