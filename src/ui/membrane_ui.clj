@@ -29,11 +29,7 @@
 ; X take side effects out of event handler
 
 ; Adrian, to run:
-; go into ns notebooks/s02-recursive-search.clj, and load the namespace -- it will
-; create the state, which is about 500 frames
-; then in this namespace, run
-; (init-state!)
-; (def w (skia/run #'dev-view))
+; search for "Adrian" for the 3 forms to run
 
 (def *sim-state genek.sim2/*state)
 
@@ -390,6 +386,7 @@
 (comment
   ; this allows getting away from global state, which we used for dev-view
   ;(def dev-app2 (make-app #'my-slider *app-state))
+  ; Adrian: run these forms
   (init-state!)
   (def dev-app2 (make-app #'render-view *app-state))
   (def w2 (skia/run dev-app2))
