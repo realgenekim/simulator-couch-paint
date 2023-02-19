@@ -977,3 +977,72 @@
 
   0)
 
+(deftest moving-termination
+  (let [state {:turn 76,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 25}
+                       {:id 1,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 25}
+                       {:id 2,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 25}
+                       {:id 3,
+                        :role :room,
+                        :state :waiting-for-painters,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 25}
+                       {:id 4,
+                        :role :room,
+                        :state :removing-furniture,
+                        :moving1-time-remaining 1,
+                        :painting-time-remaining 50,
+                        :moving2-time-remaining 25}
+                       {:id 5,
+                        :role :room,
+                        :state :waiting-for-movers2,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 25}
+                       {:id 6,
+                        :role :room,
+                        :state :waiting-for-movers2,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 25}
+                       {:id 7,
+                        :role :room,
+                        :state :waiting-for-movers2,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 25}],
+               :movers [{:id 0, :role :mover, :at-room 4} {:id 1, :role :mover, :at-room nil}],
+               :painters [{:id 0, :role :painter, :at-room nil}
+                          {:id 1, :role :painter, :at-room nil}
+                          {:id 2, :role :painter, :at-room nil}]}
+        newstate (sim/simulate-turn state)]
+    (def newstate newstate)
+    ; room 4 time remaining 0
+    (is (= [0]
+          (sp/select [:rooms 4 :moving1-time-remaining] newstate)))
+    ; room 4 state should be still :removing-furniture
+    (is (= :removing-furniture
+          (-> (sp/select [:rooms 4 :state] newstate) first))))
+  0)
+
+
+(comment
+  (sp/select [:rooms 4 :state] newstate)
+  (sp/select [:rooms 4 :moving1-time-remaining] newstate)
+  0)

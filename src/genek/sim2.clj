@@ -359,11 +359,11 @@
   [state] [::e/s-state => ::e/s-state]
   (let [rooms-moving (workers-moving state)
         rooms-painting (workers-painting state)
-        combined (flatten (conj rooms-moving rooms-painting))]
-    (log/debug :advance-state/entering :rooms-moving rooms-moving)
-    (log/debug :advance-state/entering :rooms-painting rooms-painting)
-    (log/debug :advance-state/entering :rooms-combined combined)
-    (log/debug :advance-state/entering :state state)
+        combined (vec (flatten (conj rooms-moving rooms-painting)))]
+    (log/warn :advance-state/entering :rooms-moving rooms-moving)
+    (log/warn :advance-state/entering :rooms-painting rooms-painting)
+    (log/warn :advance-state/entering :rooms-combined combined)
+    (log/warn :advance-state/entering :state state)
     ; intentially shadow state var
     (reduce (fn [state rs]
               (log/debug :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
@@ -376,19 +376,35 @@
                 ;    :painting  (dec :painting-time-remaining)
                 ;    :restoring-furniture (dec :moving2-time-remaining)
                 (let [
-                      ;roomnum   (-> rs first :id)
                       worktask  (first rs)
+                      _         (log/warn :advance-state :reduce/entering :process worktask)
                       roomnum   (:at-room worktask)
                       oldroom   (utils/get-by-id (-> state :rooms) roomnum)
-                      newroom   (case (:state oldroom)
-                                  :removing-furniture
-                                  (update-in oldroom [:moving1-time-remaining] dec)
-                                  :painting
-                                  (update-in oldroom [:painting-time-remaining] dec)
-                                  :restoring-furniture
-                                  (update-in oldroom [:moving2-time-remaining] dec)
+                      _         (log/warn :advance-state :old-room oldroom)
+                      roomstate (:state oldroom)
+                      newroom   (cond
+                                  (and
+                                    (= :removing-furniture roomstate)
+                                    (= (worktask :role) :mover))
+                                  (do
+                                    (log/warn "*** " :advance-state :decrementing :moving1-time-remaining)
+                                    (update-in oldroom [:moving1-time-remaining] dec))
 
-                                  ; default
+                                  (and
+                                    (= :painting roomstate)
+                                    (= (worktask :role) :painter))
+                                  (do
+                                     (log/warn :advance-state :decrementing :painting-time-remaining)
+                                     (update-in oldroom [:painting-time-remaining] dec))
+
+                                  (and
+                                    (= :restoring-furniture roomstate)
+                                    (= (worktask :role) :mover))
+                                  (do
+                                    (log/warn :advance-state :decrementing :moving2-time-remaining)
+                                    (update-in oldroom [:moving2-time-remaining] dec))
+
+                                  :else
                                   state)
                       ; handle case of painters already there, and needs to start painting
                       newrooms  (utils/update-by-id (-> state :rooms) newroom)
