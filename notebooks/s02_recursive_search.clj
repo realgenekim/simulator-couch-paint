@@ -23,7 +23,7 @@
 
 ; ## Results
 ;
-; - FIFO: 175 turns
+; - FIFO: 257 turns
 ; - LIFO: 173 turns -- same, because painters never wait...
 
 #_(doseq [i (range 200)]

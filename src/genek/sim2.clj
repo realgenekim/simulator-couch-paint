@@ -245,7 +245,7 @@
 ;
 
 
-(>defn- create-painter-assignments2
+(>defn- create-painter-assignments
   " for every room that needs mover/painter, identify a mover to be assigned
     input: state
     output: [{:room .. :mover} ...] "
@@ -307,7 +307,7 @@
   " for every room that needs mover/painter, assign one that is available
   "
   [state] [::e/s-state => ::e/s-state]
-  (let [assignments (create-painter-assignments2 state)
+  (let [assignments (create-painter-assignments state)
         newstate    (apply-painting-assignments state assignments)]
     newstate))
 
