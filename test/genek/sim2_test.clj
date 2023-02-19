@@ -1056,3 +1056,69 @@
   (sp/select [:movers 1 :at-room] newstate)
 
   0)
+
+(deftest painting-stuck-300
+  (let [state {:turn 331,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 1,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 2,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 3,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 4,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 5,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 6,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0}
+                       {:id 7,
+                        :role :room,
+                        :state :painting,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining -322,
+                        :moving2-time-remaining 25}],
+               :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
+               :painters [{:id 0, :role :painter, :at-room 7} {:id 1, :role :painter, :at-room 7} {:id 2, :role :painter, :at-room 7}]}
+        newstate (sim/simulate-turn state)]
+    (def newstate newstate)
+    ; Turn 300: some things going
+    ;wrong: Room 7 has 3 painters,
+    ;decrementing three times. Time
+    ;remaining is -322;
+    ;
+    ;- how'd it go negative?
+    ;- why isn't state changing?
+    ;- why are there three painters
+    ;there?
+    (is (= [:waiting-for-movers2]
+          (sp/select [:rooms 7 :state] newstate)))))

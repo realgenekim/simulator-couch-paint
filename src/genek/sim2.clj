@@ -274,8 +274,8 @@
         painters           (e/available-painters state)
         _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
         _                  (log/debug :create-painter-assignments :painters painters)
-        ;room+painters      (map vector needs-painters painters)
-        room+painters      (map vector (reverse needs-painters) painters)
+        room+painters      (map vector needs-painters painters)
+        ;room+painters      (map vector (reverse needs-painters) painters)
         ; this creates [{:room newroom :mover newmover}...]
         _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
         new-rooms+painters (->> room+painters
