@@ -99,8 +99,10 @@
 (>defn next-turn
   " for testing, just advance the turn
     "
-  [state] [::e/s-state => ::e/s-state]
-  (assoc state :turn (inc (:turn state))))
+  ([state opts] [::e/s-state map? => ::e/s-state]
+   (assoc state :turn (inc (:turn state))))
+  ([state] [::e/s-state => ::e/s-state]
+   (next-turn state {})))
 
 (>defn increment-state
   " identity, but just increment turn "
@@ -220,25 +222,29 @@
 (>defn assign-movers
   " for every room that needs mover/painter, assign one that is available
   "
-  [state] [::e/s-state => ::e/s-state]
-  (let [assignments (create-mover-assignments state)
-        newstate    (apply-moving-assignments state assignments)]
-    (log/debug :assign-movers :assignments (vec assignments))
-    newstate))
+  ([state opts] [::e/s-state map? => ::e/s-state]
+   (let [assignments (create-mover-assignments state)
+         newstate    (apply-moving-assignments state assignments)]
+     (log/debug :assign-movers :assignments (vec assignments))
+     newstate))
+  ([state] [::e/s-state => ::e/s-state]
+   (assign-movers state {})))
 
 (>defn free-movers
   " for every room that has done mover/painter:
       advance room state
       set mover :at-room to nil
   "
-  [state] [::e/s-state => ::e/s-state]
-  (let [done-rooms  (->> (e/rooms-done-with-movers (-> state :rooms))
-                         (map :id))
-        ; ^^ list of rooms that are done (0 1 2)
-        ; now we need to
-        _           (log/debug :free-movers :done-rooms (vec done-rooms))
-        newstate    (utils/free-room-movers state done-rooms)]
-    newstate))
+  ([state opts] [::e/s-state map? => ::e/s-state]
+   (let [done-rooms  (->> (e/rooms-done-with-movers (-> state :rooms))
+                          (map :id))
+         ; ^^ list of rooms that are done (0 1 2)
+         ; now we need to
+         _           (log/debug :free-movers :done-rooms (vec done-rooms))
+         newstate    (utils/free-room-movers state done-rooms)]
+     newstate))
+  ([state] [::e/s-state => ::e/s-state]
+   (free-movers state {})))
 
 ;
 ; painters
@@ -306,10 +312,12 @@
 (>defn assign-painters
   " for every room that needs mover/painter, assign one that is available
   "
-  [state] [::e/s-state => ::e/s-state]
-  (let [assignments (create-painter-assignments state)
-        newstate    (apply-painting-assignments state assignments)]
-    newstate))
+  ([state opts] [::e/s-state map? => ::e/s-state]
+   (let [assignments (create-painter-assignments state)
+         newstate    (apply-painting-assignments state assignments)]
+     newstate))
+  ([state] [::e/s-state => ::e/s-state]
+   (assign-painters state {})))
 
 (comment
   (e/rooms-done-with-movers (-> @*state last :rooms))
@@ -321,14 +329,16 @@
       advance room state
       set mover :at-room to nil
   "
-  [state] [::e/s-state => ::e/s-state]
-  (let [done-rooms  (->> (e/rooms-done-with-painters (-> state :rooms))
+  ([state opts] [::e/s-state map? => ::e/s-state]
+   (let [done-rooms (->> (e/rooms-done-with-painters (-> state :rooms))
                       (map :id))
-        ; ^^ list of rooms that are done (0 1 2)
-        ; now we need to
-        _           (log/debug :free-painters :done-rooms done-rooms)
-        newstate    (utils/free-room-painters state done-rooms)]
-    newstate))
+         ; ^^ list of rooms that are done (0 1 2)
+         ; now we need to
+         _          (log/debug :free-painters :done-rooms done-rooms)
+         newstate   (utils/free-room-painters state done-rooms)]
+     newstate))
+  ([state] [::e/s-state => ::e/s-state]
+   (free-painters state {})))
 
 (>defn rooms-needs-painter-already-there
   " there are now conditions where painters are already in room, and we haven't transitioned room states
@@ -356,69 +366,72 @@
     - decrementing working counters (e.g., :moving1-time-remaining) of all rooms with movers/painters assigned
     - change state of room (TODO: really true?)
     - unassigning movers and painters (XXX: isn't this done elsewhere?) "
-  [state] [::e/s-state => ::e/s-state]
-  (let [rooms-moving (workers-moving state)
-        rooms-painting (workers-painting state)
-        combined (vec (flatten (conj rooms-moving rooms-painting)))]
-    (log/debug :advance-state/entering :rooms-moving rooms-moving)
-    (log/debug :advance-state/entering :rooms-painting rooms-painting)
-    (log/debug :advance-state/entering :rooms-combined combined)
-    (log/debug :advance-state/entering :state state)
-    ; intentially shadow state var
-    (reduce (fn [state rs]
-              (log/debug :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
-              (log/debug :advance-state :reduce/entering :rooms-being-worked (utils/pp-str-cr rs))
-              (if-not (empty? rs)
-                ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
-                ; get the room number
-                ; decrement room counter based on current state
-                ;    :removing-furniture (dec :moving1-time-remaining)
-                ;    :painting  (dec :painting-time-remaining)
-                ;    :restoring-furniture (dec :moving2-time-remaining)
-                (let [
-                      worktask  (first rs)
-                      _         (log/warn :advance-state :reduce/entering :process worktask)
-                      roomnum   (:at-room worktask)
-                      oldroom   (utils/get-by-id (-> state :rooms) roomnum)
-                      _         (log/warn :advance-state :old-room oldroom)
-                      roomstate (:state oldroom)
-                      newroom   (cond
-                                  (and
-                                    (= :removing-furniture roomstate)
-                                    (= (worktask :role) :mover))
-                                  (do
-                                    (log/warn "*** " :advance-state :decrementing :moving1-time-remaining)
-                                    (update-in oldroom [:moving1-time-remaining] dec))
+  ([state opts] [::e/s-state map? => ::e/s-state]
+   (let [rooms-moving   (workers-moving state)
+         rooms-painting (workers-painting state)
+         combined       (vec (flatten (conj rooms-moving rooms-painting)))]
+     (log/debug :advance-state/entering :rooms-moving rooms-moving)
+     (log/debug :advance-state/entering :rooms-painting rooms-painting)
+     (log/debug :advance-state/entering :rooms-combined combined)
+     (log/debug :advance-state/entering :state state)
+     ; intentially shadow state var
+     (reduce (fn [state rs]
+               (log/debug :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
+               (log/debug :advance-state :reduce/entering :rooms-being-worked (utils/pp-str-cr rs))
+               (if-not (empty? rs)
+                 ; get the first worker, which is looks like: {:id 0, :role :mover, :at-room 0}
+                 ; get the room number
+                 ; decrement room counter based on current state
+                 ;    :removing-furniture (dec :moving1-time-remaining)
+                 ;    :painting  (dec :painting-time-remaining)
+                 ;    :restoring-furniture (dec :moving2-time-remaining)
+                 (let [
+                       worktask  (first rs)
+                       _         (log/warn :advance-state :reduce/entering :process worktask)
+                       roomnum   (:at-room worktask)
+                       oldroom   (utils/get-by-id (-> state :rooms) roomnum)
+                       _         (log/warn :advance-state :old-room oldroom)
+                       roomstate (:state oldroom)
+                       newroom   (cond
+                                   (and
+                                     (= :removing-furniture roomstate)
+                                     (= (worktask :role) :mover))
+                                   (do
+                                     (log/warn "*** " :advance-state :decrementing :moving1-time-remaining)
+                                     (update-in oldroom [:moving1-time-remaining] dec))
 
-                                  (and
-                                    (= :painting roomstate)
-                                    (= (worktask :role) :painter))
-                                  (do
+                                   (and
+                                     (= :painting roomstate)
+                                     (= (worktask :role) :painter))
+                                   (do
                                      (log/warn :advance-state :decrementing :painting-time-remaining)
                                      (update-in oldroom [:painting-time-remaining] dec))
 
-                                  (and
-                                    (= :restoring-furniture roomstate)
-                                    (= (worktask :role) :mover))
-                                  (do
-                                    (log/warn :advance-state :decrementing :moving2-time-remaining)
-                                    (update-in oldroom [:moving2-time-remaining] dec))
+                                   (and
+                                     (= :restoring-furniture roomstate)
+                                     (= (worktask :role) :mover))
+                                   (do
+                                     (log/warn :advance-state :decrementing :moving2-time-remaining)
+                                     (update-in oldroom [:moving2-time-remaining] dec))
 
-                                  :else
-                                  state)
-                      ; handle case of painters already there, and needs to start painting
-                      newrooms  (utils/update-by-id (-> state :rooms) newroom)
-                      ;newrooms  (rooms-needs-painter-already-there
-                      ;            (assoc state :rooms newrooms))
-                      new-state (-> state
-                                  (assoc :rooms newrooms))]
-                  (recur new-state (rest rs)))
-                ; termination case
-                state))
-      ; change states to :painting if painter is there
-      (assoc state :rooms
-                   (rooms-needs-painter-already-there state))
-      [combined])))
+                                   :else
+                                   state)
+                       ; handle case of painters already there, and needs to start painting
+                       newrooms  (utils/update-by-id (-> state :rooms) newroom)
+                       ;newrooms  (rooms-needs-painter-already-there
+                       ;            (assoc state :rooms newrooms))
+                       new-state (-> state
+                                   (assoc :rooms newrooms))]
+                   (recur new-state (rest rs)))
+                 ; termination case
+                 state))
+       ; change states to :painting if painter is there
+       (assoc state :rooms
+                    (rooms-needs-painter-already-there state))
+       [combined])))
+  ([state] [::e/s-state => ::e/s-state]
+   (advance-state state {})))
+
 
 (comment
   (->
@@ -429,14 +442,16 @@
 
 (>defn simulate-turn
   "execute all steps in a turn: takes a state, returns a state"
-  [state] [::e/s-state => ::e/s-state]
-  (-> state
-    assign-movers
-    free-movers
-    assign-painters
-    free-painters
-    advance-state
-    next-turn))
+  ([state opts] [::e/s-state map? => ::e/s-state]
+   (-> state
+     (assign-movers opts)
+     (free-movers opts)
+     (assign-painters opts)
+     (free-painters opts)
+     (advance-state opts)
+     (next-turn opts)))
+  ([state] [::e/s-state => ::e/s-state]
+   (simulate-turn state {})))
 
 ; main interface
 (>defn simulate-until-done
@@ -449,7 +464,7 @@
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (reset! *state states)
-   (let [newstate (simulate-turn state)]
+   (let [newstate (simulate-turn state opts)]
      ; if done return, else recurse
      (log/debug :simulate-until-done :turn (-> newstate :turn))
      (if (or
