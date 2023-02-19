@@ -23,6 +23,9 @@
 ;   X highlight which stage we're in (RED)
 ; - create pane on the left, with buttons: "start FIFO" "start LIFO"
 ; - slider
+; someday
+; - left pane
+; - take side effects out of event handler
 
 ; Adrian, to run:
 ; go into ns notebooks/s02-recursive-search.clj, and load the namespace -- it will
@@ -96,28 +99,28 @@
 (defn selector
   [curr-page total-pages]
   (ui/on
-    ;::next-frame (fn []
-    ;               (log/warn ::next-frame)
-    ;               (next-frame! curr-page total-pages)
-    ;               nil)
-    ;::prev-frame (fn []
-    ;               (log/warn ::prev-frame)
-    ;               (prev-frame! curr-page total-pages)
-    ;               nil)
-    ;::last-frame (fn []
-    ;               (log/warn ::last-frame)
-    ;               (last-frame!)
-    ;               nil)
-    ;::first-frame (fn []
-    ;                (log/warn ::first-frame)
-    ;                (first-frame!)
-    ;                nil)
-    ;::animate-all-frames (fn []
-    ;                       (log/warn ::animate-all-frames)
-    ;                       ; run in future
-    ;                       (future
-    ;                         (animate-all-frames! 0 total-pages))
-    ;                       nil)
+    ::next-frame (fn []
+                   (log/warn ::next-frame)
+                   (next-frame! curr-page total-pages)
+                   nil)
+    ::prev-frame (fn []
+                   (log/warn ::prev-frame)
+                   (prev-frame! curr-page total-pages)
+                   nil)
+    ::last-frame (fn []
+                   (log/warn ::last-frame)
+                   (last-frame!)
+                   nil)
+    ::first-frame (fn []
+                    (log/warn ::first-frame)
+                    (first-frame!)
+                    nil)
+    ::animate-all-frames (fn []
+                           (log/warn ::animate-all-frames)
+                           ; run in future
+                           (future
+                             (animate-all-frames! 0 total-pages))
+                           nil)
     :key-press (fn [k]
                  (log/warn :selector :key-press k :type (type k))
                  (case k
@@ -303,8 +306,7 @@
   0)
 
 (defui my-slider
-  [{:keys [frame sim-state]
-    :as   m}]
+  [{:keys [frame sim-state]}]
   (ui/vertical-layout
     (ui/label "hello!")
     (ui/label (str frame))
@@ -315,17 +317,20 @@
                           :integer? true})))
 
 
-(defn render-view
-  [sim-state *app-state]
+(defui render-view
+  [{:keys [frame sim-state]
+    :as   m}]
   (let [framenum (-> @*app-state :frame)
         state    (case framenum
                    :last-frame (last sim-state)
                    (get-frame framenum sim-state))]
     (ui/vertical-layout
       ; curr-page total-pages
-      #_(my-slider {:frame (-> @*app-state :frame)
-                    :sim-state (-> @*app-state :sim-state)})
-
+      (ui/on-bubble
+        (fn [& args]
+          (println args))
+        (my-slider {:frame frame
+                    :sim-state sim-state}))
       (selector (-> @*app-state :frame) (count sim-state))
       (turn state)
       (rooms state)
@@ -337,7 +342,8 @@
 
 (comment
   ; this allows getting away from global state, which we used for dev-view
-  (def dev-app2 (make-app #'my-slider *app-state))
+  ;(def dev-app2 (make-app #'my-slider *app-state))
+  (def dev-app2 (make-app #'render-view *app-state))
   (def w2 (skia/run dev-app2))
   0)
 
@@ -359,6 +365,12 @@
                                 [x y]))]
           :when intents]
       intents))
+
+  (ui/mouse-down (basic/number-slider {:num 0
+                                       :min 0
+                                       :max 100
+                                       :integer? true})
+    [10 10])
 
 
 
