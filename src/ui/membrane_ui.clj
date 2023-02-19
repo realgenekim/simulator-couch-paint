@@ -25,7 +25,7 @@
 ; - slider
 ; someday
 ; - left pane
-; - take side effects out of event handler
+; X take side effects out of event handler
 
 ; Adrian, to run:
 ; go into ns notebooks/s02-recursive-search.clj, and load the namespace -- it will
@@ -95,6 +95,9 @@
           ((:membrane.skia/repaint @w)))
         (recur (inc framenum) total-pages)))))
 
+(defeffect ::prev-frame
+  [curr-page total-pages]
+  (prev-frame! curr-page total-pages))
 
 (defn selector
   [curr-page total-pages]
@@ -105,8 +108,7 @@
                    nil)
     ::prev-frame (fn []
                    (log/warn ::prev-frame)
-                   (prev-frame! curr-page total-pages)
-                   nil)
+                   [[::prev-frame curr-page total-pages]])
     ::last-frame (fn []
                    (log/warn ::last-frame)
                    (last-frame!)
@@ -326,11 +328,8 @@
                    (get-frame framenum sim-state))]
     (ui/vertical-layout
       ; curr-page total-pages
-      (ui/on-bubble
-        (fn [& args]
-          (println args))
-        (my-slider {:frame frame
-                    :sim-state sim-state}))
+      (my-slider {:frame     frame
+                  :sim-state sim-state})
       (selector (-> @*app-state :frame) (count sim-state))
       (turn state)
       (rooms state)
