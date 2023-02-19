@@ -172,16 +172,17 @@
                   (-> state :turn))))
     (ui/spacer 25)))
 
-(def states-text { :initial "start"
-                  :waiting-for-movers1 "wait"
-                  :removing-furniture [{:text "🛋 "
-                                        :style #:text-style {:font-size 9}}
-                                       "moving"]
+(def states-text {:initial              "start"
+                  :waiting-for-movers1  "wait"
+                  :removing-furniture   "moving"
+                  ;:removing-furniture   [{:text  "🛋 "
+                  ;                        :style #:text-style {:font-size 9}
+                  ;                       "moving"
                   :waiting-for-painters "wait"
-                  :painting "painting"
-                  :waiting-for-movers2 "wait"
-                  :restoring-furniture "moving"
-                  :finished "done!"})
+                  :painting             "painting"
+                  :waiting-for-movers2  "wait"
+                  :restoring-furniture  "moving"
+                  :finished             "done!"})
 
 (comment
   (get states-text :initial)
@@ -216,8 +217,7 @@
 (defn time-remaining-bar
   " just time remaining as string of chars "
   [n]
-  (ui/label
-     (apply str (repeat n "*"))))
+  (str "" (apply str (repeat n "*"))))
 
 (defn worker-str
   [w]
@@ -239,7 +239,6 @@
                           (format "%s %d" (worker-str x) (:id x))))
                   (clojure.string/join " "))]
     (ui/horizontal-layout
-      ;(ui/label (str workers))
       (ui/with-color [0 0 1]
         (if-not (empty? msg)
           (ui/label msg)
@@ -256,29 +255,26 @@
 
     (ui/spacer 5)
     (ui/horizontal-layout
-      (ui/label (format ":moving1-time-remaining: %d"
-                  (-> r :moving1-time-remaining)))
-      (time-remaining-bar (-> r :moving1-time-remaining)))
+      (para/paragraph
+        {:text (str "🛋 work remaining: "
+                 (time-remaining-bar (-> r :moving1-time-remaining)))})
+      #_(ui/label (format ":moving1-time-remaining: %d"
+                    (-> r :moving1-time-remaining)))
+      #_(time-remaining-bar (-> r :moving1-time-remaining)))
 
     (ui/horizontal-layout
-      (ui/label (format ":painting-time-remaining: %d"
-                  (-> r :painting-time-remaining)))
-      (time-remaining-bar (-> r :painting-time-remaining)))
+      (para/paragraph
+        {:text (str "🖌 work remaining: "
+                 (time-remaining-bar (-> r :painting-time-remaining)))}))
 
     (ui/horizontal-layout
-      (ui/label (format ":moving2-time-remaining: %d"
-                  (-> r :moving2-time-remaining)))
-      (time-remaining-bar (-> r :moving2-time-remaining)))
+      (para/paragraph
+        {:text (str "🛋 work remaining: "
+                 (time-remaining-bar (-> r :moving2-time-remaining)))}))
 
     (ui/spacer 10)
     (room-state r)
-    (ui/spacer 10)
-
-    (ui/vertical-layout
-      #_(ui/spacer 70 20)
-      (ui/horizontal-layout
-        (ui/spacer 70 10)))))
-
+    (ui/spacer 10)))
 
 
 (defn rooms
