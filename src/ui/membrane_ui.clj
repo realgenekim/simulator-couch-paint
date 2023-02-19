@@ -37,12 +37,14 @@
 (defonce *app-state (atom nil))
 
 (defn init-state!
-  []
+  [{:keys [sim] :as opts}]
   ;(reset! *app-state {:frame :last-frame})
   (log/warn :init-state! :running-simulator)
 
   (sim/init-state!)
-  (sim/simulate-until-done (-> @sim/*state last) {:maxturns 500})
+  (sim/simulate-until-done (-> @sim/*state last)
+    (merge {:maxturns 500}
+      sim))
 
   (log/warn :init-state! :updating-atom)
   (swap! *app-state
@@ -350,10 +352,14 @@
       [
        (ui/spacer 100)
        (ui/vertical-layout
-         (basic/button {:text     "Initialize"
+         (basic/button {:text     "Initialize (FIFO)"
                         :on-click #(do
                                      (log/warn :outer-pane :click)
-                                     (init-state!))}))])
+                                     (init-state! {:sim {:painter-fifo true}}))})
+         (basic/button {:text     "Initialize (LIFO)"
+                        :on-click #(do
+                                     (log/warn :outer-pane :click)
+                                     (init-state! {:sim {:painter-fifo true}}))}))])
 
     (ui/horizontal-layout
       ;[(ui/spacer 100)

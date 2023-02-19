@@ -223,7 +223,7 @@
   [state] [::e/s-state => ::e/s-state]
   (let [assignments (create-mover-assignments state)
         newstate    (apply-moving-assignments state assignments)]
-    (log/warn :assign-movers :assignments (vec assignments))
+    (log/debug :assign-movers :assignments (vec assignments))
     newstate))
 
 (>defn free-movers
@@ -360,10 +360,10 @@
   (let [rooms-moving (workers-moving state)
         rooms-painting (workers-painting state)
         combined (vec (flatten (conj rooms-moving rooms-painting)))]
-    (log/warn :advance-state/entering :rooms-moving rooms-moving)
-    (log/warn :advance-state/entering :rooms-painting rooms-painting)
-    (log/warn :advance-state/entering :rooms-combined combined)
-    (log/warn :advance-state/entering :state state)
+    (log/debug :advance-state/entering :rooms-moving rooms-moving)
+    (log/debug :advance-state/entering :rooms-painting rooms-painting)
+    (log/debug :advance-state/entering :rooms-combined combined)
+    (log/debug :advance-state/entering :state state)
     ; intentially shadow state var
     (reduce (fn [state rs]
               (log/debug :advance-state :reduce/entering :state :s (utils/pp-str-cr state))
@@ -444,13 +444,14 @@
     input: initial state
     output: sequence of states, run through state machine"
   ; 3 arity, build upon state
-  ([state states {:keys [maxturns]
+  ([state states {:keys [maxturns painter-fifo]
+                  :or {painter-fifo true}
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (reset! *state states)
    (let [newstate (simulate-turn state)]
      ; if done return, else recurse
-     (log/warn :simulate-until-done :turn (-> newstate :turn))
+     (log/debug :simulate-until-done :turn (-> newstate :turn))
      (if (or
            (e/all-rooms-finished? state)
            (and maxturns

@@ -158,7 +158,7 @@
                                        (remove nil?)
                                        (into #{}))
 
-         _                           (log/warn :rooms-needing-painting :rooms-with-painters-already rooms-with-painters-already)
+         _                           (log/debug :rooms-needing-painting :rooms-with-painters-already rooms-with-painters-already)
 
          rooms-with-no-painters      (->> rooms
                                        (remove (fn [x]
@@ -180,7 +180,7 @@
                                                                  :removing-furniture
                                                                  :waiting-for-painters}]
                                                      (needs state))))))]
-     (log/warn :rooms-needing-painting :retval (vec retval))
+     (log/debug :rooms-needing-painting :retval (vec retval))
      retval))
   ([rooms] [::s-state => ::s-rooms]
    (rooms-needing-painters rooms {:strict true})))
