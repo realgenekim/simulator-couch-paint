@@ -27,6 +27,7 @@
 ; someday
 ; - left pane
 ; X take side effects out of event handler
+; - 3:20pm: OMG, got it working!
 
 ; Adrian, to run:
 ; search for "Adrian" for the 3 forms to run
@@ -239,11 +240,19 @@
                             (worker-str x)
                           (format "%s %d" (worker-str x) (:id x))))
                   (clojure.string/join " "))]
-    (ui/horizontal-layout
-      (ui/with-color [0 0 1]
-        (if-not (empty? msg)
-          (ui/label msg)
-          (ui/label "  "))))))
+    (apply
+      ui/horizontal-layout
+      (ui/spacer 20 0)
+      (for [w workers]
+        [(para/paragraph
+           [{:text  (case (:role w)
+                      :painter "🖌"
+                      :mover "🛋")
+             :style #:text-style {:font-size 11}}
+            {:text  (format "%s %d   " (worker-str w) (:id r))
+             :style #:text-style {:font-size 14
+                                  :color [0 0 1]}}])]))))
+
 
 (defn room
   [r movers painters]
@@ -283,8 +292,28 @@
     (room-state r)
     (ui/spacer 10)))
 
+(defn room-row
+  [rooms movers painters]
+  (apply
+    ui/horizontal-layout
+    (for [r rooms]
+      (ui/bordered [0 0]
+        (ui/padding
+          4
+          (room r movers painters))))))
 
 (defn rooms
+  " main view: will show all details of room, as well as any movers/painters present
+    NOTE: 405 pixels is good "
+  [state]
+  (let [{:keys [rooms movers painters]} state
+        roomrows (partition-all 2 rooms)]
+    (apply
+      ui/vertical-layout
+      (for [row roomrows]
+        (room-row row movers painters)))))
+
+(defn rooms-OLD
   " main view: will show all details of room, as well as any movers/painters present
     NOTE: 405 pixels is good "
   [state]
@@ -296,6 +325,11 @@
           (ui/padding
             4
             (room r movers painters)))))))
+
+(comment
+  (def ww (range 20))
+  (partition-all 2 (range 21))
+  0)
 
 (defn movers
   [state]
@@ -367,11 +401,11 @@
     (ui/horizontal-layout
       (ui/horizontal-layout
         (ui/spacer 20 20)
-        (basic/button {:text     "Initialize (FIFO)"
+        (basic/button {:text     "Initialize (Painters FIFO)"
                        :on-click #(do
                                     (log/warn :outer-pane :click)
                                     (init-state! {:sim {:painter-fifo true}}))})
-        (basic/button {:text     "Initialize (LIFO)"
+        (basic/button {:text     "Initialize (Painters LIFO)"
                        :on-click #(do
                                     (log/warn :outer-pane :click)
                                     (init-state! {:sim {:painter-fifo false}}))})))
