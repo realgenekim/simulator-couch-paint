@@ -398,10 +398,13 @@
     (outer-pane {:view
                  (ui/vertical-layout
                    ; curr-page total-pages
-                   (slider {:frame        frame
-                            :sim-state sim-state})
-                   (selector frame (count sim-state))
-                   (turn state)
+                   (ui/horizontal-layout
+                     (slider {:frame        frame
+                              :sim-state sim-state})
+                     (ui/spacer 20)
+                     (selector frame (count sim-state)))
+                   ;(turn state)
+                   (ui/spacer 20 20)
                    (rooms state)
                    (movers state)
                    (painters state))})))
