@@ -1057,6 +1057,11 @@
 
   0)
 
+(deftest zeroorneg
+  (is (true? (e/zero-or-neg? 0)))
+  (is (true? (e/zero-or-neg? -1)))
+  (is (false? (e/zero-or-neg? 1))))
+
 (deftest painting-stuck-300
   (let [state {:turn 331,
                :rooms [{:id 0,
@@ -1120,5 +1125,17 @@
     ;- why isn't state changing?
     ;- why are there three painters
     ;there?
-    (is (= [:waiting-for-movers2]
-          (sp/select [:rooms 7 :state] newstate)))))
+    ; should be done painting
+    (is (= [:waiting-for-movers2] (sp/select [:rooms 7 :state] newstate)))
+    ; should only be no painters
+    (is (= [nil nil nil] (sp/select [:painters sp/ALL :at-room] newstate)))
+
+    ; are painters done
+    (is (= []
+          (e/rooms-done-with-painters (-> newstate :rooms))))))
+
+(comment
+  (e/rooms-done-with-painters (-> newstate :rooms))
+  ; => []
+
+  0)

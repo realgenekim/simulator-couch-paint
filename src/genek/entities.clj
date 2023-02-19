@@ -172,6 +172,15 @@
   0)
 
 
+(>defn zero-or-neg?
+  " condition to switch states: zero or negative "
+  [n] [integer? => boolean?]
+  (or
+    (zero? n)
+    (neg? n)))
+
+
+
 
 
 (>defn rooms-done-with-movers
@@ -183,10 +192,10 @@
               (or
                 (and
                   (= :removing-furniture (-> r :state))
-                  (zero? (-> r :moving1-time-remaining)))
+                  (zero-or-neg? (-> r :moving1-time-remaining)))
                 (and
                   (= :restoring-furniture (-> r :state))
-                  (zero? (-> r :moving2-time-remaining))))))))
+                  (zero-or-neg? (-> r :moving2-time-remaining))))))))
 
 (>defn rooms-done-with-painters
   " input: all rooms
@@ -196,7 +205,7 @@
     (filter (fn [r]
               (and
                 (= :painting (-> r :state))
-                (zero? (-> r :painting-time-remaining)))))))
+                (zero-or-neg? (-> r :painting-time-remaining)))))))
 
 (>defn available-movers
   " input: state
