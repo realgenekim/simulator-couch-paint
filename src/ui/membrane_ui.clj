@@ -248,6 +248,8 @@
   [r movers painters]
   (ui/vertical-layout
     (ui/horizontal-layout
+      (ui/spacer 405 0))
+    (ui/horizontal-layout
       (ui/label (format "Room %d:"
                   (-> r :id)))
       (ui/spacer 50 0)
@@ -278,7 +280,8 @@
 
 
 (defn rooms
-  " main view: will show all details of room, as well as any movers/painters present "
+  " main view: will show all details of room, as well as any movers/painters present
+    NOTE: 405 pixels is good "
   [state]
   (let [{:keys [rooms movers painters]} state]
     (apply
@@ -288,6 +291,7 @@
                      4
                      (room r movers painters))
               bounds (ui/bounds relem)]
+          (log/warn :rooms :bounds (str bounds))
           [(ui/with-style :membrane.ui/style-stroke
              (ui/rectangle (first bounds) (- (second bounds) 2)))
            relem])))))
