@@ -91,7 +91,7 @@
         (Thread/sleep 50)
         (next-frame! framenum total-pages)
         ; see if we can force repaint
-        (if-let [w (resolve `w)]
+        (if-let [w (resolve `w2)]
           ((:membrane.skia/repaint @w)))
         (recur (inc framenum) total-pages)))))
 
@@ -319,6 +319,25 @@
                           :integer? true})))
 
 
+(defui outer-pane
+  [{:keys [view]}]
+  (ui/horizontal-layout
+    (ui/horizontal-layout
+      [
+       (ui/spacer 100)
+       (ui/vertical-layout
+         (basic/button {:text "push me"
+                        :on-click #(println "pushed")})
+         (ui/label "hello2"))])
+
+    ;(ui/button "push me")])
+
+    (ui/horizontal-layout
+      [(ui/spacer 100)
+       (ui/label "hello2")
+       view])))
+
+
 (defui render-view
   [{:keys [frame sim-state]
     :as   m}]
@@ -326,15 +345,23 @@
         state    (case framenum
                    :last-frame (last sim-state)
                    (get-frame framenum sim-state))]
-    (ui/vertical-layout
-      ; curr-page total-pages
-      (my-slider {:frame     frame
-                  :sim-state sim-state})
-      (selector (-> @*app-state :frame) (count sim-state))
-      (turn state)
-      (rooms state)
-      (movers state)
-      (painters state))))
+    (outer-pane {:view
+                 (ui/vertical-layout
+                   ; curr-page total-pages
+                   (my-slider {:frame     frame
+                               :sim-state sim-state})
+                   (selector (-> @*app-state :frame) (count sim-state))
+                   (turn state)
+                   (rooms state)
+                   (movers state)
+                   (painters state))})))
+
+
+
+
+(comment
+  (def w3 (skia/run (make-app #'outer-pane {})))
+  0)
 
 
 

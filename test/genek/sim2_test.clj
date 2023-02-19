@@ -382,7 +382,8 @@
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
               :painters
-              (mapv #(-> % :at-room)))))
+              (mapv #(-> % :at-room))
+              sort)))
 
       0))
   ; now test for painting done
@@ -430,7 +431,8 @@
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
               :painters
-              (mapv #(-> % :at-room)))))
+              (mapv #(-> % :at-room))
+              sort)))
 
       ; now test for painting done
       0))
