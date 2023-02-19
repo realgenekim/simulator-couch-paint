@@ -472,13 +472,13 @@
      ; if done return, else recurse
      (log/warn :simulate-until-done :turn (-> newstate :turn))
      (if (or
-           (e/all-rooms-finished? newstate)
+           (e/all-rooms-finished? state)
            (and maxturns
              (> (-> state :turn) maxturns)))
            ;(> (-> state :turn) 200))
-       ; one more frame needed, to get completed
-       (conj states (simulate-turn newstate))
+       states
 
+       ; else
        (recur newstate (conj states newstate) opts))))
   ; 2 arity: create new states
   ([state opts] [::e/s-state map? => ::e/s-states]
