@@ -1,9 +1,10 @@
 (ns ui.membrane-ui
   (:require
+    [genek.entities :as e]
+    [genek.sim2 :as sim]
     [membrane.skia.paragraph :as para]
     [membrane.ui :as ui]
     [membrane.skia :as skia]
-    [genek.entities :as e]
     [taoensso.timbre :as log]
     [membrane.basic-components :as basic]
     [membrane.component :refer
@@ -31,7 +32,8 @@
 ; go into ns notebooks/s02-recursive-search.clj, and load the namespace -- it will
 ; create the state, which is about 500 frames
 ; then in this namespace, run
-;(def w (skia/run #'dev-view))
+; (init-state!)
+; (def w (skia/run #'dev-view))
 
 (def *sim-state genek.sim2/*state)
 
@@ -41,11 +43,18 @@
 (defn init-state!
   []
   ;(reset! *app-state {:frame :last-frame})
+  (log/warn :init-state! :running-simulator)
+
+  (sim/init-state!)
+  (sim/simulate-until-done (-> @sim/*state last) {:maxturns 500})
+
+  (log/warn :init-state! :updating-atom)
   (swap! *app-state
-    assoc
-    :frame 0
-    :sim-state @*sim-state
-    :*sim-state *sim-state)
+     assoc
+     :frame 0
+     :sim-state @*sim-state
+     :*sim-state *sim-state)
+
   nil)
 
 
@@ -305,7 +314,7 @@
   " get frame, and prevent overflow "
   [n frames]
   ;(log/warn :get-frame :n n :maxn maxn)
-  (log/warn :get-frame :n n :type (type frames))
+  ;(log/warn :get-frame :n n :type (type frames))
   (let [maxn (count frames)]
     (if (>= n maxn)
       (last frames)
@@ -326,13 +335,15 @@
 (defui my-slider
   [{:keys [frame sim-state]}]
   (ui/vertical-layout
-    (ui/label "hello!")
-    (ui/label (str frame))
+    ;(ui/label "hello!")
+    ;(ui/label (str frame))
 
-    (basic/number-slider {:num (parse-framenum frame sim-state)
-                          :min 0
-                          :max (dec (count sim-state))
-                          :integer? true})))
+    ; handle :last-frame
+    (let [fnum (parse-framenum frame sim-state)]
+      (basic/number-slider {:num fnum
+                            :min 0
+                            :max (dec (count sim-state))
+                            :integer? true}))))
 
 
 (defui outer-pane
@@ -342,16 +353,19 @@
       [
        (ui/spacer 100)
        (ui/vertical-layout
-         (basic/button {:text "push me"
-                        :on-click #(println "pushed")})
+         (basic/button {:text     "Initialize"
+                        :on-click #(do
+                                     (log/warn :outer-pane :click)
+                                     (init-state!))})
          (ui/label "hello2"))])
 
     ;(ui/button "push me")])
 
     (ui/horizontal-layout
-      [(ui/spacer 100)
-       (ui/label "hello2")
-       view])))
+      ;[(ui/spacer 100)
+      ; (ui/label "hello2")
+      ; (ui/spacer 100)
+       view)))
 
 (comment
   (def w3 (skia/run (make-app #'outer-pane {})))
@@ -425,6 +439,7 @@
 
 (comment
   (skia/run #'dev-view)
+
   (init-state!)
   (def w (skia/run #'dev-view))
   (def w1 (skia/run #'dev-view))
@@ -437,12 +452,6 @@
   0)
 
 
-
-
-
-
-
 (comment
   genek.sim2/*state
-
   (skia/run (fn [] (ui/label "hi"))))
