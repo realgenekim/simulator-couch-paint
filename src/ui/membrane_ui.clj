@@ -356,10 +356,7 @@
          (basic/button {:text     "Initialize"
                         :on-click #(do
                                      (log/warn :outer-pane :click)
-                                     (init-state!))})
-         (ui/label "hello2"))])
-
-    ;(ui/button "push me")])
+                                     (init-state!))}))])
 
     (ui/horizontal-layout
       ;[(ui/spacer 100)
