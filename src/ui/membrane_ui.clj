@@ -242,6 +242,19 @@
   [w]
   (-> w :role str (subs 1)))
 
+(defn worker
+  [w movers painters]
+  (para/paragraph
+    [{:text  (case (:role w)
+               :painter "🖌"
+               :mover   "🛋")
+      :style #:text-style {:font-size 11}}
+     {:text  (format "%s %d   " (worker-str w) (:id w))
+      :style #:text-style {:font-size 13
+                           :color     (case (:role w)
+                                        :painter mh/set1-purple
+                                        :mover mh/set1-green)}}]))
+
 (defn workers-present
   " show any movers/painters in room"
   [r movers painters]
@@ -253,16 +266,7 @@
       ui/horizontal-layout
       (ui/spacer 20 0)
       (for [w workers]
-        (para/paragraph
-          [{:text  (case (:role w)
-                     :painter "🖌"
-                     :mover   "🛋")
-            :style #:text-style {:font-size 11}}
-           {:text  (format "%s %d   " (worker-str w) (:id w))
-            :style #:text-style {:font-size 13
-                                 :color     (case (:role w)
-                                              :painter mh/set1-purple
-                                              :mover mh/set1-green)}}])))))
+        (worker w movers painters)))))
 
 
 ; convenient emojis "                     :painter "👯🖌""
@@ -374,6 +378,11 @@
                       (if roomnum
                         (str (-> r :at-room))
                         "---"))))))))
+
+#_(defui workers-status-row
+    [{:keys [frame sim-state]}]
+    (ui/horizontal-layout
+      ()))
 
 (defn get-frame
   " get frame, and prevent overflow "
