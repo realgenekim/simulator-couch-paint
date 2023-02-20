@@ -195,14 +195,14 @@
   (cond
     (string? text)
     {:text text
-     :style #:text-style {:color [1 0 0]
+     :style #:text-style {:color mh/set1-red
                           :font-size 12
                           :height-override true
                           :height 0.90}}
 
     (map? text)
     (-> text
-      (assoc-in [:style :text-style/color] [1 1 0]))
+      (assoc-in [:style :text-style/color] mh/set1-red))
 
     :else
     (map make-red text)))
@@ -383,20 +383,23 @@
   [w movers painters]
   (let [inroom (:at-room w)
         inroomstr (if inroom
-                    (format "in room %d" inroom)
+                    (format "⌂ room %d" inroom)
+                    ;(format "- room %d" inroom)
                     (str ""))]
     (log/debug :worker-in-room :roomstr inroomstr :w w)
     (ui/bordered [2 2]
-      (para/paragraph
-        [{:text  (case (:role w)
-                   :painter "🖌"
-                   :mover   "🛋")
-          :style #:text-style {:font-size 11}}
-         {:text  (format "%s %d %s" (worker-str w) (:id w) inroomstr)
-          :style #:text-style {:font-size 13
-                               :color     (case (:role w)
-                                            :painter mh/set1-purple
-                                            :mover mh/set1-green)}}]))))
+      (ui/vertical-layout
+        (ui/spacer 130 0)
+        (para/paragraph
+          [{:text  (case (:role w)
+                     :painter "🖌"
+                     :mover   "🛋")
+            :style #:text-style {:font-size 11}}
+           {:text  (format "%s %d %s" (worker-str w) (:id w) inroomstr)
+            :style #:text-style {:font-size 13
+                                 :color     (case (:role w)
+                                              :painter mh/set1-purple
+                                              :mover mh/set1-green)}}])))))
 
 
 
@@ -422,12 +425,16 @@
         workers (concat movers painters)]
     (log/debug :workers-status-row :workers (vec workers))
     (log/debug :workers-status-row :state state)
-    (ui/bordered [0 0]
-      (apply
-        ui/horizontal-layout
-        (for [w workers]
-          (let [wpara (worker-in-room w movers painters)]
-            wpara))))))
+    (ui/vertical-layout
+      (ui/spacer 0 10)
+      (ui/bordered [0 0]
+        (apply
+          ui/horizontal-layout
+          (for [w workers]
+            (let [wpara (worker-in-room w movers painters)
+                  ; to figure out how wide the box should be
+                  _     (log/debug (ui/bounds wpara))]
+              wpara)))))))
 
 (comment
   (get-frame 100 @*sim-state)

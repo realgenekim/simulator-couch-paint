@@ -31,3 +31,4 @@
 
 (def set1-purple (rgb255vec>mrgbvec [152, 78, 163]))
 (def set1-green (rgb255vec>mrgbvec [77, 175, 74]))
+(def set1-red (rgb255vec>mrgbvec [228, 26, 28]))
