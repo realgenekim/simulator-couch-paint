@@ -226,6 +226,9 @@
   (let [n (or n 0)]
     (str "" (apply str (repeat n "*")))))
 
+
+(def ROOMWIDTH 405)
+
 (defn furniture-bar
   [n]
   (let [n (or n 0)
@@ -233,7 +236,7 @@
     (para/paragraph
      {:text  msg
       :style #:text-style {:font-size 8}}
-     800)))
+     (- (* ROOMWIDTH 2) 100))))
 
 (defn worker-str
   [w]
@@ -269,12 +272,13 @@
 ; convenient emojis "                     :painter "👯🖌""
 
 
+
 (defn room
   [r movers painters]
   (ui/vertical-layout
     ; keep all boxes the same width
     (ui/horizontal-layout
-      (ui/spacer 405 0))
+      (ui/spacer ROOMWIDTH 0))
     (ui/horizontal-layout
       ; https://phronmophobic.github.io/membrane/styled-text/index.html
       (para/paragraph
@@ -490,6 +494,17 @@
   (def w3 (skia/run (make-app #'outer-pane {})))
   0)
 
+(defn furniture-text
+  " TODO: bound this to set # of pixels "
+  [nf maxnf]
+  (ui/vertical-layout
+    (ui/spacer 95 0)
+    (para/paragraph
+      {:text  (format "Furniture in storage:\n (%3d, max %3d): "
+                (or nf 0)
+                (or maxnf 0))
+       :style #:text-style {:font-size 13}})))
+
 (defui furniture-stats
   " show furniture inventory"
   [{:keys [frame sim-state]}]
@@ -499,9 +514,10 @@
     ;(ui/label (format "Furniture: %d" (-> state :furniture-stored)))
     (ui/bordered [2 2]
       (ui/vertical-layout
-        (ui/spacer 800 0)
+        (ui/spacer (* ROOMWIDTH 2) 0)
         (ui/horizontal-layout
-          (ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
+          (furniture-text nf maxnf)
+          ;(ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
           (furniture-bar nf))))
 
     #_(ui/label (format "Furniture (%3d): %s"
