@@ -232,7 +232,7 @@
 (defn furniture-bar
   [n]
   (let [n (or n 0)
-        msg (str "" (apply str (repeat n "🛋")))]
+        msg (str "" (apply str (repeat (/ n 3) "🛋")))]
     (para/paragraph
      {:text  msg
       :style #:text-style {:font-size 8}}
@@ -240,7 +240,11 @@
 
 (defn worker-str
   [w]
-  (-> w :role str (subs 1)))
+  ; to "Movers" and "Painters"
+  (str
+    (-> w :role str (subs 1) clojure.string/capitalize)
+    ; pluralize
+    "s"))
 
 (defn worker
   [w movers painters]
@@ -249,13 +253,13 @@
                :painter "🖌"
                :mover   "🛋")
       :style #:text-style {:font-size 11}}
-     {:text  (format "%s %d   " (worker-str w) (:id w))
+     {:text  (format "%s %d   " (worker-str w) (inc (:id w)))
       :style #:text-style {:font-size 13
                            :color     (case (:role w)
                                         :painter mh/set1-purple
                                         :mover mh/set1-green)}}]))
 
-(defn workers-present
+(defn workers-status-bar
   " show any movers/painters in room"
   [r movers painters]
   (let [rid (:id r)
@@ -288,7 +292,7 @@
          :style #:text-style {:font-size  14
                               :font-style #:font-style{:weight :bold}}})
       (ui/spacer 50 0)
-      (workers-present r movers painters))
+      (workers-status-bar r movers painters))
 
     ;(ui/spacer 5)
     (ui/horizontal-layout
@@ -386,13 +390,14 @@
   [w movers painters]
   (let [inroom (:at-room w)
         inroomstr (if inroom
-                    (format "⌂ room %d" inroom)
+                    ;(format "⌂ room %d" inroom)
+                    (format "(Room %d)" inroom)
                     ;(format "- room %d" inroom)
                     (str ""))]
     (log/debug :worker-in-room :roomstr inroomstr :w w)
     (ui/bordered [2 2]
       (ui/vertical-layout
-        (ui/spacer 130 0)
+        (ui/spacer 150 0)
         (para/paragraph
           [{:text  (case (:role w)
                      :painter "🖌"
@@ -501,8 +506,10 @@
   (ui/vertical-layout
     (ui/spacer 95 0)
     (para/paragraph
-      {:text  (format "Furniture in storage:\n (%3d, max %3d): "
+      {:text  (format "Furniture in storage:\n%-11s %-3d\n%-11s %-3d"
+                "Current: "
                 (or nf 0)
+                "Peak: "
                 (or maxnf 0))
        :style #:text-style {:font-size 13}})))
 
