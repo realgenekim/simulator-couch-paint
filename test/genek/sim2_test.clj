@@ -1293,5 +1293,6 @@
                :painters [{:id 0, :role :painter, :at-room 0}]
                :furniture-stored 0}
         newstate (sim/simulate-turn state {})]
+    (def newstate newstate)
     (is (= 1
           (-> newstate :furniture-stored)))))

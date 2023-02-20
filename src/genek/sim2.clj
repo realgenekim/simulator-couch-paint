@@ -408,7 +408,9 @@
                                      (= (worktask :role) :mover))
                                    (do
                                      (log/warn "*** " :advance-state :decrementing :moving1-time-remaining)
-                                     (update-in oldroom [:moving1-time-remaining] dec))
+                                     (-> oldroom
+                                       (update-in [:moving1-time-remaining] dec)
+                                       (update-in [:furniture-stored] (fnil inc 0))))
 
                                    (and
                                      (= :painting roomstate)
@@ -422,7 +424,9 @@
                                      (= (worktask :role) :mover))
                                    (do
                                      (log/warn :advance-state :decrementing :moving2-time-remaining)
-                                     (update-in oldroom [:moving2-time-remaining] dec))
+                                     (-> oldroom
+                                       (update-in [:moving2-time-remaining] dec)
+                                       (update-in [:furniture-stored] (fnil dec 0))))
 
                                    :else
                                    nil)
@@ -434,7 +438,11 @@
                        ;newrooms  (rooms-needs-painter-already-there
                        ;            (assoc state :rooms newrooms))
                        new-state (-> state
-                                   (assoc :rooms newrooms))]
+                                   (assoc :rooms newrooms
+                                          :furniture-stored (->> newrooms
+                                                              (map :furniture-stored)
+                                                              (remove nil?)
+                                                              (reduce +))))]
                    (recur new-state (rest rs)))
                  ; termination case
                  state))
@@ -450,6 +458,10 @@
   (->
     (last @*state)
     advance-state)
+  (->> [{:a 1} {:a 2} {:b 3}]
+    (map :a)
+    (remove nil?)
+    (reduce +))
   0)
 
 
