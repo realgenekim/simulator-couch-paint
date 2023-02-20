@@ -209,7 +209,7 @@
 
 (defn make-small-text
   [t]
-  (log/warn :make-small-text t)
+  (log/debug :make-small-text t)
   {:text            (str t)
    :style           #:text-style {;:color mh/accent-green
                                   :font-size 13
@@ -379,20 +379,55 @@
                         (str (-> r :at-room))
                         "---"))))))))
 
-#_(defui workers-status-row
-    [{:keys [frame sim-state]}]
-    (ui/horizontal-layout
-      ()))
+(defn worker-in-room
+  [w movers painters]
+  (let [inroom (:at-room w)
+        inroomstr (if inroom
+                    (format "in room %d" inroom)
+                    (str ""))]
+    (log/debug :worker-in-room :roomstr inroomstr :w w)
+    (ui/bordered [2 2]
+      (para/paragraph
+        [{:text  (case (:role w)
+                   :painter "🖌"
+                   :mover   "🛋")
+          :style #:text-style {:font-size 11}}
+         {:text  (format "%s %d %s" (worker-str w) (:id w) inroomstr)
+          :style #:text-style {:font-size 13
+                               :color     (case (:role w)
+                                            :painter mh/set1-purple
+                                            :mover mh/set1-green)}}]))))
 
+
+
+
+; TODO: rename this to get-state
 (defn get-frame
   " get frame, and prevent overflow "
   [n frames]
   ;(log/warn :get-frame :n n :maxn maxn)
   ;(log/warn :get-frame :n n :type (type frames))
-  (let [maxn (count frames)]
+  (let [maxn (count frames)
+        n    (if (= n :last-frame)
+               (count frames)
+               n)]
     (if (>= n maxn)
       (last frames)
       (nth frames n))))
+
+(defui workers-status-row
+  [{:keys [frame sim-state]}]
+  (let [state (get-frame frame sim-state)
+        {:keys [movers painters]} state
+        workers (concat movers painters)]
+    (log/debug :workers-status-row :workers (vec workers))
+    (log/debug :workers-status-row :state state)
+    (ui/bordered [0 0]
+      (apply
+        ui/horizontal-layout
+        (for [w workers]
+          (let [wpara (worker-in-room w movers painters)]
+            wpara))))))
 
 (comment
   (get-frame 100 @*sim-state)
@@ -467,6 +502,8 @@
                    ;(turn state)
                    (ui/spacer 20 20)
                    (rooms state)
+                   (workers-status-row {:frame        frame
+                                        :sim-state sim-state})
                    (movers state)
                    (painters state))})))
 
