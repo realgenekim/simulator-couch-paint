@@ -226,7 +226,14 @@
   (let [n (or n 0)]
     (str "" (apply str (repeat n "*")))))
 
-(def furniture-bar time-remaining-bar)
+(defn furniture-bar
+  [n]
+  (let [n (or n 0)
+        msg (str "" (apply str (repeat n "🛋")))]
+    (para/paragraph
+     {:text  msg
+      :style #:text-style {:font-size 8}}
+     800)))
 
 (defn worker-str
   [w]
@@ -489,9 +496,16 @@
   (let [state (get-nth-state frame sim-state)
         nf (-> state :furniture-stored)]
     ;(ui/label (format "Furniture: %d" (-> state :furniture-stored)))
-    (ui/label (format "Furniture (%3d): %s"
-                nf
-                (furniture-bar nf)))))
+    (ui/bordered [2 2]
+      (ui/vertical-layout
+        (ui/spacer 800 0)
+        (ui/horizontal-layout
+          (ui/label (format "Furniture (%3d): " nf))
+          (furniture-bar nf))))
+
+    #_(ui/label (format "Furniture (%3d): %s"
+                  nf
+                  (furniture-bar nf)))))
 
 
 (defui render-view
