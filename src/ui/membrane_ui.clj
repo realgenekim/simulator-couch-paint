@@ -510,9 +510,9 @@
                    (ui/spacer 20 20)
                    (rooms state)
                    (workers-status-row {:frame        frame
-                                        :sim-state sim-state})
-                   (movers state)
-                   (painters state))})))
+                                        :sim-state sim-state}))})))
+                   ;(movers state)
+                   ;(painters state))})))
 
 (comment
   ; this allows getting away from global state, which we used for dev-view
