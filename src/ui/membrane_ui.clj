@@ -144,7 +144,7 @@
       (ui/button "<<"
         (fn []
           [[::prev-frame]]))
-      (ui/label (format "curr-page: %s, total-pages %s"
+      (ui/label (format "Current turn: (%s / %s)"
                   (str curr-page) (str total-pages)))
       (ui/button ">>"
         (fn []
@@ -537,7 +537,6 @@
                    (get-nth-state frame sim-state))]
     (outer-pane {:view
                  (ui/vertical-layout
-                   ; curr-page total-pages
                    (ui/horizontal-layout
                      (slider {:frame        frame
                               :sim-state sim-state})
