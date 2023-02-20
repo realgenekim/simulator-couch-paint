@@ -1295,4 +1295,6 @@
         newstate (sim/simulate-turn state {})]
     (def newstate newstate)
     (is (= 1
-          (-> newstate :furniture-stored)))))
+          (-> newstate :furniture :in-storage)))
+    (is (= 1
+          (-> newstate :furniture :max-in-storage)))))

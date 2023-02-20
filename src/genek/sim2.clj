@@ -438,11 +438,17 @@
                        ;newrooms  (rooms-needs-painter-already-there
                        ;            (assoc state :rooms newrooms))
                        new-state (-> state
-                                   (assoc :rooms newrooms
-                                          :furniture-stored (->> newrooms
-                                                              (map :furniture-stored)
-                                                              (remove nil?)
-                                                              (reduce +))))]
+                                   (assoc :rooms newrooms)
+                                   (assoc-in [:furniture :in-storage]
+                                     (->> newrooms
+                                       (map :furniture-stored)
+                                       (remove nil?)
+                                       (reduce +)))
+                                   (assoc-in [:furniture :max-in-storage]
+                                     (max
+                                       (or (get-in state [:furniture :in-storage]) 0)
+                                       (or (get-in state [:furniture :max-in-storage]) 0))))]
+
                    (recur new-state (rest rs)))
                  ; termination case
                  state))
