@@ -490,17 +490,18 @@
   (def w3 (skia/run (make-app #'outer-pane {})))
   0)
 
-(defui furniture
+(defui furniture-stats
   " show furniture inventory"
   [{:keys [frame sim-state]}]
   (let [state (get-nth-state frame sim-state)
-        nf (-> state :furniture-stored)]
+        nf (get-in state [:furniture :in-storage])
+        maxnf (get-in state [:furniture :max-in-storage])]
     ;(ui/label (format "Furniture: %d" (-> state :furniture-stored)))
     (ui/bordered [2 2]
       (ui/vertical-layout
         (ui/spacer 800 0)
         (ui/horizontal-layout
-          (ui/label (format "Furniture (%3d): " nf))
+          (ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
           (furniture-bar nf))))
 
     #_(ui/label (format "Furniture (%3d): %s"
@@ -528,8 +529,8 @@
                    (rooms state)
                    (workers-status-row {:frame        frame
                                         :sim-state sim-state})
-                   (furniture {:frame        frame
-                               :sim-state sim-state}))})))
+                   (furniture-stats {:frame frame
+                                     :sim-state   sim-state}))})))
                    ;(movers state)
                    ;(painters state))})))
 
