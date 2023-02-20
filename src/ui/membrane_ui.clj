@@ -266,13 +266,16 @@
       (ui/spacer 50 0)
       (workers-present r movers painters))
 
-    (ui/spacer 5)
+    ;(ui/spacer 5)
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🛋 work remaining: "
-                 (time-remaining-bar (-> r :moving1-time-remaining)))}))
+                 (time-remaining-bar (-> r :moving1-time-remaining)))
+         :style #:text-style {:font-size 14
+                              :height-override true
+                              :height 0.75}}))
 
-    ; adrian, is there an easy way to tighen up the line spacing between these?
+; adrian, is there an easy way to tighen up the line spacing between these?
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🖌 work remaining: "
