@@ -29,12 +29,13 @@
 
 (defonce *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
 
+(def default-start-state
+  (create-state (e/create-rooms 10) (e/create-movers 2) (e/create-painters 3)))
+
 (defn init-state!
   []
-  (reset! *state [(create-state (e/create-rooms 8) (e/create-movers 2) (e/create-painters 3))]))
+  (reset! *state [default-start-state]))
 
-(def default-start-state
-  (create-state (e/create-rooms 8) (e/create-movers 2) (e/create-painters 3)))
 
 
 (comment

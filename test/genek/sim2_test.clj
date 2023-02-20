@@ -1251,10 +1251,11 @@
 
 
 (deftest fifo-vs-lifo
-  (let [fifo (sim/simulate-until-done sim/default-start-state
+  (let [start (sim/create-state (e/create-rooms 8) (e/create-movers 2) (e/create-painters 3))
+        fifo (sim/simulate-until-done start
                {:maxturns 500
                 :painter-fifo true})
-        lifo (sim/simulate-until-done sim/default-start-state
+        lifo (sim/simulate-until-done start
                {:maxturns 500
                 :painter-fifo false})]
     (is (= 259
