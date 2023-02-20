@@ -1262,3 +1262,36 @@
           (count fifo)))
     (is (= 283
           (count lifo)))))
+
+(deftest furniture-inventory
+  (let [state {:turn     19,
+               :rooms    [{:id                      0,
+                           :role                    :room,
+                           :state                   :waiting-for-painters,
+                           :moving1-time-remaining  0,
+                           :painting-time-remaining 50,
+                           :moving2-time-remaining  10}
+                          {:id                      1,
+                           :role                    :room,
+                           :state                   :waiting-for-painters,
+                           :moving1-time-remaining  0,
+                           :painting-time-remaining 50,
+                           :moving2-time-remaining  10}
+                          {:id                      2,
+                           :role                    :room,
+                           :state                   :removing-furniture,
+                           :moving1-time-remaining  8,
+                           :painting-time-remaining 50,
+                           :moving2-time-remaining  10}
+                          {:id                      3,
+                           :role                    :room,
+                           :state                   :waiting-for-movers1,
+                           :moving1-time-remaining  10,
+                           :painting-time-remaining 50,
+                           :moving2-time-remaining  10}],
+               :movers   [{:id 0, :role :mover, :at-room 2}],
+               :painters [{:id 0, :role :painter, :at-room 0}]
+               :furniture-stored 0}
+        newstate (sim/simulate-turn state {})]
+    (is (= 1
+          (-> newstate :furniture-stored)))))

@@ -425,9 +425,12 @@
                                      (update-in oldroom [:moving2-time-remaining] dec))
 
                                    :else
-                                   state)
+                                   nil)
                        ; handle case of painters already there, and needs to start painting
-                       newrooms  (utils/update-by-id (-> state :rooms) newroom)
+                       newrooms  (if newroom
+                                   (utils/update-by-id (-> state :rooms) newroom)
+                                   ; leave unchanged
+                                   (-> state :rooms))
                        ;newrooms  (rooms-needs-painter-already-there
                        ;            (assoc state :rooms newrooms))
                        new-state (-> state
