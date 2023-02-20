@@ -272,11 +272,13 @@
         {:text (str "🛋 work remaining: "
                  (time-remaining-bar (-> r :moving1-time-remaining)))}))
 
+    ; adrian, is there an easy way to tighen up the line spacing between these?
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🖌 work remaining: "
                  (time-remaining-bar (-> r :painting-time-remaining)))}))
 
+    ; adrian, is there an easy way to tighen up the line spacing between these?
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🛋 work remaining: "
