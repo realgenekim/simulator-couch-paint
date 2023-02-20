@@ -195,13 +195,26 @@
   (cond
     (string? text)
     {:text text
-     :style #:text-style {:color [1 0 0]}}
+     :style #:text-style {:color [1 0 0]
+                          :font-size 12
+                          :height-override true
+                          :height 0.90}}
 
     (map? text)
-    (assoc-in text [:style :text-style/color] [1 0 0])
+    (-> text
+      (assoc-in [:style :text-style/color] [1 1 0]))
 
     :else
     (map make-red text)))
+
+(defn make-small-text
+  [t]
+  (log/warn :make-small-text t)
+  {:text            (str t)
+   :font-size       30
+   :style           #:text-style {:color mh/accent-green}})
+   ;:height-override true
+   ;:height          0.90})
 
 (defn room-state
   " show all room states, and highlight the current one
@@ -215,7 +228,7 @@
       ; skip "start"
      (for [st (rest e/room-states)]
        (if (not= st (:state room))
-         (get states-text st)
+         (make-small-text (get states-text st))
          (make-red (get states-text st))))))))
 
 (defn time-remaining-bar
@@ -271,25 +284,29 @@
       (para/paragraph
         {:text (str "🛋 work remaining: "
                  (time-remaining-bar (-> r :moving1-time-remaining)))
-         :style #:text-style {:font-size 14
-                              :height-override true
-                              :height 0.75}}))
+         :style #:text-style {:font-size 13}}))
 
 ; adrian, is there an easy way to tighen up the line spacing between these?
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🖌 work remaining: "
-                 (time-remaining-bar (-> r :painting-time-remaining)))}))
+                 (time-remaining-bar (-> r :painting-time-remaining)))
+         :style #:text-style {:font-size 13
+                              :height-override true
+                              :height 0.90}}))
 
-    ; adrian, is there an easy way to tighen up the line spacing between these?
+; adrian, is there an easy way to tighen up the line spacing between these?
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🛋 work remaining: "
-                 (time-remaining-bar (-> r :moving2-time-remaining)))}))
+                 (time-remaining-bar (-> r :moving2-time-remaining)))
+         :style #:text-style {:font-size 13
+                              :height-override true
+                              :height 0.90}}))
 
-    (ui/spacer 10)
+    (ui/spacer 5)
     (room-state r)
-    (ui/spacer 10)))
+    (ui/spacer 5)))
 
 (defn room-row
   [rooms movers painters]
