@@ -259,15 +259,17 @@
   " for every room that needs mover/painter, identify a mover to be assigned
     input: state
     output: [{:room .. :mover} ...] "
-  ([state {:keys [painter-fifo]}] [::e/s-state map? => ::s-moving-assignments]
+  ([state {:keys [painter-schedule]}]
+   [::e/s-state map? => ::s-moving-assignments]
    (let [needs-painters     (e/rooms-needing-painters state {:strict false})
          painters           (e/available-painters state)
          _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
          _                  (log/debug :create-painter-assignments :painters painters)
-         _                  (log/warn :create-painter-assignments :painters-fifo painter-fifo)
-         room+painters      (if painter-fifo
-                              (map vector needs-painters painters)
-                              (map vector (reverse needs-painters) painters))
+         _                  (log/warn :create-painter-assignments :painter-schedule painter-schedule)
+         room+painters      (case (or painter-schedule :fifo)
+                              :fifo (map vector needs-painters painters)
+                              :lifo (map vector (reverse needs-painters) painters)
+                              :random (map vector (shuffle needs-painters) painters))
          ; this creates [{:room newroom :mover newmover}...]
          _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
          new-rooms+painters (->> room+painters
@@ -467,7 +469,7 @@
     input: initial state
     output: sequence of states, run through state machine"
   ; 3 arity, build upon state
-  ([state states {:keys [maxturns painter-fifo]
+  ([state states {:keys [maxturns]
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (log/warn :simulate-until-done :opts opts)

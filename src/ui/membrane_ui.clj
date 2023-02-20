@@ -15,21 +15,8 @@
 ; - learn about focus
 
 ; next
-; X  I’ll have ability to nav through all the frames
-;    - prev/next
-;    - last frame
-;    - handle inc/dec :last-frame
-; X and a way to animate all the frames.
-; X show all stages [:start :waiting-for-movers1 ...]
-;   X highlight which stage we're in (RED)
-; - create pane on the left, with buttons: "start FIFO" "start LIFO"
-; - slider
-; someday
-; - left pane
-; X take side effects out of event handler
-; - 3:20pm: OMG, got it working!
-; - 3:55pm: got into trouble
-; - 4:05pm: restarted repl, now working again!
+; - new schedules: painter-random, mover-random
+; - furniture inventory
 
 ; Adrian, to run:
 ; search for "Adrian" for the 3 forms to run
@@ -472,11 +459,15 @@
         (basic/button {:text     "Initialize (Painters FIFO)"
                        :on-click #(do
                                     (log/warn :outer-pane :click)
-                                    (init-state! {:sim {:painter-fifo true}}))})
+                                    (init-state! {:sim {:painter-schedule :fifo}}))})
         (basic/button {:text     "Initialize (Painters LIFO)"
                        :on-click #(do
                                     (log/warn :outer-pane :click)
-                                    (init-state! {:sim {:painter-fifo false}}))})))
+                                    (init-state! {:sim {:painter-schedule :lifo}}))})
+        (basic/button {:text     "Initialize (Painters random)"
+                       :on-click #(do
+                                    (log/warn :outer-pane :click)
+                                    (init-state! {:sim {:painter-schedule :random}}))})))
     (ui/spacer 20 20)
 
     (ui/horizontal-layout

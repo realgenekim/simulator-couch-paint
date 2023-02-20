@@ -18,7 +18,7 @@
 (def painter-lifo
   (sim/simulate-until-done sim/default-start-state
     {:maxturns 500
-     :painter-fifo false}))
+     :painter-schedule :lifo}))
 
 (count painter-lifo)
 ; 283
@@ -27,10 +27,18 @@
 (def painter-fifo
   (sim/simulate-until-done sim/default-start-state
     {:maxturns 500
-     :painter-fifo true}))
+     :painter-schedule :fifo}))
 
 (count painter-fifo)
 ; 283
+
+; ## fifo
+(def painter-random
+  (sim/simulate-until-done sim/default-start-state
+    {:maxturns 500
+     :painter-schedule :fifo}))
+
+(count painter-random)
 
 
 (def newstates

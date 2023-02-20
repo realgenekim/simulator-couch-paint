@@ -1243,10 +1243,10 @@
                             {:id 2, :role :painter, :at-room nil}
                             {:id 3, :role :painter, :at-room nil}]}]
       (is (= [0 1 2 3]
-            (->> (#'sim/create-painter-assignments state {:painter-fifo true})
+            (->> (#'sim/create-painter-assignments state {:painter-schedule :fifo})
               (map #(-> % :painter :at-room)))))
       (is (= [3 2 1 0]
-            (->> (#'sim/create-painter-assignments state {:painter-fifo false})
+            (->> (#'sim/create-painter-assignments state {:painter-schedule :lifo})
               (map #(-> % :painter :at-room))))))))
 
 
@@ -1254,10 +1254,10 @@
   (let [start (sim/create-state (e/create-rooms 8) (e/create-movers 2) (e/create-painters 3))
         fifo (sim/simulate-until-done start
                {:maxturns 500
-                :painter-fifo true})
+                :painter-schedule :fifo})
         lifo (sim/simulate-until-done start
                {:maxturns 500
-                :painter-fifo false})]
+                :painter-schedule :lifo})]
     (is (= 259
           (count fifo)))
     (is (= 283
