@@ -223,7 +223,10 @@
 (defn time-remaining-bar
   " just time remaining as string of chars "
   [n]
-  (str "" (apply str (repeat n "*"))))
+  (let [n (or n 0)]
+    (str "" (apply str (repeat n "*")))))
+
+(def furniture-bar time-remaining-bar)
 
 (defn worker-str
   [w]
@@ -480,6 +483,16 @@
   (def w3 (skia/run (make-app #'outer-pane {})))
   0)
 
+(defui furniture
+  " show furniture inventory"
+  [{:keys [frame sim-state]}]
+  (let [state (get-nth-state frame sim-state)
+        nf (-> state :furniture-stored)]
+    ;(ui/label (format "Furniture: %d" (-> state :furniture-stored)))
+    (ui/label (format "Furniture (%3d): %s"
+                nf
+                (furniture-bar nf)))))
+
 
 (defui render-view
   [{:keys [frame sim-state *sim-state]
@@ -500,7 +513,9 @@
                    (ui/spacer 20 20)
                    (rooms state)
                    (workers-status-row {:frame        frame
-                                        :sim-state sim-state}))})))
+                                        :sim-state sim-state})
+                   (furniture {:frame        frame
+                               :sim-state sim-state}))})))
                    ;(movers state)
                    ;(painters state))})))
 
