@@ -224,10 +224,12 @@
   " just time remaining as string of chars "
   [n]
   (let [n (or n 0)]
-    (str "" (apply str (repeat n "*")))))
+    (str "" (apply str (repeat (/ n 2) "*")))))
 
 
-(def ROOMWIDTH 405)
+(def ROOMWIDTH 260)
+(def ROOMHEIGHT 7)
+(def SPACERHEIGHT 10)
 
 (defn furniture-bar
   [n]
@@ -252,14 +254,21 @@
     [{:text  (case (:role w)
                :painter "🖌"
                :mover   "🛋")
-      :style #:text-style {:font-size 11}}
+      :style #:text-style {:font-size 11
+                           :color     (case (:role w)
+                                        :painter mh/set1-purple
+                                        :mover mh/set1-green)
+                           :height-override true
+                           :height 0.80}}
      {:text  (format "%s %d   " (worker-str w) (inc (:id w)))
       :style #:text-style {:font-size 13
                            :color     (case (:role w)
                                         :painter mh/set1-purple
-                                        :mover mh/set1-green)}}]))
+                                        :mover mh/set1-green)
+                           :height-override true
+                           :height 0.80}}]))
 
-(defn workers-status-bar
+(defn room-workers-status-bar
   " show any movers/painters in room"
   [r movers painters]
   (let [rid (:id r)
@@ -268,15 +277,12 @@
                   vec)]
     (apply
       ui/horizontal-layout
-      (ui/spacer 20 0)
       (for [w workers]
         (worker w movers painters)))))
 
 
 ; convenient emojis "                     :painter "👯🖌""
 
-(def ROOMHEIGHT 7)
-(def SPACERHEIGHT 10)
 
 
 (defn room
@@ -291,8 +297,8 @@
         {:text  (format "Room %d" (inc (-> r :id)))
          :style #:text-style {:font-size  14
                               :font-style #:font-style{:weight :bold}}})
-      (ui/spacer 50 0)
-      (workers-status-bar r movers painters))
+      (ui/spacer 30 0)
+      (room-workers-status-bar r movers painters))
 
     ;(ui/spacer 5)
     (ui/horizontal-layout
@@ -326,17 +332,15 @@
   (apply
     ui/horizontal-layout
     (for [r rooms]
-      (ui/bordered [0 0]
-        (ui/padding
-          4
-          (room r movers painters))))))
+      (ui/bordered [4 4]
+        (room r movers painters)))))
 
 (defn rooms
   " main view: will show all details of room, as well as any movers/painters present
     NOTE: 405 pixels is good "
   [state]
   (let [{:keys [rooms movers painters]} state
-        roomrows (partition-all 2 rooms)]
+        roomrows (partition-all 3 rooms)]
     (apply
       ui/vertical-layout
       (for [row roomrows]
