@@ -284,8 +284,8 @@
     (ui/horizontal-layout
       ; https://phronmophobic.github.io/membrane/styled-text/index.html
       (para/paragraph
-        {:text (format "Room %d" (-> r :id))
-         :style #:text-style {:font-size 14
+        {:text  (format "Room %d" (inc (-> r :id)))
+         :style #:text-style {:font-size  14
                               :font-style #:font-style{:weight :bold}}})
       (ui/spacer 50 0)
       (workers-present r movers painters))
@@ -452,11 +452,10 @@
 
 (defui slider
   [{:keys [frame sim-state]}]
-  (ui/vertical-layout
-    ;(ui/label "hello!")
-    ;(ui/label (str frame))
-
-    ; handle :last-frame
+  (ui/horizontal-layout
+    (ui/horizontal-layout
+      (ui/label "Turn #: ")
+      (ui/spacer 5 0))
     (let [fnum (parse-framenum frame sim-state)]
       (basic/number-slider {:num fnum
                             :$num $frame
