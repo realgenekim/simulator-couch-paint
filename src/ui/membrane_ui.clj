@@ -270,10 +270,7 @@
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🛋 work remaining: "
-                 (time-remaining-bar (-> r :moving1-time-remaining)))})
-      #_(ui/label (format ":moving1-time-remaining: %d"
-                    (-> r :moving1-time-remaining)))
-      #_(time-remaining-bar (-> r :moving1-time-remaining)))
+                 (time-remaining-bar (-> r :moving1-time-remaining)))}))
 
     (ui/horizontal-layout
       (para/paragraph
