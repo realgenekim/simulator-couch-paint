@@ -501,7 +501,6 @@
   0)
 
 (defn furniture-text
-  " TODO: bound this to set # of pixels "
   [nf maxnf]
   (ui/vertical-layout
     (ui/spacer 95 0)
@@ -528,11 +527,8 @@
           (ui/horizontal-layout
             (furniture-text nf maxnf)
             ;(ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
-            (furniture-bar nf)))))
+            (furniture-bar nf)))))))
 
-    #_(ui/label (format "Furniture (%3d): %s"
-                  nf
-                  (furniture-bar nf)))))
 
 
 (defui render-view
@@ -551,13 +547,12 @@
                      (selector frame (count sim-state)))
                    ;(turn state)
                    (ui/spacer 20 20)
-                   (rooms state)
                    (workers-status-row {:frame        frame
                                         :sim-state sim-state})
                    (furniture-stats {:frame frame
-                                     :sim-state   sim-state}))})))
-                   ;(movers state)
-                   ;(painters state))})))
+                                     :sim-state   sim-state})
+                   (ui/spacer 20 20)
+                   (rooms state))})))
 
 (comment
   ; this allows getting away from global state, which we used for dev-view
