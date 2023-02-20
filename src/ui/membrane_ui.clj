@@ -404,8 +404,7 @@
 
 
 
-; TODO: rename this to get-state
-(defn get-frame
+(defn get-nth-state
   " get frame, and prevent overflow "
   [n frames]
   ;(log/warn :get-frame :n n :maxn maxn)
@@ -420,7 +419,7 @@
 
 (defui workers-status-row
   [{:keys [frame sim-state]}]
-  (let [state (get-frame frame sim-state)
+  (let [state (get-nth-state frame sim-state)
         {:keys [movers painters]} state
         workers (concat movers painters)]
     (log/debug :workers-status-row :workers (vec workers))
@@ -437,7 +436,7 @@
               wpara)))))))
 
 (comment
-  (get-frame 100 @*sim-state)
+  (get-nth-state 100 @*sim-state)
   0)
 
 (defn parse-framenum
@@ -497,7 +496,7 @@
   (let [
         state    (case frame
                    :last-frame (last sim-state)
-                   (get-frame frame sim-state))]
+                   (get-nth-state frame sim-state))]
     (outer-pane {:view
                  (ui/vertical-layout
                    ; curr-page total-pages
