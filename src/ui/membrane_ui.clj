@@ -271,6 +271,8 @@
 
 ; convenient emojis "                     :painter "👯🖌""
 
+(def ROOMHEIGHT 7)
+(def SPACERHEIGHT 10)
 
 
 (defn room
@@ -278,7 +280,7 @@
   (ui/vertical-layout
     ; keep all boxes the same width
     (ui/horizontal-layout
-      (ui/spacer ROOMWIDTH 0))
+      (ui/spacer ROOMWIDTH ROOMHEIGHT))
     (ui/horizontal-layout
       ; https://phronmophobic.github.io/membrane/styled-text/index.html
       (para/paragraph
@@ -512,13 +514,15 @@
         nf (get-in state [:furniture :in-storage])
         maxnf (get-in state [:furniture :max-in-storage])]
     ;(ui/label (format "Furniture: %d" (-> state :furniture-stored)))
-    (ui/bordered [2 2]
-      (ui/vertical-layout
-        (ui/spacer (* ROOMWIDTH 2) 0)
-        (ui/horizontal-layout
-          (furniture-text nf maxnf)
-          ;(ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
-          (furniture-bar nf))))
+    (ui/vertical-layout
+      (ui/spacer SPACERHEIGHT)
+      (ui/bordered [2 2]
+        (ui/vertical-layout
+          (ui/spacer (* ROOMWIDTH 2) 0)
+          (ui/horizontal-layout
+            (furniture-text nf maxnf)
+            ;(ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
+            (furniture-bar nf)))))
 
     #_(ui/label (format "Furniture (%3d): %s"
                   nf
