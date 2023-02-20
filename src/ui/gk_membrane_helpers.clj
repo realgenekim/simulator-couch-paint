@@ -1,0 +1,27 @@
+(ns ui.gk-membrane-helpers)
+
+; https://vega.github.io/vega/docs/schemes/
+
+; helpful colors
+
+; 240, 2, 127: red
+; 56, 108, 176: blue
+
+(defn rgb255vec>mrgbvec
+  " take 3-tuple of 0-255, turn into 3-tuple of 0-1 float (e.g., [240, 2, 127] "
+  [v]
+  (println v)
+  (->> v
+    (mapv (fn [n]
+            (println "-- " n)
+            (-> (/ n 255)
+              double)))))
+
+(comment
+  (rgb255vec>mrgbvec [240, 2, 127])
+  (rgb255vec>mrgbvec [0, 255, 128])
+  (-> (/ 128 255) float)
+  0)
+
+(def accent-red (rgb255vec>mrgbvec [240, 2, 127]))
+(def accent-blue (rgb255vec>mrgbvec [56, 108, 176]))
