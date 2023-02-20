@@ -45,9 +45,9 @@
   (log/warn :init-state! :running-simulator)
 
   (sim/init-state!)
+  (log/warn :init-state! :sim sim :opts opts)
   (sim/simulate-until-done (-> @sim/*state last)
-    (merge {:maxturns 500}
-      sim))
+    (merge {:maxturns 500} sim))
 
   (log/warn :init-state! :updating-atom)
   (swap! *app-state

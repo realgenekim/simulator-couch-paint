@@ -14,6 +14,24 @@
 ;; assign mover to room
 (def newstate (sim/assign-movers (-> @sim/*state last)))
 
+; ## lifo
+(def painter-lifo
+  (sim/simulate-until-done sim/default-start-state
+    {:maxturns 500
+     :painter-fifo false}))
+
+(count painter-lifo)
+; 283
+
+; ## fifo
+(def painter-fifo
+  (sim/simulate-until-done sim/default-start-state
+    {:maxturns 500
+     :painter-fifo true}))
+
+(count painter-fifo)
+; 283
+
 
 (def newstates
   ;(sim/simulate-until-done (-> @sim/*state last) {:maxturns 200})

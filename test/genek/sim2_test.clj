@@ -1248,3 +1248,16 @@
       (is (= [3 2 1 0]
             (->> (#'sim/create-painter-assignments state {:painter-fifo false})
               (map #(-> % :painter :at-room))))))))
+
+
+(deftest fifo-vs-lifo
+  (let [fifo (sim/simulate-until-done sim/default-start-state
+               {:maxturns 500
+                :painter-fifo true})
+        lifo (sim/simulate-until-done sim/default-start-state
+               {:maxturns 500
+                :painter-fifo false})]
+    (is (= 259
+          (count fifo)))
+    (is (= 283
+          (count lifo)))))

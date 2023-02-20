@@ -33,6 +33,9 @@
   []
   (reset! *state [(create-state (e/create-rooms 8) (e/create-movers 2) (e/create-painters 3))]))
 
+(def default-start-state
+  (create-state (e/create-rooms 8) (e/create-movers 2) (e/create-painters 3)))
+
 
 (comment
   @*state
@@ -317,7 +320,7 @@
   " for every room that needs mover/painter, assign one that is available
   "
   ([state opts] [::e/s-state map? => ::e/s-state]
-   (let [assignments (create-painter-assignments state)
+   (let [assignments (create-painter-assignments state opts)
          newstate    (apply-painting-assignments state assignments)]
      newstate))
   ([state] [::e/s-state => ::e/s-state]
@@ -464,9 +467,9 @@
     output: sequence of states, run through state machine"
   ; 3 arity, build upon state
   ([state states {:keys [maxturns painter-fifo]
-                  :or {painter-fifo true}
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
+   (log/warn :simulate-until-done :opts opts)
    (reset! *state states)
    (let [newstate (simulate-turn state opts)]
      ; if done return, else recurse
