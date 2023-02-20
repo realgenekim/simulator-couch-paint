@@ -256,14 +256,16 @@
         (para/paragraph
           [{:text  (case (:role w)
                      :painter "🖌"
-                     :mover "🛋")
+                     :mover   "🛋")
             :style #:text-style {:font-size 11}}
-           {:text  (format "%s %d   " (worker-str w) (:id r))
+           {:text  (format "%s %d   " (worker-str w) (:id w))
             :style #:text-style {:font-size 13
                                  :color     (case (:role w)
                                               :painter mh/set1-purple
                                               :mover mh/set1-green)}}])))))
 
+
+; convenient emojis "                     :painter "👯🖌""
 
 
 (defn room
