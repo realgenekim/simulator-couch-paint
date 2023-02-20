@@ -30,7 +30,7 @@
 (defonce *state (atom [(create-state (e/create-rooms 4) (e/create-movers 2) (e/create-painters 4))]))
 
 (def default-start-state
-  (create-state (e/create-rooms 10) (e/create-movers 2) (e/create-painters 3)))
+  (create-state (e/create-rooms 14) (e/create-movers 2) (e/create-painters 3)))
 
 (defn init-state!
   []

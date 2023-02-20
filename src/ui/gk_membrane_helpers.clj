@@ -27,3 +27,7 @@
 (def accent-blue (rgb255vec>mrgbvec [56, 108, 176]))
 (def accent-brown (rgb255vec>mrgbvec [191, 91, 23]))
 (def accent-green (rgb255vec>mrgbvec [127, 201, 127]))
+(def accent-purple (rgb255vec>mrgbvec [190, 174, 212]))
+
+(def set1-purple (rgb255vec>mrgbvec [152, 78, 163]))
+(def set1-green (rgb255vec>mrgbvec [77, 175, 74]))

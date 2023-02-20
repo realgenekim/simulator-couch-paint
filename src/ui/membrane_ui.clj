@@ -211,8 +211,10 @@
   [t]
   (log/warn :make-small-text t)
   {:text            (str t)
-   :font-size       30
-   :style           #:text-style {:color mh/accent-green}})
+   :style           #:text-style {;:color mh/accent-green
+                                  :font-size 13
+                                  :height-override true
+                                  :height 0.90}})
    ;:height-override true
    ;:height          0.90})
 
@@ -221,7 +223,7 @@
     [:initial   :waiting-for-movers1   :removing-furniture   :waiting-for-painters   :painting   :waiting-for-movers2   :restoring-furniture   :finished])"
   [room]
   (ui/translate
-   0 3
+   0 0
    (para/paragraph
     (interpose
      " "
@@ -257,10 +259,10 @@
                      :mover "🛋")
             :style #:text-style {:font-size 11}}
            {:text  (format "%s %d   " (worker-str w) (:id r))
-            :style #:text-style {:font-size 14
+            :style #:text-style {:font-size 13
                                  :color     (case (:role w)
-                                              :painter mh/accent-blue
-                                              :mover mh/accent-green)}}])))))
+                                              :painter mh/set1-purple
+                                              :mover mh/set1-green)}}])))))
 
 
 
@@ -286,7 +288,6 @@
                  (time-remaining-bar (-> r :moving1-time-remaining)))
          :style #:text-style {:font-size 13}}))
 
-; adrian, is there an easy way to tighen up the line spacing between these?
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🖌 work remaining: "
@@ -295,7 +296,6 @@
                               :height-override true
                               :height 0.90}}))
 
-; adrian, is there an easy way to tighen up the line spacing between these?
     (ui/horizontal-layout
       (para/paragraph
         {:text (str "🛋 work remaining: "
