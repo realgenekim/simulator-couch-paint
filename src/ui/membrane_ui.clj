@@ -2,13 +2,13 @@
   (:require
     [genek.entities :as e]
     [genek.sim2 :as sim]
-    [membrane.skia.paragraph :as para]
+    [membrane.basic-components :as basic]
+    [membrane.component :refer [defui defeffect make-app]]
     [membrane.ui :as ui]
     [membrane.skia :as skia]
+    [membrane.skia.paragraph :as para]
     [taoensso.timbre :as log]
-    [membrane.basic-components :as basic]
-    [membrane.component :refer
-     [defui defeffect make-app]]))
+    [ui.gk-membrane-helpers :as mh]))
 
 
 ; someday
@@ -28,6 +28,8 @@
 ; - left pane
 ; X take side effects out of event handler
 ; - 3:20pm: OMG, got it working!
+; - 3:55pm: got into trouble
+; - 4:05pm: restarted repl, now working again!
 
 ; Adrian, to run:
 ; search for "Adrian" for the 3 forms to run
@@ -231,27 +233,22 @@
   (let [rid (:id r)
         workers (->> (concat movers painters)
                   (filter #(= rid (:at-room %)))
-                  vec)
-        msg     (->> workers
-                  (mapv (fn [x]
-                          ; strip out colon from :mover
-                          ;(log/debug :workers-present :role (:role x))
-                          ;(log/debug :workers-present :role (:role x)
-                            (worker-str x)
-                          (format "%s %d" (worker-str x) (:id x))))
-                  (clojure.string/join " "))]
+                  vec)]
     (apply
       ui/horizontal-layout
       (ui/spacer 20 0)
       (for [w workers]
-        [(para/paragraph
-           [{:text  (case (:role w)
-                      :painter "🖌"
-                      :mover "🛋")
-             :style #:text-style {:font-size 11}}
-            {:text  (format "%s %d   " (worker-str w) (:id r))
-             :style #:text-style {:font-size 14
-                                  :color [0 0 1]}}])]))))
+        (para/paragraph
+          [{:text  (case (:role w)
+                     :painter "🖌"
+                     :mover "🛋")
+            :style #:text-style {:font-size 11}}
+           {:text  (format "%s %d   " (worker-str w) (:id r))
+            :style #:text-style {:font-size 14
+                                 :color     (case (:role w)
+                                              :painter mh/accent-blue
+                                              :mover mh/accent-green)}}])))))
+
 
 
 (defn room

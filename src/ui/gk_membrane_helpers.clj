@@ -10,10 +10,10 @@
 (defn rgb255vec>mrgbvec
   " take 3-tuple of 0-255, turn into 3-tuple of 0-1 float (e.g., [240, 2, 127] "
   [v]
-  (println v)
+  ;(println v)
   (->> v
     (mapv (fn [n]
-            (println "-- " n)
+            ;(println "-- " n)
             (-> (/ n 255)
               double)))))
 
@@ -25,3 +25,5 @@
 
 (def accent-red (rgb255vec>mrgbvec [240, 2, 127]))
 (def accent-blue (rgb255vec>mrgbvec [56, 108, 176]))
+(def accent-brown (rgb255vec>mrgbvec [191, 91, 23]))
+(def accent-green (rgb255vec>mrgbvec [127, 201, 127]))
