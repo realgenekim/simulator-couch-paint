@@ -309,6 +309,9 @@
             (ui/spacer 30 0)
             (room-workers-status-bar r movers painters))
 
+          (ui/spacer 5)
+          (room-state-bar r)
+
           ;(ui/spacer 5)
           (ui/horizontal-layout
             (para/paragraph
@@ -332,8 +335,7 @@
                                     :height-override true
                                     :height 0.90}}))
 
-          (ui/spacer 5)
-          (room-state-bar r)
+
           (ui/spacer 5))))))
 
 (defn room-row
