@@ -267,7 +267,7 @@
                                         :painter mh/set1-purple
                                         :mover mh/set1-green)
                            :height-override true
-                           :height 0.80}}]))
+                           :height 0.90}}]))
 
 (defn room-workers-status-bar
   " show any movers/painters in room"
@@ -304,15 +304,19 @@
             ; https://phronmophobic.github.io/membrane/styled-text/index.html
             (para/paragraph
               {:text  (format "Room %d" (inc (-> r :id)))
-               :style #:text-style {:font-size  14
+               :style #:text-style {:font-size  13
+                                    :height-override true
+                                    :height 0.90
                                     :font-style #:font-style{:weight :bold}}})
             (ui/spacer 30 0)
             (room-workers-status-bar r movers painters))
 
+          ;(ui/spacer 5)
+
           (ui/spacer 5)
           (room-state-bar r)
 
-          ;(ui/spacer 5)
+
           (ui/horizontal-layout
             (para/paragraph
               {:text (str "🛋 work remaining: "
