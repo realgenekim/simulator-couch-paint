@@ -28,6 +28,9 @@
   (-> (/ 128 255) float)
   0)
 
+; colors taking from
+; https://vega.github.io/vega/docs/schemes/
+
 (def accent-red (rgb255vec>mrgbvec [240, 2, 127]))
 (def accent-blue (rgb255vec>mrgbvec [56, 108, 176]))
 (def accent-brown (rgb255vec>mrgbvec [191, 91, 23]))
@@ -37,6 +40,9 @@
 (def set1-purple (rgb255vec>mrgbvec [152, 78, 163]))
 (def set1-green (rgb255vec>mrgbvec [77, 175, 74]))
 (def set1-red (rgb255vec>mrgbvec [228, 26, 28]))
+
+(def pastel2-cyan (rgb255vec>mrgbvec [179, 226, 205]))
+(def pastel2-lavender (rgb255vec>mrgbvec [203, 213, 232]))
 
 
 (defn my-label
