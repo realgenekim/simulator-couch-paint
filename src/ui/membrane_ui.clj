@@ -234,7 +234,7 @@
 (defn furniture-bar
   [n]
   (let [n (or n 0)
-        msg (str "" (apply str (repeat (/ n 3) "🛋")))]
+        msg (str "" (apply str (repeat (/ n 4) "🛋")))]
     (para/paragraph
      {:text  msg
       :style #:text-style {:font-size 8}}
@@ -527,7 +527,7 @@
       (ui/spacer SPACERHEIGHT)
       (ui/bordered [2 2]
         (ui/vertical-layout
-          (ui/spacer (* ROOMWIDTH 2) 0)
+          (ui/spacer (* ROOMWIDTH 3) 0)
           (ui/horizontal-layout
             (furniture-text nf maxnf)
             ;(ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
