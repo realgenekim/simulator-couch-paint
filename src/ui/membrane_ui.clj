@@ -290,55 +290,57 @@
   (log/warn :room :state (-> r :state))
   (let [color (case (-> r :state)
                 :removing-furniture mh/pastel2-cyan
+                :restoring-furniture mh/pastel2-cyan
                 :painting mh/pastel2-lavender
                 [255 255 255])]
     (ui/fill-bordered color [0 0]
-      (ui/vertical-layout
-        ; keep all boxes the same width
-        (ui/horizontal-layout
-          (ui/spacer ROOMWIDTH ROOMHEIGHT))
-        (ui/horizontal-layout
-          ; https://phronmophobic.github.io/membrane/styled-text/index.html
-          (para/paragraph
-            {:text  (format "Room %d" (inc (-> r :id)))
-             :style #:text-style {:font-size  14
-                                  :font-style #:font-style{:weight :bold}}})
-          (ui/spacer 30 0)
-          (room-workers-status-bar r movers painters))
+      (ui/padding 2
+        (ui/vertical-layout
+          ; keep all boxes the same width
+          (ui/horizontal-layout
+            (ui/spacer ROOMWIDTH ROOMHEIGHT))
+          (ui/horizontal-layout
+            ; https://phronmophobic.github.io/membrane/styled-text/index.html
+            (para/paragraph
+              {:text  (format "Room %d" (inc (-> r :id)))
+               :style #:text-style {:font-size  14
+                                    :font-style #:font-style{:weight :bold}}})
+            (ui/spacer 30 0)
+            (room-workers-status-bar r movers painters))
 
-        ;(ui/spacer 5)
-        (ui/horizontal-layout
-          (para/paragraph
-            {:text (str "🛋 work remaining: "
-                     (time-remaining-bar (-> r :moving1-time-remaining)))
-             :style #:text-style {:font-size 13}}))
+          ;(ui/spacer 5)
+          (ui/horizontal-layout
+            (para/paragraph
+              {:text (str "🛋 work remaining: "
+                       (time-remaining-bar (-> r :moving1-time-remaining)))
+               :style #:text-style {:font-size 13}}))
 
-        (ui/horizontal-layout
-          (para/paragraph
-            {:text (str "🖌 work remaining: "
-                     (time-remaining-bar (-> r :painting-time-remaining)))
-             :style #:text-style {:font-size 13
-                                  :height-override true
-                                  :height 0.90}}))
+          (ui/horizontal-layout
+            (para/paragraph
+              {:text (str "🖌 work remaining: "
+                       (time-remaining-bar (-> r :painting-time-remaining)))
+               :style #:text-style {:font-size 13
+                                    :height-override true
+                                    :height 0.90}}))
 
-        (ui/horizontal-layout
-          (para/paragraph
-            {:text (str "🛋 work remaining: "
-                     (time-remaining-bar (-> r :moving2-time-remaining)))
-             :style #:text-style {:font-size 13
-                                  :height-override true
-                                  :height 0.90}}))
+          (ui/horizontal-layout
+            (para/paragraph
+              {:text (str "🛋 work remaining: "
+                       (time-remaining-bar (-> r :moving2-time-remaining)))
+               :style #:text-style {:font-size 13
+                                    :height-override true
+                                    :height 0.90}}))
 
-        (ui/spacer 5)
-        (room-state r)
-        (ui/spacer 5)))))
+          (ui/spacer 5)
+          (room-state r)
+          (ui/spacer 5))))))
 
 (defn room-row
   [rooms movers painters]
   (apply
     ui/horizontal-layout
     (for [r rooms]
-      (ui/bordered [4 4]
+      (ui/bordered [0 0]
         (room r movers painters)))))
 
 (defn rooms
