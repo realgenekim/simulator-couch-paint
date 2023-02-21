@@ -133,6 +133,7 @@
                    "j" [[::next-frame]]
                    "k" [[::prev-frame]]
                    "$" [[::last-frame]]
+                   "l" [[::last-frame]]
                    ;["^" "0"] [[::first-frame]]
                    "^" [[::first-frame]]
                    "0" [[::first-frame]]
@@ -205,7 +206,7 @@
    ;:height-override true
    ;:height          0.90})
 
-(defn room-state
+(defn room-state-bar
   " show all room states, and highlight the current one
     [:initial   :waiting-for-movers1   :removing-furniture   :waiting-for-painters   :painting   :waiting-for-movers2   :restoring-furniture   :finished])"
   [room]
@@ -332,7 +333,7 @@
                                     :height 0.90}}))
 
           (ui/spacer 5)
-          (room-state r)
+          (room-state-bar r)
           (ui/spacer 5))))))
 
 (defn room-row
