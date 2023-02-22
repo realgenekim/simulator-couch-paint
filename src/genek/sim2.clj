@@ -298,10 +298,7 @@
   ([state {:keys [painter-schedule strict] :as opts}]
    ;[::e/s-state map? => ::s-moving-assignments-and-choices]
    [::e/s-state map? => ::s-moving-assignments]
-   (let [needs-painters     (e/rooms-needing-painters state opts)
-         painters           (e/available-painters state)
-         _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
-         _                  (log/debug :create-painter-assignments :painters painters)
+   (let [{:keys [needs-painters painters]} (painter-potential-assignments state opts)
          _                  (log/warn :create-painter-assignments :painter-schedule painter-schedule)
          room+painters      (case (or painter-schedule :fifo)
                               ; this is what we need to lift up --
@@ -318,11 +315,7 @@
                               (remove nil?))]
      (log/debug :create-painter-assignments :new-room-movers
        (with-out-str (clojure.pprint/pprint new-rooms+painters)))
-     ; ::choices
-     ; ::assignments
-     new-rooms+painters
-     #_{:assignments new-rooms+painters
-        :choices 0}))
+     new-rooms+painters))
   ([state] [::e/s-state => ::s-moving-assignments]
    (create-painter-assignments state {})))
 
