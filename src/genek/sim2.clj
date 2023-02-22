@@ -143,10 +143,10 @@
   (s/coll-of ::s-moving-assignment))
 
 (s/def ::assignments ::s-moving-assignment)
-(s/def ::choices sequential?)
+(s/def ::all-choices sequential?)
 
 (s/def ::s-moving-assignments-and-choices
-  (s/keys :opt-un [::assignments ::choices]))
+  (s/keys :opt-un [::choice ::all-choices]))
 
 (>defn- vecmap->room-assignments
   " input as tuplies of [room, worker]
@@ -263,17 +263,12 @@
 (>defn- painter-potential-assignments
   " for every room that needs mover/painter, identify a mover to be assigned
     this requires the following steps:
-       - find all rooms that need painters   /- these two, let's put into discover (the rest into choose)
+       - find all rooms that need painters   /- these two, let's put into discover (the rest into choose assignment)
        - find all available painters        /
-       - pick one <-- this is either O(1), or O(n!) (combinatorial, because we will search through all combinations of rooms to be assigned)
-       - assign them to a room
     input: state
     output:
              {:needs-painters
-              :painters}
-
-            the caller will do (map   (combo/permutations painters) needs-painters)
-            "
+              :painters} "
   ([state opts]
    ;[::e/s-state map? => ::s-moving-assignments-and-choices]
    [::e/s-state map? => map?]
@@ -289,15 +284,15 @@
 (>defn- create-painter-assignments
   " for every room that needs mover/painter, identify a mover to be assigned
     this requires the following steps:
-       - find all rooms that need painters
-       - find all available painters
+       - find all rooms that need painters    /- these two live in painter-potential-assignments
+       - find all available painters         /
        - pick one <-- this is either O(1), or O(n!) (combinatorial, because we will search through all combinations of rooms to be assigned)
        - assign them to a room
     input: state
     output: [{:room .. :mover} ...] "
   ([state {:keys [painter-schedule strict] :as opts}]
-   ;[::e/s-state map? => ::s-moving-assignments-and-choices]
-   [::e/s-state map? => ::s-moving-assignments]
+   [::e/s-state map? => ::s-moving-assignments-and-choices]
+   ;[::e/s-state map? => ::s-moving-assignments]
    (let [{:keys [needs-painters painters]
           :as   all-choices} (painter-potential-assignments state opts)
          _                  (log/warn :create-painter-assignments :painter-schedule painter-schedule)
@@ -316,8 +311,9 @@
                               (remove nil?))]
      (log/debug :create-painter-assignments :new-room-movers
        (with-out-str (clojure.pprint/pprint new-rooms+painters)))
-     new-rooms+painters))
-  ([state] [::e/s-state => ::s-moving-assignments]
+     {:choice new-rooms+painters
+      :all-choices all-choices}))
+  ([state] [::e/s-state => ::s-moving-assignments-and-choices]
    (create-painter-assignments state {})))
 
 
