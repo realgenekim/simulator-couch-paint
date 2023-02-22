@@ -1331,10 +1331,25 @@
                           {:id 2, :role :painter, :at-room nil}
                           {:id 3, :role :painter, :at-room nil}
                           {:id 4, :role :painter, :at-room nil}]
-               :furniture-stored 0}
-        newstate (sim/simulate-turn state {:strict true})]
-    (def newstate newstate)
-    (is (= [0 1]
-          (->> (-> newstate :metadata :painter-schedule-choices)
-             (map (fn [x]
-                    (-> x :room :id))))))))
+               :furniture-stored 0}]
+
+    (let [newstate (sim/simulate-turn state {:strict true})]
+      (def newstate newstate)
+      (is (= [0 1]
+            (->> (-> newstate :metadata :painter-schedule-choices)
+               (map (fn [x]
+                      (-> x :room :id)))))))
+
+    ; what does :strict true and false really do?
+    ;
+    ; false lets us park painters at the bottom of building: otherwise, they'd just be unassigned
+    ;
+    (let [newstate (sim/simulate-turn state {:strict false})]
+      (def newstate newstate)
+      ; this should put painterse in every room
+      (is (= [0 1 2 3]
+            (->> (-> newstate :metadata :painter-schedule-choices)
+              (map (fn [x]
+                     (-> x :room :id)))))))
+
+    0))
