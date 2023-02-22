@@ -143,7 +143,8 @@
   (s/coll-of ::s-moving-assignment))
 
 (s/def ::assignments ::s-moving-assignment)
-(s/def ::all-choices sequential?)
+(s/def ::all-choices
+  (s/keys :opt-un [::needs-painters ::painters]))
 
 (s/def ::s-moving-assignments-and-choices
   (s/keys :opt-un [::choice ::all-choices]))
@@ -360,7 +361,7 @@
   " for every room that needs mover/painter, assign one that is available
   "
   ([state opts] [::e/s-state map? => ::e/s-state]
-   (let [assignments (create-painter-assignments state opts)
+   (let [assignments (-> (create-painter-assignments state opts) :choice)
          newstate    (-> (apply-painting-assignments state assignments)
                        (assoc-in [:metadata :painter-schedule-choices] assignments))]
      newstate))

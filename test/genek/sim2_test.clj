@@ -376,9 +376,11 @@
               (mapv :id))))
       (is (= [:painting :painting :painting :painting]
             (->> (#'sim/create-painter-assignments state)
+              :choice
               (map #(-> % :room :state)))))
       (is (= [0 1 2 3]
             (->> (#'sim/create-painter-assignments state {:painter-fifo true})
+              :choice
               (map #(-> % :painter :at-room)))))
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
@@ -425,9 +427,11 @@
               (mapv :id))))
       (is (= [:painting :painting :painting :painting]
             (->> (#'sim/create-painter-assignments state)
+              :choice
               (map #(-> % :room :state)))))
       (is (= [0 1 2 3]
             (->> (#'sim/create-painter-assignments state {:painter-fifo true})
+              :choice
               (map #(-> % :painter :at-room)))))
       (is (= [0 1 2 3]
             (->> (sim/assign-painters state)
@@ -1201,7 +1205,7 @@
     ;- two painters assigned to same
     ;room
     (is (= 1
-          (count (#'sim/create-painter-assignments state))))
+          (count (-> (#'sim/create-painter-assignments state) :choice))))
     (is (= [5 6 7]
           (->> (sp/select [:painters sp/ALL :at-room] newstate)
             sort)))))
@@ -1244,9 +1248,11 @@
                             {:id 3, :role :painter, :at-room nil}]}]
       (is (= [0 1 2 3]
             (->> (#'sim/create-painter-assignments state {:painter-schedule :fifo})
+              :choice
               (map #(-> % :painter :at-room)))))
       (is (= [3 2 1 0]
             (->> (#'sim/create-painter-assignments state {:painter-schedule :lifo})
+              :choice
               (map #(-> % :painter :at-room))))))))
 
 
