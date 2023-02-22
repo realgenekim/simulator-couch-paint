@@ -263,6 +263,11 @@
 
 (>defn- create-painter-assignments
   " for every room that needs mover/painter, identify a mover to be assigned
+    this requires the following steps:
+       - find all rooms that need painters
+       - find all available painters
+       - pick one <-- this is either O(1), or O(n!) (combinatorial, because we will search through all combinations of rooms to be assigned)
+       - assign them to a room
     input: state
     output: [{:room .. :mover} ...] "
   ([state {:keys [painter-schedule strict] :as opts}]
