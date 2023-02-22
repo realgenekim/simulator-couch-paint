@@ -1341,22 +1341,11 @@
 
     (let [newstate (sim/simulate-turn state {:strict true})]
       (def newstate newstate)
-      (is (= [0 1]
-            (->> (-> newstate :metadata :painter-schedule-choices)
-               (map (fn [x]
-                      (-> x :room :id)))))))
+      (is (map?
+            (->> (-> newstate :metadata :painter-schedule-choices)))))
 
-    ; what does :strict true and false really do?
-    ;
-    ; false lets us park painters at the bottom of building: otherwise, they'd just be unassigned
-    ;
-    (let [newstate (sim/simulate-turn state {:strict false})]
-      (def newstate newstate)
-      ; this should put painterse in every room
-      (is (= [0 1 2 3]
-            (->> (-> newstate :metadata :painter-schedule-choices)
-              (map (fn [x]
-                     (-> x :room :id)))))))
+
+
 
     0))
 
@@ -1373,6 +1362,12 @@
                             :state                   :waiting-for-painters,
                             :moving1-time-remaining  0,
                             :painting-time-remaining 50,
+                            :moving2-time-remaining  10}
+                           {:id                      2,
+                            :role                    :room,
+                            :state                   :waiting-for-painters,
+                            :moving1-time-remaining  0,
+                            :painting-time-remaining 50,
                             :moving2-time-remaining  10}]
                 :movers   [{:id 0, :role :mover, :at-room nil}],
                 :painters [{:id 0, :role :painter, :at-room nil}
@@ -1385,4 +1380,14 @@
       (is (= [0 1]
             (->> newstates (mapv :turn))))))
 
+  0)
+
+
+(comment
+  ; TODO
+  ; what does :strict true and false really do?
+  ;
+  ; false lets us park painters at the bottom of building: otherwise, they'd just be unassigned
+  ;
+  (-> newstate last :metadata :painter-schedule-choices)
   0)

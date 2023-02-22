@@ -275,10 +275,10 @@
    [::e/s-state map? => map?]
    (let [needs-painters     (e/rooms-needing-painters state opts)
          painters           (e/available-painters state)
-         _                  (log/debug :painter-potential-assignments :needs-movers needs-painters)
-         _                  (log/debug :painter-potential-assignments :painters painters)]
-     {:needs-painters needs-painters
-      :painters       painters}))
+         _                  (log/warn :painter-potential-assignments :needs-movers (vec needs-painters))
+         _                  (log/warn :painter-potential-assignments :painters (vec painters))]
+     {:needs-painters (vec needs-painters)
+      :painters       (vec painters)}))
   ([state] [::e/s-state => map?]
    (painter-potential-assignments state {})))
 
@@ -296,7 +296,7 @@
    ;[::e/s-state map? => ::s-moving-assignments]
    (let [{:keys [needs-painters painters]
           :as   all-choices} (painter-potential-assignments state opts)
-         _                  (log/warn :create-painter-assignments :painter-schedule painter-schedule)
+         _                  (log/warn :create-painter-assignments :opt-painter-schedule painter-schedule)
          room+painters      (case (or painter-schedule :fifo)
                               ; this is what we need to lift up --
                               ;   a search would rotate/cycle (if all equal)
@@ -317,32 +317,6 @@
   ([state] [::e/s-state => ::s-moving-assignments-and-choices]
    (create-painter-assignments state {})))
 
-
-
-(comment
-  (def state
-    {:turn 26,
-     :rooms [{:id 0,
-              :role :room,
-              :state :waiting-for-movers1
-              :moving1-time-remaining 10,
-              :painting-time-remaining 10,
-              :moving2-time-remaining 10}
-             {:id 1,
-              :role :room,
-              :state :waiting-for-painters,
-              :moving1-time-remaining 0,
-              :painting-time-remaining 10,
-              :moving2-time-remaining 10}],
-     :movers [{:id 0, :role :mover, :at-room nil} {:id 1, :role :mover, :at-room nil}],
-     :painters [{:id 0, :role :painter, :at-room nil}
-                {:id 1, :role :painter, :at-room nil}
-                {:id 2, :role :painter, :at-room nil}
-                {:id 3, :role :painter, :at-room nil}]})
-
-  (e/rooms-needing-painters state)
-  (e/rooms-needing-painters state {:strict false})
-  0)
 
 (>defn- apply-painting-assignments
   " input:  state
@@ -557,6 +531,34 @@
 
 ; find min
 
+(>defn simulate-with-painting-choice
+  " this is responsible for running the sim
+    input: initial state
+    output: sequence of states, run through state machine"
+  ; 3 arity, build upon state
+  ([state states {:keys [maxturns]
+                  :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
+   ; save to global var so we can watch
+   (log/warn :simulate-with-painting-choice :opts opts)
+   (reset! *state states)
+   (let [newstate (simulate-turn state opts)]
+     ; if done return, else recurse
+     (log/debug :simulate-with-painting-choice :turn (-> newstate :turn))
+     (if (or
+           (e/all-rooms-finished? state)
+           (and maxturns
+             (> (-> state :turn) maxturns)))
+       ;(> (-> state :turn) 200))
+       states
+
+       ; else
+       (recur newstate (conj states newstate) opts)))))
+  ; 2 arity: create new states
+  ;([state opts] [::e/s-state map? => ::e/s-states]
+  ; (simulate-until-done state [state] opts))
+  ;([state] [::e/s-state => ::e/s-states]
+  ; (simulate-until-done state {})))
+
 (>defn simulate-find-min
   " this is responsible for running the sim
     input: initial state
@@ -565,18 +567,20 @@
   ([state states {:keys [maxturns]
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
-   (log/warn :simulate-until-done :opts opts)
+   (log/warn :simulate-find-min :opts opts)
    (reset! *state states)
 
    ; algorithm
    ;   - do one run, to get all the painter choices
    ;   - then iterate to find the minimum
-   (let [setup-run (simulate-turn state opts)]
-     (log/warn :simulate-find-min :state setup-run)
+   (let [setup-run       (simulate-turn state opts)
+         _               (log/warn :simulate-find-min :state setup-run)
+         painter-choices (-> setup-run :metadata :painter-schedule-choices)]
+         ;all-choices]
      (conj states setup-run))
    #_(let [newstate (simulate-turn state opts)]
        ; if done return, else recurse
-       (log/debug :simulate-until-done :turn (-> newstate :turn))
+       (log/debug :simulate-find-min :turn (-> newstate :turn))
        (if (or
              (e/all-rooms-finished? state)
              (and maxturns
