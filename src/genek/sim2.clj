@@ -259,9 +259,9 @@
   " for every room that needs mover/painter, identify a mover to be assigned
     input: state
     output: [{:room .. :mover} ...] "
-  ([state {:keys [painter-schedule]}]
+  ([state {:keys [painter-schedule strict] :as opts}]
    [::e/s-state map? => ::s-moving-assignments]
-   (let [needs-painters     (e/rooms-needing-painters state {:strict false})
+   (let [needs-painters     (e/rooms-needing-painters state opts)
          painters           (e/available-painters state)
          _                  (log/debug :create-painter-assignments :needs-movers needs-painters)
          _                  (log/debug :create-painter-assignments :painters painters)

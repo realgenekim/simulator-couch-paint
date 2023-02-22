@@ -1328,9 +1328,13 @@
                :movers   [{:id 0, :role :mover, :at-room 2}],
                :painters [{:id 0, :role :painter, :at-room nil}
                           {:id 1, :role :painter, :at-room nil}
-                          {:id 2, :role :painter, :at-room nil}]
+                          {:id 2, :role :painter, :at-room nil}
+                          {:id 3, :role :painter, :at-room nil}
+                          {:id 4, :role :painter, :at-room nil}]
                :furniture-stored 0}
-        newstate (sim/simulate-turn state {})]
+        newstate (sim/simulate-turn state {:strict true})]
     (def newstate newstate)
-    (is (= []
-          (-> newstate :metadata :painter-schedule-choices)))))
+    (is (= [0 1]
+          (->> (-> newstate :metadata :painter-schedule-choices)
+             (map (fn [x]
+                    (-> x :room :id))))))))

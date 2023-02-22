@@ -149,7 +149,7 @@
                    :loose  : any state when operations isn't done (can cause deadlock)}
     output: all rooms that need painters "
   ([state {:keys [strict]
-           ;:or   {strict true}
+           :or   {strict false}
            :as   opts}] [::s-state map? => ::s-rooms]
    (log/debug :rooms-needing-painting :opts opts)
    (let [{:keys [rooms]} state
