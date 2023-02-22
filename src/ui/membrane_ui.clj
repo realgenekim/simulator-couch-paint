@@ -96,7 +96,7 @@
         (Thread/sleep 40)
         (next-frame! framenum total-pages)
         ; see if we can force repaint
-        (if-let [w (resolve `w2)]
+        (if-let [w (resolve `ui.main/w2)]
           ((:membrane.skia/repaint @w)))
         (recur (inc framenum) total-pages)))))
 

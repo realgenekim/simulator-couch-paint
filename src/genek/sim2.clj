@@ -291,14 +291,31 @@
        - find all available painters         /
        - pick one <-- this is either O(1), or O(n!) (combinatorial, because we will search through all combinations of rooms to be assigned)
        - assign them to a room
-    input: state
-    output: [{:room .. :mover} ...] "
+
+    input:  state
+    opts:   {:schedule {:rooms-needing-painting [{room } ...]}}
+               ^^ when schedule is given, just use it
+
+    output: [{:room .. :mover} ...]
+    "
   ([state {:keys [painter-schedule strict] :as opts}]
    [::e/s-state map? => ::s-moving-assignments-and-choices]
    ;[::e/s-state map? => ::s-moving-assignments]
    (let [{:keys [rooms-need-painters painters]
           :as   all-choices} (painter-potential-assignments state opts)
-         _                  (log/warn :create-painter-assignments :opt-painter-schedule painter-schedule)
+         _                  (log/warn :create-painter-assignments :opt-painter-schedule painter-schedule :opts opts)
+
+         ; was the order/selection/schedule of rooms given by parent?
+         sched-provided      (-> opts :schedule :rooms-needing-painting)
+         rooms-need-painters (if-not sched-provided
+                               ; no-op
+                               rooms-need-painters
+                               ; else we were given it by parent
+                               (do
+                                 (log/warn :create-painter-assignments :schedule-provided!!! :old-sched (vec rooms-need-painters))
+                                 (log/warn :create-painter-assignments :schedule-provided!!! (vec sched-provided))
+                                 sched-provided))
+
          room+painters      (case (or painter-schedule :fifo)
                               ; this is what we need to lift up --
                               ;   a search would rotate/cycle (if all equal)
@@ -335,6 +352,7 @@
 
 (>defn assign-painters
   " for every room that needs mover/painter, assign one that is available
+    input: state
   "
   ([state opts] [::e/s-state map? => ::e/s-state]
    (let [all-assignments (create-painter-assignments state opts)
@@ -514,12 +532,13 @@
    (reset! *state states)
    (let [newstate (simulate-turn state opts)]
      ; if done return, else recurse
-     (log/debug :simulate-until-done :turn (-> newstate :turn))
+     (log/warn :simulate-until-done :turn (-> newstate :turn))
      (if (or
            (e/all-rooms-finished? state)
            (and maxturns
-             (> (-> state :turn) maxturns)))
-           ;(> (-> state :turn) 200))
+             (> (-> newstate :turn) maxturns))
+           ; to limit run
+           (> (-> newstate :turn) 200))
        states
 
        ; else
@@ -584,7 +603,7 @@
                                     (-> setup-run :metadata :painter-schedule-choices :rooms-need-painters))]
 
      (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
-     (let [runs (for [rp (->> room-permutations (take 3))]
+     (let [runs (for [rp (->> room-permutations (take 1))]
                   (simulate-until-done state states
                     (merge opts {:schedule {:rooms-needing-painting rp}})))]
        (doseq [r runs]
