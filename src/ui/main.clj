@@ -25,6 +25,7 @@
     :sim-state
     #(subvec % 0 50))
 
+  ; equiv to "pushing all the buttons in the window"
   (first
     (for [x (range 1000)
           y (range 1000)

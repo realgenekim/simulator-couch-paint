@@ -324,7 +324,8 @@
   "
   ([state opts] [::e/s-state map? => ::e/s-state]
    (let [assignments (create-painter-assignments state opts)
-         newstate    (apply-painting-assignments state assignments)]
+         newstate    (-> (apply-painting-assignments state assignments)
+                       (assoc-in [:metadata :painter-schedule-choices] assignments))]
      newstate))
   ([state] [::e/s-state => ::e/s-state]
    (assign-painters state {})))
