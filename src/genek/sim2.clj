@@ -161,8 +161,8 @@
   ; case 3: mover rooms than mover
   ;
   ; put them into one vector
-  (log/warn :vecmap->room-assignments :room room)
-  (log/warn :vecmap->room-assignments :worker (str worker))
+  (log/debug :vecmap->room-assignments :room room)
+  (log/debug :vecmap->room-assignments :worker (str worker))
   (if (and room worker)
     (let [roomstate (-> room :state)
           ; update room state, given that we've just assigned a worker
@@ -407,7 +407,7 @@
                            (if (room-has-painter state id)
                              (assoc room :state :painting)
                              room)))))]
-    (log/warn :rooms-needs-painter-already-there :retval retval)
+    (log/debug :rooms-needs-painter-already-there :retval retval)
     retval))
 
 (>defn advance-state
@@ -436,17 +436,17 @@
                  ;    :restoring-furniture (dec :moving2-time-remaining)
                  (let [
                        worktask  (first rs)
-                       _         (log/warn :advance-state :reduce/entering :process worktask)
+                       _         (log/debug :advance-state :reduce/entering :process worktask)
                        roomnum   (:at-room worktask)
                        oldroom   (utils/get-by-id (-> state :rooms) roomnum)
-                       _         (log/warn :advance-state :old-room oldroom)
+                       _         (log/debug :advance-state :old-room oldroom)
                        roomstate (:state oldroom)
                        newroom   (cond
                                    (and
                                      (= :removing-furniture roomstate)
                                      (= (worktask :role) :mover))
                                    (do
-                                     (log/warn "*** " :advance-state :decrementing :moving1-time-remaining)
+                                     (log/debug "*** " :advance-state :decrementing :moving1-time-remaining)
                                      (-> oldroom
                                        (update-in [:moving1-time-remaining] dec)
                                        (update-in [:furniture-stored] (fnil inc 0))))
@@ -455,14 +455,14 @@
                                      (= :painting roomstate)
                                      (= (worktask :role) :painter))
                                    (do
-                                     (log/warn :advance-state :decrementing :painting-time-remaining)
+                                     (log/debug :advance-state :decrementing :painting-time-remaining)
                                      (update-in oldroom [:painting-time-remaining] dec))
 
                                    (and
                                      (= :restoring-furniture roomstate)
                                      (= (worktask :role) :mover))
                                    (do
-                                     (log/warn :advance-state :decrementing :moving2-time-remaining)
+                                     (log/debug :advance-state :decrementing :moving2-time-remaining)
                                      (-> oldroom
                                        (update-in [:moving2-time-remaining] dec)
                                        (update-in [:furniture-stored] (fnil dec 0))))
