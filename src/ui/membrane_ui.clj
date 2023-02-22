@@ -20,6 +20,7 @@
 
 ; Adrian, to run:
 ; search for "Adrian" for the 3 forms to run
+;   ^^^ this has been moved to ui.main (where I'm putting in REPL friendly convenience forms to run)
 
 (def *sim-state genek.sim2/*state)
 
@@ -290,9 +291,9 @@
   [r movers painters]
   (log/warn :room :state (-> r :state))
   (let [color (case (-> r :state)
-                :removing-furniture mh/pastel2-cyan
-                :restoring-furniture mh/pastel2-cyan
-                :painting mh/pastel2-lavender
+                ;:removing-furniture mh/pastel2-cyan
+                ;:restoring-furniture mh/pastel2-cyan
+                ;:painting mh/pastel2-lavender
                 [255 255 255])]
     (ui/fill-bordered color [0 0]
       (ui/padding 2
