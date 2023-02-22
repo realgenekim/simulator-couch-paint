@@ -10,6 +10,7 @@
   ;(def dev-app2 (make-app #'my-slider *app-state))
   ; Adrian: run these forms
   (m/init-state! {})
+  (m/init-state! {:load-sim-state! true})
   (def dev-app2 (make-app #'m/render-view m/*app-state))
   (def w2 (skia/run dev-app2))
   0)

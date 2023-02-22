@@ -48,7 +48,7 @@
     ; load sim
     (swap! *app-state
       assoc
-      :frame 0
+      :frame 1
       :sim-state @*sim-state
       :*sim-state *sim-state))
 
@@ -59,6 +59,7 @@
 
 (comment
   (init-state! {})
+  (init-state! {:load-sim-state! true})
   0)
 
 (defn next-frame!

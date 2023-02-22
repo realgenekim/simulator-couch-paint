@@ -525,11 +525,13 @@
     input: initial state
     output: sequence of states, run through state machine"
   ; 3 arity, build upon state
-  ([state states {:keys [maxturns]
+  ([state states {:keys [maxturns update-state-atom?]
+                  :or {update-state-atom? true}
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (log/warn :simulate-until-done :opts opts)
-   (reset! *state states)
+   (if update-state-atom?
+     (reset! *state states))
    (let [newstate (simulate-turn state opts)]
      ; if done return, else recurse
      (log/warn :simulate-until-done :turn (-> newstate :turn))
@@ -538,7 +540,7 @@
            (and maxturns
              (> (-> newstate :turn) maxturns))
            ; to limit run
-           (> (-> newstate :turn) 1000))
+           (> (-> newstate :turn) 2000))
        states
 
        ; else
@@ -605,7 +607,9 @@
      (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
      (let [runs (for [rp (->> room-permutations (take 1))]
                   (simulate-until-done state states
-                    (merge opts {:schedule {:rooms-needing-painting rp}})))]
+                    (merge opts {:schedule {:rooms-needing-painting rp}
+                                 :update-state-atom? false})))]
+       (def runs runs)
        (doseq [r runs]
          (log/warn :simulate-find-min :turns (count r))))
      ;all-choices
@@ -629,4 +633,55 @@
    (simulate-find-min state {})))
 
 
+
+(comment
+  (-> runs count)
+  (-> runs count)
+  (for [r runs]
+    (count r))
+
+
+  (-> runs first count)
+  (-> *state deref count)
+  (do
+    (reset! *state (first runs))
+    nil)
+
+
+  (let [state {:turn     0,
+               :rooms    [{:id                      0,
+                           :role                    :room,
+                           :state                   :waiting-for-painters,
+                           :moving1-time-remaining  0,
+                           :painting-time-remaining 50,
+                           :moving2-time-remaining  10}
+                          {:id                      1,
+                           :role                    :room,
+                           :state                   :waiting-for-painters,
+                           :moving1-time-remaining  0,
+                           :painting-time-remaining 50,
+                           :moving2-time-remaining  10}
+                          {:id                      2,
+                           :role                    :room,
+                           :state                   :waiting-for-painters,
+                           :moving1-time-remaining  0,
+                           :painting-time-remaining 50,
+                           :moving2-time-remaining  10}]
+               :movers   [{:id 0, :role :mover, :at-room nil}],
+               :painters [{:id 0, :role :painter, :at-room nil}
+                          {:id 1, :role :painter, :at-room nil}]
+               :furniture-stored 0}]
+
+    (let [newstates (simulate-find-min state {:strict true})]
+      (def newstates newstates)))
+      ; two turns?
+      ;(is (= [0 1]
+      ;      (->> newstates (mapv :turn))))))
+
+  (do
+    (reset! *state runs)
+    nil)
+  (count newstates)
+
+  0)
 
