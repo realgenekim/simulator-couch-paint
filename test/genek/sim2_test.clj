@@ -1390,8 +1390,8 @@
   (combo/permutations [1 2 3])
   (combo/permutations [1 2 3 4 5])
   (count (combo/permutations [1 2 3 4 5 6 7]))
-  (combo/permutations (-> newstates last :metadata :painter-schedule-choices :needs-painters))
-  (count (combo/permutations (-> newstates last :metadata :painter-schedule-choices :needs-painters)))
+  (combo/permutations (-> newstates last :metadata :painter-schedule-choices :rooms-need-painters))
+  (count (combo/permutations (-> newstates last :metadata :painter-schedule-choices :rooms-need-painters)))
 
 
   ; TODO

@@ -1,6 +1,7 @@
 (ns genek.sim2
   (:require
     [clojure.spec.alpha :as s]
+    [clojure.math.combinatorics :as combo]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
     [com.rpl.specter :as sp]
     [flow-storm.api]
@@ -574,10 +575,21 @@
    ; algorithm
    ;   - do one run, to get all the painter choices
    ;   - then iterate to find the minimum
-   (let [setup-run       (simulate-turn state opts)
-         _               (log/warn :simulate-find-min :state setup-run)
-         painter-choices (-> setup-run :metadata :painter-schedule-choices)]
-         ;all-choices]
+   (let [setup-run                (simulate-turn state opts)
+         _                        (log/warn :simulate-find-min :state setup-run)
+         painter-schedule-choices (-> setup-run :metadata :painter-schedule-choices)
+         _ (log/warn :simulate-find-min :painter-schedule-choices painter-schedule-choices)
+         {:keys [rooms-need-painters painters]} painter-schedule-choices
+         room-permutations        (combo/permutations
+                                    (-> setup-run :metadata :painter-schedule-choices :rooms-need-painters))]
+
+     (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
+     (let [runs (for [rp (->> room-permutations (take 3))]
+                  (simulate-until-done state states
+                    (merge opts {:schedule {:rooms-needing-painting rp}})))]
+       (doseq [r runs]
+         (log/warn :simulate-find-min :turns (count r))))
+     ;all-choices
      (conj states setup-run))
    #_(let [newstate (simulate-turn state opts)]
        ; if done return, else recurse
