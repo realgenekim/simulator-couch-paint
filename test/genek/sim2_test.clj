@@ -1359,3 +1359,30 @@
                      (-> x :room :id)))))))
 
     0))
+
+(deftest simulate-find-min
+  (let [state {:turn     0,
+                :rooms    [{:id                      0,
+                            :role                    :room,
+                            :state                   :waiting-for-painters,
+                            :moving1-time-remaining  0,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining  10}
+                           {:id                      1,
+                            :role                    :room,
+                            :state                   :waiting-for-painters,
+                            :moving1-time-remaining  0,
+                            :painting-time-remaining 50,
+                            :moving2-time-remaining  10}]
+                :movers   [{:id 0, :role :mover, :at-room nil}],
+                :painters [{:id 0, :role :painter, :at-room nil}
+                           {:id 1, :role :painter, :at-room nil}]
+                :furniture-stored 0}]
+
+    (let [newstates (sim/simulate-find-min state {:strict true})]
+      (def newstates newstates)
+      ; two turns?
+      (is (= [0 1]
+            (->> newstates (mapv :turn))))))
+
+  0)

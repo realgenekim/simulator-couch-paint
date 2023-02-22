@@ -361,9 +361,11 @@
   " for every room that needs mover/painter, assign one that is available
   "
   ([state opts] [::e/s-state map? => ::e/s-state]
-   (let [assignments (-> (create-painter-assignments state opts) :choice)
+   (let [all-assignments (create-painter-assignments state opts)
+         assignments (-> all-assignments :choice)
          newstate    (-> (apply-painting-assignments state assignments)
-                       (assoc-in [:metadata :painter-schedule-choices] assignments))]
+                       (assoc-in [:metadata :painter-schedule-choices]
+                         (-> all-assignments :all-choices)))]
      newstate))
   ([state] [::e/s-state => ::e/s-state]
    (assign-painters state {})))
@@ -551,6 +553,44 @@
    (simulate-until-done state [state] opts))
   ([state] [::e/s-state => ::e/s-states]
    (simulate-until-done state {})))
+
+
+; find min
+
+(>defn simulate-find-min
+  " this is responsible for running the sim
+    input: initial state
+    output: sequence of states, run through state machine"
+  ; 3 arity, build upon state
+  ([state states {:keys [maxturns]
+                  :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
+   ; save to global var so we can watch
+   (log/warn :simulate-until-done :opts opts)
+   (reset! *state states)
+
+   ; algorithm
+   ;   - do one run, to get all the painter choices
+   ;   - then iterate to find the minimum
+   (let [setup-run (simulate-turn state opts)]
+     (log/warn :simulate-find-min :state setup-run)
+     (conj states setup-run))
+   #_(let [newstate (simulate-turn state opts)]
+       ; if done return, else recurse
+       (log/debug :simulate-until-done :turn (-> newstate :turn))
+       (if (or
+             (e/all-rooms-finished? state)
+             (and maxturns
+               (> (-> state :turn) maxturns)))
+         ;(> (-> state :turn) 200))
+         states
+
+         ; else
+         (recur newstate (conj states newstate) opts))))
+  ; 2 arity: create new states
+  ([state opts] [::e/s-state map? => ::e/s-states]
+   (simulate-find-min state [state] opts))
+  ([state] [::e/s-state => ::e/s-states]
+   (simulate-find-min state {})))
 
 
 
