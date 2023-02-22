@@ -28,21 +28,31 @@
 (defonce *app-state (atom nil))
 
 (defn init-state!
-  [{:keys [sim] :as opts}]
+  [{:keys [sim load-sim-state!] :as opts}]
   ;(reset! *app-state {:frame :last-frame})
-  (log/warn :init-state! :running-simulator)
+  (log/warn :init-state! :running-simulator :opts opts)
 
-  (sim/init-state!)
-  (log/warn :init-state! :sim sim :opts opts)
-  (sim/simulate-until-done (-> @sim/*state last)
-    (merge {:maxturns 500} sim))
+  (if-not load-sim-state!
+    ; run simulation
+    (do
+      (sim/init-state!)
+      (log/warn :init-state! :sim sim :opts opts)
+      (sim/simulate-until-done (-> @sim/*state last)
+        (merge {:maxturns 500} sim))
+
+      (swap! *app-state
+        assoc
+        :frame 0
+        :sim-state @*sim-state
+        :*sim-state *sim-state))
+    ; load sim
+    (swap! *app-state
+      assoc
+      :frame 0
+      :sim-state @*sim-state
+      :*sim-state *sim-state))
 
   (log/warn :init-state! :updating-atom)
-  (swap! *app-state
-     assoc
-     :frame 0
-     :sim-state @*sim-state
-     :*sim-state *sim-state)
 
   nil)
 
@@ -496,6 +506,10 @@
     (ui/horizontal-layout
       (ui/horizontal-layout
         (ui/spacer 20 20)
+        (basic/button {:text     "Load sim state"
+                       :on-click #(do
+                                    (log/warn :outer-pane :click)
+                                    (init-state! {:load-sim-state! true}))})
         (basic/button {:text     "Initialize (Painters FIFO)"
                        :on-click #(do
                                     (log/warn :outer-pane :click)

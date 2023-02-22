@@ -538,7 +538,7 @@
            (and maxturns
              (> (-> newstate :turn) maxturns))
            ; to limit run
-           (> (-> newstate :turn) 200))
+           (> (-> newstate :turn) 1000))
        states
 
        ; else
