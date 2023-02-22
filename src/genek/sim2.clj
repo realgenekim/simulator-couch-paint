@@ -298,7 +298,8 @@
   ([state {:keys [painter-schedule strict] :as opts}]
    ;[::e/s-state map? => ::s-moving-assignments-and-choices]
    [::e/s-state map? => ::s-moving-assignments]
-   (let [{:keys [needs-painters painters]} (painter-potential-assignments state opts)
+   (let [{:keys [needs-painters painters]
+          :as   all-choices} (painter-potential-assignments state opts)
          _                  (log/warn :create-painter-assignments :painter-schedule painter-schedule)
          room+painters      (case (or painter-schedule :fifo)
                               ; this is what we need to lift up --
