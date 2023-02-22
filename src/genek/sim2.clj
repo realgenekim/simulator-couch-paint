@@ -142,6 +142,12 @@
 (s/def ::s-moving-assignments
   (s/coll-of ::s-moving-assignment))
 
+(s/def ::assignments ::s-moving-assignment)
+(s/def ::choices sequential?)
+
+(s/def ::s-moving-assignments-and-choices
+  (s/keys :opt-un [::assignments ::choices]))
+
 (>defn- vecmap->room-assignments
   " input as tuplies of [room, worker]
        assign the room, which means we change room state, change mover :at-room
