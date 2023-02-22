@@ -266,6 +266,7 @@
     input: state
     output: [{:room .. :mover} ...] "
   ([state {:keys [painter-schedule strict] :as opts}]
+   ;[::e/s-state map? => ::s-moving-assignments-and-choices]
    [::e/s-state map? => ::s-moving-assignments]
    (let [needs-painters     (e/rooms-needing-painters state opts)
          painters           (e/available-painters state)
@@ -273,6 +274,10 @@
          _                  (log/debug :create-painter-assignments :painters painters)
          _                  (log/warn :create-painter-assignments :painter-schedule painter-schedule)
          room+painters      (case (or painter-schedule :fifo)
+                              ; this is what we need to lift up --
+                              ;   a search would rotate/cycle (if all equal)
+                              ;   or would find all combinations
+                              ;       https://stackoverflow.com/questions/26076077/clojure-list-all-permutations-of-a-list
                               :fifo (map vector needs-painters painters)
                               :lifo (map vector (reverse needs-painters) painters)
                               :random (map vector (shuffle needs-painters) painters))
@@ -283,7 +288,11 @@
                               (remove nil?))]
      (log/debug :create-painter-assignments :new-room-movers
        (with-out-str (clojure.pprint/pprint new-rooms+painters)))
-     new-rooms+painters))
+     ; ::choices
+     ; ::assignments
+     new-rooms+painters
+     #_{:assignments new-rooms+painters
+        :choices 0}))
   ([state] [::e/s-state => ::s-moving-assignments]
    (create-painter-assignments state {})))
 
