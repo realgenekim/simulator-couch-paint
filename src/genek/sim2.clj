@@ -260,6 +260,31 @@
 ; painters
 ;
 
+(>defn- painter-potential-assignments
+  " for every room that needs mover/painter, identify a mover to be assigned
+    this requires the following steps:
+       - find all rooms that need painters   /- these two, let's put into discover (the rest into choose)
+       - find all available painters        /
+       - pick one <-- this is either O(1), or O(n!) (combinatorial, because we will search through all combinations of rooms to be assigned)
+       - assign them to a room
+    input: state
+    output:
+             {:needs-painters
+              :painters}
+
+            the caller will do (map   (combo/permutations painters) needs-painters)
+            "
+  ([state opts]
+   ;[::e/s-state map? => ::s-moving-assignments-and-choices]
+   [::e/s-state map? => map?]
+   (let [needs-painters     (e/rooms-needing-painters state opts)
+         painters           (e/available-painters state)
+         _                  (log/debug :painter-potential-assignments :needs-movers needs-painters)
+         _                  (log/debug :painter-potential-assignments :painters painters)]
+     {:needs-painters needs-painters
+      :painters       painters}))
+  ([state] [::e/s-state => map?]
+   (painter-potential-assignments state {})))
 
 (>defn- create-painter-assignments
   " for every room that needs mover/painter, identify a mover to be assigned
@@ -300,6 +325,8 @@
         :choices 0}))
   ([state] [::e/s-state => ::s-moving-assignments]
    (create-painter-assignments state {})))
+
+
 
 (comment
   (def state
