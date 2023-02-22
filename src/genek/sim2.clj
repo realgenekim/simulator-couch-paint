@@ -591,9 +591,17 @@
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (log/warn :simulate-find-min :opts opts)
-   (reset! *state states)
+   ;(reset! *state states)
 
-   ; algorithm
+   ; done?
+   (log/debug :simulate-find-min :turn (-> state :turn))
+   (if (or
+         (e/all-rooms-finished? state)
+         (and maxturns
+           (> (-> state :turn) maxturns)))
+     (> (-> state :turn) 5)
+     states)
+   ; else: algorithm
    ;   - do one run, to get all the painter choices
    ;   - then iterate to find the minimum
    (let [setup-run                (simulate-turn state opts)
@@ -606,14 +614,19 @@
 
      (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
      (let [runs (for [rp (->> room-permutations (take 1))]
-                  (simulate-until-done state states
+                  (simulate-find-min state states
                     (merge opts {:schedule {:rooms-needing-painting rp}
-                                 :update-state-atom? false})))]
+                                 :update-state-atom? false})))
+           min-run (->> runs
+                     (sort-by #(fn [r]
+                                 (count r)))
+                     first)]
+
        (def runs runs)
        (doseq [r runs]
-         (log/warn :simulate-find-min :turns (count r))))
-     ;all-choices
-     (conj states setup-run))
+         (log/warn :simulate-find-min :turns (count r)))
+       ;all-choices
+       (recur min-run (conj states min-run) opts)))
    #_(let [newstate (simulate-turn state opts)]
        ; if done return, else recurse
        (log/debug :simulate-find-min :turn (-> newstate :turn))
