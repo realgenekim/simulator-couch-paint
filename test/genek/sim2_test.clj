@@ -5,6 +5,7 @@
     [genek.entities :as e]
     [genek.sim2 :as sim]
     [genek.utils :as utils]
+    [clojure.math.combinatorics :as combo]
     [taoensso.timbre :as log]))
 
 (deftest a-test
@@ -1384,10 +1385,18 @@
 
 
 (comment
+
+  (-> newstates last :metadata :painter-schedule-choices)
+  (combo/permutations [1 2 3])
+  (combo/permutations [1 2 3 4 5])
+  (count (combo/permutations [1 2 3 4 5 6 7]))
+  (combo/permutations (-> newstates last :metadata :painter-schedule-choices :needs-painters))
+  (count (combo/permutations (-> newstates last :metadata :painter-schedule-choices :needs-painters)))
+
+
   ; TODO
   ; what does :strict true and false really do?
   ;
   ; false lets us park painters at the bottom of building: otherwise, they'd just be unassigned
   ;
-  (-> newstate last :metadata :painter-schedule-choices)
   0)

@@ -144,7 +144,7 @@
 
 (s/def ::assignments ::s-moving-assignment)
 (s/def ::all-choices
-  (s/keys :opt-un [::needs-painters ::painters]))
+  (s/keys :opt-un [::rooms-need-painters ::painters]))
 
 (s/def ::s-moving-assignments-and-choices
   (s/keys :opt-un [::choice ::all-choices]))
@@ -268,7 +268,7 @@
        - find all available painters        /
     input: state
     output:
-             {:needs-painters
+             {:rooms-need-painters
               :painters} "
   ([state opts]
    ;[::e/s-state map? => ::s-moving-assignments-and-choices]
@@ -277,8 +277,9 @@
          painters           (e/available-painters state)
          _                  (log/warn :painter-potential-assignments :needs-movers (vec needs-painters))
          _                  (log/warn :painter-potential-assignments :painters (vec painters))]
-     {:needs-painters (vec needs-painters)
-      :painters       (vec painters)}))
+
+     {:rooms-need-painters (vec needs-painters)
+      :painters             (vec painters)}))
   ([state] [::e/s-state => map?]
    (painter-potential-assignments state {})))
 
@@ -294,7 +295,7 @@
   ([state {:keys [painter-schedule strict] :as opts}]
    [::e/s-state map? => ::s-moving-assignments-and-choices]
    ;[::e/s-state map? => ::s-moving-assignments]
-   (let [{:keys [needs-painters painters]
+   (let [{:keys [rooms-need-painters painters]
           :as   all-choices} (painter-potential-assignments state opts)
          _                  (log/warn :create-painter-assignments :opt-painter-schedule painter-schedule)
          room+painters      (case (or painter-schedule :fifo)
@@ -302,9 +303,9 @@
                               ;   a search would rotate/cycle (if all equal)
                               ;   or would find all combinations
                               ;       https://stackoverflow.com/questions/26076077/clojure-list-all-permutations-of-a-list
-                              :fifo (map vector needs-painters painters)
-                              :lifo (map vector (reverse needs-painters) painters)
-                              :random (map vector (shuffle needs-painters) painters))
+                              :fifo (map vector rooms-need-painters painters)
+                              :lifo (map vector (reverse rooms-need-painters) painters)
+                              :random (map vector (shuffle rooms-need-painters) painters))
          ; this creates [{:room newroom :mover newmover}...]
          _                  (log/debug :create-painter-assignments :rooms+painters room+painters)
          new-rooms+painters (->> room+painters
