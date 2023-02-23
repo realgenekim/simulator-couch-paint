@@ -453,7 +453,7 @@
   ;(log/warn :get-frame :n n :type (type frames))
   (let [maxn (count frames)
         n    (if (= n :last-frame)
-               (count frames)
+               (dec (count frames))
                n)]
     (log/warn :get-frame :n n :maxn maxn)
     (if (> n maxn)

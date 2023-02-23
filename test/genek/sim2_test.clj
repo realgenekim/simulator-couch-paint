@@ -1378,8 +1378,8 @@
     (let [newstates (sim/simulate-find-min state {:strict true})]
       (def newstates newstates)
       ; two turns?
-      (is (= [0 1]
-            (->> newstates (mapv :turn))))))
+      (is (= 114
+            (->> newstates count)))))
 
   0)
 

@@ -539,9 +539,9 @@
      (if (or
            (e/all-rooms-finished? state)
            (and maxturns
-             (> (-> newstate :turn) maxturns))
+             (> (-> newstate :turn) maxturns)))
            ; to limit run
-           (> (-> newstate :turn) 2000))
+           ;(> (-> newstate :turn) 2000))
        states
 
        ; else
