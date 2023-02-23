@@ -37,7 +37,9 @@
     (do
       (sim/init-state!)
       (log/warn :init-state! :sim sim :opts opts)
-      (sim/simulate-until-done (-> @sim/*state last)
+      #_(sim/simulate-until-done (-> @sim/*state last)
+          (merge {:maxturns 500} sim))
+      (sim/simulate-find-min (-> @sim/*state last)
         (merge {:maxturns 500} sim))
 
       (swap! *app-state

@@ -62,8 +62,8 @@
     [[#{"taoensso.*"} :info]
      ["org.mongodb.driver.*" :error]
      ["com.example.*" :info]
-     ["*" :info]]}})
-     ;["*" :error]]}})
+     ;["*" :info]]}})
+     ["*" :error]]}})
 
 (defmacro p
   "Convert a data structure to a visually-delimited pretty-printed string block."

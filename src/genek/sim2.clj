@@ -33,15 +33,27 @@
 (def default-start-state
   (create-state (e/create-rooms 15) (e/create-movers 2) (e/create-painters 3)))
 
+(defn create-state-cfg!
+  [{:keys [rooms movers painters]
+    :or {rooms 15 movers 2 painters 3}}]
+  (log/error :create-state-cfg! :rooms rooms :movers movers :painters painters)
+  (let [state (create-state
+                (e/create-rooms rooms)
+                (e/create-movers movers)
+                (e/create-painters painters))]
+
+    (reset! *state [state])))
+
 (defn init-state!
   []
   (reset! *state [default-start-state]))
 
 
-
 (comment
   @*state
+  (create-state-cfg! {:rooms 5})
   (reset! *state [default-start-state])
+
   (init-state!)
   0)
 
@@ -583,6 +595,8 @@
   ;([state] [::e/s-state => ::e/s-states]
   ; (simulate-until-done state {})))
 
+(def *leaf-counter (atom 0))
+
 (>defn simulate-find-min
   " this is responsible for running the sim
     input: initial state
@@ -594,20 +608,23 @@
    (log/warn :simulate-find-min :opts opts)
    (reset! *state states)
 
-   (log/error :simulate-find-min "****************************")
-   (log/error :simulate-find-min :turn (-> state :turn))
+   (log/info :simulate-find-min "****************************")
+   (log/info :simulate-find-min :turn (-> state :turn))
    ; done?
    (if (or
-         (> (-> state :turn) 200)
+         ;(> (-> state :turn) 200)
          (e/all-rooms-finished? state)
          (and maxturns
            (> (-> state :turn) maxturns)))
-     states
+     (do
+       (log/warn :simulate-find-min :final-turn-count (-> state :turn))
+       (swap! *leaf-counter inc)
+       states)
      ; else: algorithm
      ;   - do one run, to get all the painter choices
      ;   - then iterate to find the minimum
      (let [setup-run                (simulate-turn state opts)
-           _                        (log/warn :simulate-find-min :state setup-run)
+           _                        (log/info :simulate-find-min :state setup-run)
            painter-schedule-choices (-> setup-run :metadata :painter-schedule-choices)
            _ (log/warn :simulate-find-min :painter-schedule-choices painter-schedule-choices)
            {:keys [rooms-need-painters painters]} painter-schedule-choices
@@ -616,23 +633,24 @@
 
        (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
        ; call next-turn here on all permutations, and then pick the one with the least cost
-       (let [runs    (for [rp (->> room-permutations (take 3))]
-                       (let [_         (log/error :simulate-find-min "### FOR BEGINS")
+       (let [runs    (for [rp (->> room-permutations)]
+                                ;(take 3))]
+                       (let [_         (log/info :simulate-find-min "### FOR BEGINS")
                              next-turn (simulate-turn state
                                          (merge opts {:schedule           {:rooms-needing-painting rp}
                                                       :update-state-atom? false}))]
                          (simulate-find-min next-turn (conj states next-turn) opts)))
              _       (def runs runs)
-             _       (log/error :simulate-find-min :turn (-> state :turn) :type1 (type runs))
-             _       (log/error :simulate-find-min :turn (-> state :turn) :type2 (type (first runs)))
+             _       (log/info :simulate-find-min :turn (-> state :turn) :type1 (type runs))
+             _       (log/info :simulate-find-min :turn (-> state :turn) :type2 (type (first runs)))
              min-run (->> runs
                        (sort-by (fn [r]
                                   (count r)))
                        first)]
 
-         (log/warn :simulate-find-min "******** SCORES " (count runs))
-         (doseq [r runs]
-           (log/error :simulate-find-min :print-out-each-score (count r)))
+         ;(log/info :simulate-find-min "******** SCORES " (count runs))
+         ;(doseq [r runs]
+         ;  (log/info :simulate-find-min :print-out-each-score (count r))
          ;all-choices
          ;(recur min-run (conj states min-run) opts)
          min-run)))
@@ -657,8 +675,18 @@
 
 
 (comment
+  (reset! *leaf-counter 0)
+  (create-state-cfg! {:rooms 8 :movers 2})
+  (time (do
+          (let [retval (simulate-find-min (-> @*state last))]
+            (-> retval last :turn))))
+
+  ; rooms
+  ; 5 - .1s
+  ; 6 - 440 turns - .1s
+  ; 7
   (-> runs count)
-  (-> runs count)
+  (-> @*state count)
   (for [r runs]
     (count r))
 
