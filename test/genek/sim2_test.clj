@@ -1362,7 +1362,7 @@
                             :role                    :room,
                             :state                   :waiting-for-painters,
                             :moving1-time-remaining  0,
-                            :painting-time-remaining 50,
+                            :painting-time-remaining 55,
                             :moving2-time-remaining  10}
                            {:id                      2,
                             :role                    :room,

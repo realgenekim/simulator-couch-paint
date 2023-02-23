@@ -616,16 +616,17 @@
 
        (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
        ; call next-turn here on all permutations, and then pick the one with the least cost
-       (let [runs (for [rp (->> room-permutations (take 1))]
-                    (simulate-turn state
-                      (merge opts {:schedule {:rooms-needing-painting rp}
-                                   :update-state-atom? false})))
+       (let [runs    (for [rp (->> room-permutations (take 3))]
+                       (simulate-turn state
+                         (merge opts {:schedule           {:rooms-needing-painting rp}
+                                      :update-state-atom? false})))
+             _       (def runs runs)
              min-run (->> runs
                        (sort-by #(fn [r]
                                    (count r)))
                        first)]
 
-         (def runs runs)
+         (log/warn :simulate-find-min "******** SCORES " (count runs))
          (doseq [r runs]
            (log/warn :simulate-find-min :print-out-each-score (count r)))
          ;all-choices
