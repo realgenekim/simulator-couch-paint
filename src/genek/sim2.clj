@@ -41,6 +41,7 @@
 
 (comment
   @*state
+  (reset! *state [default-start-state])
   (init-state!)
   0)
 
@@ -591,42 +592,44 @@
                   :as opts}] [::e/s-state ::e/s-states map? => ::e/s-states]
    ; save to global var so we can watch
    (log/warn :simulate-find-min :opts opts)
-   ;(reset! *state states)
+   (reset! *state states)
 
+   (log/error :simulate-find-min "****************************")
+   (log/error :simulate-find-min :turn (-> state :turn))
    ; done?
-   (log/debug :simulate-find-min :turn (-> state :turn))
    (if (or
+         (> (-> state :turn) 200)
          (e/all-rooms-finished? state)
          (and maxturns
            (> (-> state :turn) maxturns)))
-     (> (-> state :turn) 5)
-     states)
-   ; else: algorithm
-   ;   - do one run, to get all the painter choices
-   ;   - then iterate to find the minimum
-   (let [setup-run                (simulate-turn state opts)
-         _                        (log/warn :simulate-find-min :state setup-run)
-         painter-schedule-choices (-> setup-run :metadata :painter-schedule-choices)
-         _ (log/warn :simulate-find-min :painter-schedule-choices painter-schedule-choices)
-         {:keys [rooms-need-painters painters]} painter-schedule-choices
-         room-permutations        (combo/permutations
-                                    (-> setup-run :metadata :painter-schedule-choices :rooms-need-painters))]
+     states
+     ; else: algorithm
+     ;   - do one run, to get all the painter choices
+     ;   - then iterate to find the minimum
+     (let [setup-run                (simulate-turn state opts)
+           _                        (log/warn :simulate-find-min :state setup-run)
+           painter-schedule-choices (-> setup-run :metadata :painter-schedule-choices)
+           _ (log/warn :simulate-find-min :painter-schedule-choices painter-schedule-choices)
+           {:keys [rooms-need-painters painters]} painter-schedule-choices
+           room-permutations        (combo/permutations
+                                      (-> setup-run :metadata :painter-schedule-choices :rooms-need-painters))]
 
-     (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
-     (let [runs (for [rp (->> room-permutations (take 1))]
-                  (simulate-find-min state states
-                    (merge opts {:schedule {:rooms-needing-painting rp}
-                                 :update-state-atom? false})))
-           min-run (->> runs
-                     (sort-by #(fn [r]
-                                 (count r)))
-                     first)]
+       (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
+       ; call next-turn here on all permutations, and then pick the one with the least cost
+       (let [runs (for [rp (->> room-permutations (take 1))]
+                    (simulate-turn state
+                      (merge opts {:schedule {:rooms-needing-painting rp}
+                                   :update-state-atom? false})))
+             min-run (->> runs
+                       (sort-by #(fn [r]
+                                   (count r)))
+                       first)]
 
-       (def runs runs)
-       (doseq [r runs]
-         (log/warn :simulate-find-min :turns (count r)))
-       ;all-choices
-       (recur min-run (conj states min-run) opts)))
+         (def runs runs)
+         (doseq [r runs]
+           (log/warn :simulate-find-min :print-out-each-score (count r)))
+         ;all-choices
+         (recur min-run (conj states min-run) opts))))
    #_(let [newstate (simulate-turn state opts)]
        ; if done return, else recurse
        (log/debug :simulate-find-min :turn (-> newstate :turn))
@@ -654,11 +657,23 @@
     (count r))
 
 
+  (tap> runs)
   (-> runs first count)
   (-> *state deref count)
+  (tap> (-> *state deref))
   (do
     (reset! *state (first runs))
     nil)
+
+  (init-state!)
+  (reset! *state [default-start-state])
+
+  (->> @*state
+    (take 50)
+    (map e/all-rooms-finished?))
+
+  (-> @*state (nth 68)
+    (e/all-rooms-finished?))
 
 
   (let [state {:turn     0,
@@ -666,19 +681,19 @@
                            :role                    :room,
                            :state                   :waiting-for-painters,
                            :moving1-time-remaining  0,
-                           :painting-time-remaining 50,
+                           :painting-time-remaining 10,
                            :moving2-time-remaining  10}
                           {:id                      1,
                            :role                    :room,
                            :state                   :waiting-for-painters,
                            :moving1-time-remaining  0,
-                           :painting-time-remaining 50,
+                           :painting-time-remaining 10,
                            :moving2-time-remaining  10}
                           {:id                      2,
                            :role                    :room,
                            :state                   :waiting-for-painters,
-                           :moving1-time-remaining  0,
-                           :painting-time-remaining 50,
+                           :moving1-time-remaining 0,
+                           :painting-time-remaining 10,
                            :moving2-time-remaining  10}]
                :movers   [{:id 0, :role :mover, :at-room nil}],
                :painters [{:id 0, :role :painter, :at-room nil}
@@ -691,6 +706,8 @@
       ;(is (= [0 1]
       ;      (->> newstates (mapv :turn))))))
 
+
+  (init-state!)
   (do
     (reset! *state runs)
     nil)

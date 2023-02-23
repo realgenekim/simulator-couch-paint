@@ -1383,6 +1383,38 @@
 
   0)
 
+(deftest finished-not-working
+  (let [state {:turn 68,
+               :rooms [{:id 0,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0,
+                        :furniture-stored -10}
+                       {:id 1,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0,
+                        :furniture-stored -10}
+                       {:id 2,
+                        :role :room,
+                        :state :finished,
+                        :moving1-time-remaining 0,
+                        :painting-time-remaining 0,
+                        :moving2-time-remaining 0,
+                        :furniture-stored -10}],
+               :movers [{:id 0, :role :mover, :at-room nil}],
+               :painters [{:id 0, :role :painter, :at-room nil} {:id 1, :role :painter, :at-room nil}],
+               :furniture-stored 0,
+               :metadata {:painter-schedule-choices {:rooms-need-painters [],
+                                                     :painters [{:id 0, :role :painter, :at-room nil}
+                                                                {:id 1, :role :painter, :at-room nil}]}},
+               :furniture {:in-storage -30, :max-in-storage 0}}]
+    (is (true? (e/all-rooms-finished? state)))))
+
 
 (comment
 

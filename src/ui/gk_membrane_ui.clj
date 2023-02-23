@@ -1,4 +1,4 @@
-(ns ui.membrane-ui
+(ns ui.gk-membrane-ui
   (:require
     [genek.entities :as e]
     [genek.sim2 :as sim]
@@ -60,6 +60,7 @@
 (comment
   (init-state! {})
   (init-state! {:load-sim-state! true})
+  (tap> @*app-state)
   0)
 
 (defn next-frame!
@@ -331,21 +332,24 @@
 
           (ui/horizontal-layout
             (para/paragraph
-              {:text (str "🛋 work remaining: "
-                       (time-remaining-bar (-> r :moving1-time-remaining)))
+              {:text  (str "🛋 work remaining: "
+                        (-> r :moving1-time-remaining)
+                        (time-remaining-bar (-> r :moving1-time-remaining)))
                :style #:text-style {:font-size 13}}))
 
           (ui/horizontal-layout
             (para/paragraph
-              {:text (str "🖌 work remaining: "
-                       (time-remaining-bar (-> r :painting-time-remaining)))
-               :style #:text-style {:font-size 13
+              {:text  (str "🖌 work remaining: "
+                        (-> r :painting-time-remaining)
+                        (time-remaining-bar (-> r :painting-time-remaining)))
+               :style #:text-style {:font-size       13
                                     :height-override true
-                                    :height 0.90}}))
+                                    :height          0.90}}))
 
           (ui/horizontal-layout
             (para/paragraph
               {:text (str "🛋 work remaining: "
+                       (-> r :moving2-time-remaining)
                        (time-remaining-bar (-> r :moving2-time-remaining)))
                :style #:text-style {:font-size 13
                                     :height-override true
@@ -446,13 +450,13 @@
 (defn get-nth-state
   " get frame, and prevent overflow "
   [n frames]
-  ;(log/warn :get-frame :n n :maxn maxn)
   ;(log/warn :get-frame :n n :type (type frames))
   (let [maxn (count frames)
         n    (if (= n :last-frame)
                (count frames)
                n)]
-    (if (>= n maxn)
+    (log/warn :get-frame :n n :maxn maxn)
+    (if (> n maxn)
       (last frames)
       (nth frames n))))
 

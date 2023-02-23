@@ -2,16 +2,16 @@
   (:require
     [membrane.skia :as skia]
     [membrane.component :refer [defui defeffect make-app]]
-    [ui.membrane-ui :as m]))
+    [ui.gk-membrane-ui :as gm]))
 
 
 (comment
   ; this allows getting away from global state, which we used for dev-view
   ;(def dev-app2 (make-app #'my-slider *app-state))
   ; Adrian: run these forms
-  (m/init-state! {})
-  (m/init-state! {:load-sim-state! true})
-  (def dev-app2 (make-app #'m/render-view m/*app-state))
+  (gm/init-state! {})
+  (gm/init-state! {:load-sim-state! true})
+  (def dev-app2 (make-app #'gm/render-view gm/*app-state))
   (def w2 (skia/run dev-app2))
   0)
 
