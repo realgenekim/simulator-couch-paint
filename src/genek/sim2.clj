@@ -617,20 +617,25 @@
        (log/warn :simulate-find-min :count (count room-permutations) :permutations (vec room-permutations))
        ; call next-turn here on all permutations, and then pick the one with the least cost
        (let [runs    (for [rp (->> room-permutations (take 3))]
-                       (simulate-turn state
-                         (merge opts {:schedule           {:rooms-needing-painting rp}
-                                      :update-state-atom? false})))
+                       (let [_         (log/error :simulate-find-min "### FOR BEGINS")
+                             next-turn (simulate-turn state
+                                         (merge opts {:schedule           {:rooms-needing-painting rp}
+                                                      :update-state-atom? false}))]
+                         (simulate-find-min next-turn (conj states next-turn) opts)))
              _       (def runs runs)
+             _       (log/error :simulate-find-min :turn (-> state :turn) :type1 (type runs))
+             _       (log/error :simulate-find-min :turn (-> state :turn) :type2 (type (first runs)))
              min-run (->> runs
-                       (sort-by #(fn [r]
-                                   (count r)))
+                       (sort-by (fn [r]
+                                  (count r)))
                        first)]
 
          (log/warn :simulate-find-min "******** SCORES " (count runs))
          (doseq [r runs]
-           (log/warn :simulate-find-min :print-out-each-score (count r)))
+           (log/error :simulate-find-min :print-out-each-score (count r)))
          ;all-choices
-         (recur min-run (conj states min-run) opts))))
+         ;(recur min-run (conj states min-run) opts)
+         min-run)))
    #_(let [newstate (simulate-turn state opts)]
        ; if done return, else recurse
        (log/debug :simulate-find-min :turn (-> newstate :turn))
