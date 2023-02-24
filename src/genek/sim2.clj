@@ -693,7 +693,8 @@
   ; 6 - 185 sec
   ; "Elapsed time: 184990.898084 msecs"
   ;=> {:last-turn 179, :count 180, :leaf-count 720}
-  ; 7
+  ;  about 30 minutes
+  ; {:last-turn 205, :count 206, :leaf-count 5040}
   (tap> retval)
   (-> runs count)
   (-> @*state count)

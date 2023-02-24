@@ -2,6 +2,7 @@
   (:require
     [clojure.java.jmx :as jmx]
     [genek.sim2 :as sim]
+    [taoensso.timbre :as log]
     [membrane.ui :as ui]))
 
 ; UsedMemory
@@ -32,6 +33,7 @@
 
 (defn collect-stats!
   []
+  (log/error :collect-stats! :running)
   (let [g1old (jmx/mbean "java.lang:name=G1 Old Gen,type=MemoryPool")]
     (reset! *stats {:g1old g1old})))
 
@@ -74,6 +76,14 @@
   (collect-stats!)
 
   (def f (future
-           (repeatedly 5
-             #(do (println "hello")))))
+           (doall
+             (repeatedly
+             ;(repeatedly 5
+              #(do
+                 (collect-stats!)
+                 (Thread/sleep 1000)
+                 0)))))
+
+  (for [n (range 5)]
+    (apply str (repeat (* 100000 n) "*")))
   0)
