@@ -9,6 +9,7 @@
     [membrane.skia.paragraph :as para]
     [taoensso.timbre :as log]
     [ui.gk-membrane-helpers :as mh]
+    [ui.monitoring :as mon]
     [ui.menu :as menu]))
 
 
@@ -507,70 +508,12 @@
                             :max (dec (count sim-state))
                             :integer? true}))))
 
-(defn show-leaf-counter
-  []
-  (let [counter (-> @sim/*leaf-counter)]
-    (ui/label (str "Leaf counter: " counter))))
-
-(comment
-  (swap! sim/*leaf-counter inc)
-  (reset! sim/*leaf-counter 0))
-
-#_(defui outer-pane2
-    [{:keys [view]}]
-    (ui/vertical-layout
-      (ui/spacer 20 20)
-      [
-       (ui/translate
-          0 (+ menu/menu-height 20)
-          (ui/horizontal-layout
-           ;; [(ui/spacer 100)
-           ;; (ui/label "hello2")
-           (ui/spacer 20)
-           view))
-
-       ;; put menus last so they are drawn
-       ;; on top of everything else.
-       (ui/translate
-          20 0
-          (menu/menus
-           {:$menus [::top-menu]
-            :menus
-            [{:text "Init"
-              :items [{:text     "Load sim state"
-                       :on-click #(do
-                                    (log/warn :outer-pane :click)
-                                    (init-state! {:load-sim-state! true}))}
-                      {:text     "Initialize (Painters FIFO)"
-                       :on-click #(do
-                                    (log/warn :outer-pane :click)
-                                    (init-state! {:sim {:painter-schedule :fifo}}))}
-                      {:text     "Initialize (Painters LIFO)"
-                       :on-click #(do
-                                    (log/warn :outer-pane :click)
-                                    (init-state! {:sim {:painter-schedule :lifo}}))}
-                      {:text     "Initialize (Painters random)"
-                       :on-click #(do
-                                    (log/warn :outer-pane :click)
-                                    (init-state! {:sim {:painter-schedule :random}}))}]}
-             {:text "Second menu"
-              :items [{:text "View All"
-                       :on-click
-                       (fn []
-                         (prn "viewall")
-                         nil)}
-                      {:text "new"
-                       :on-click
-                       (fn []
-                         (prn "new")
-                         nil)}]}]}))]))
-
 
 (defn button-cmd-bar
   []
   (ui/horizontal-layout
     (ui/spacer 20 20)
-    (show-leaf-counter)
+    ;(show-leaf-counter)
     (ui/spacer 20 20)
     (basic/button {:text     "Load sim state"
                    :on-click #(do
@@ -721,7 +664,7 @@
   (let [states @*sim-state]
     ;(selector (-> @*app-state :frame) (count states))
     ;(render-view @*sim-state *app-state)
-    (show-leaf-counter)))
+    (mon/show-leaf-counter)))
 
 (comment
   ; to show leaf-counter
