@@ -686,7 +686,9 @@
   ; 5 - 26 sec
   ; "Elapsed time: 26015.585458 msecs"
   ;=> {:last-turn 154, :count 155, :leaf-count 120}
-  ; 6 - 440 turns - .1s
+  ; 6 - 185 sec
+  ; "Elapsed time: 184990.898084 msecs"
+  ;=> {:last-turn 179, :count 180, :leaf-count 720}
   ; 7
   (-> runs count)
   (-> @*state count)
