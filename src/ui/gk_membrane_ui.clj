@@ -8,7 +8,8 @@
     [membrane.skia :as skia]
     [membrane.skia.paragraph :as para]
     [taoensso.timbre :as log]
-    [ui.gk-membrane-helpers :as mh]))
+    [ui.gk-membrane-helpers :as mh]
+    [ui.menu :as menu]))
 
 
 ; someday
@@ -593,13 +594,55 @@
   [{:keys [view]}]
   (ui/vertical-layout
     (ui/spacer 20 20)
-    (button-cmd-bar)
+    [
+      (ui/vertical-layout
+        (ui/spacer 20 20)
+        (button-cmd-bar)
 
-    (ui/horizontal-layout
-      ;[(ui/spacer 100)
-      ; (ui/label "hello2")
-      (ui/spacer 20)
-      view)))
+        (ui/horizontal-layout
+          ;[(ui/spacer 100)
+          ; (ui/label "hello2")
+          (ui/spacer 20)
+          view))
+
+
+      ;; put menus last so they are drawn
+      ;; on top of everything else.
+      (ui/translate
+         20 0
+         (menu/menus
+          {:$menus [::top-menu]
+           :menus
+           [{:text "Init"
+             :items [{:text     "Load sim state"
+                      :on-click #(do
+                                   (log/warn :outer-pane :click)
+                                   (init-state! {:load-sim-state! true}))}
+                     {:text     "Initialize (Painters FIFO)"
+                      :on-click #(do
+                                   (log/warn :outer-pane :click)
+                                   (init-state! {:sim {:painter-schedule :fifo}}))}
+                     {:text     "Initialize (Painters LIFO)"
+                      :on-click #(do
+                                   (log/warn :outer-pane :click)
+                                   (init-state! {:sim {:painter-schedule :lifo}}))}
+                     {:text     "Initialize (Painters random)"
+                      :on-click #(do
+                                   (log/warn :outer-pane :click)
+                                   (init-state! {:sim {:painter-schedule :random}}))}]}
+            {:text "Second menu"
+             :items [{:text "View All"
+                      :on-click
+                      (fn []
+                        (prn "viewall")
+                        nil)}
+                     {:text "new"
+                      :on-click
+                      (fn []
+                        (prn "new")
+                        nil)}]}]}))]))
+
+
 
 (comment
   (def w3 (skia/run (make-app #'outer-pane {})))
