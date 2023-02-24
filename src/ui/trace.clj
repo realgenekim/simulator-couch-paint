@@ -112,14 +112,15 @@
    [(when hover-state
       (let [[room-num room-state] hover-state]
         (ui/label (str room-num ": " room-state))))
-    (ui/translate 0 20 (trace states))]
+    (ui/translate 0 20 (trace states))]))
    
-   ))
+
 
 
 (comment
   (skia/save-image "trace.jpeg" (trace @*sim-state))
 
+  ; to run
   (skia/run (make-app #'trace-explore {:states @*sim-state}))
 
   ,)

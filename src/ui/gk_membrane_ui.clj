@@ -64,6 +64,7 @@
   (init-state! {})
   (init-state! {:load-sim-state! true})
   (tap> @*app-state)
+  (-> @*app-state :sim-state count)
   0)
 
 (defn next-frame!
@@ -458,7 +459,7 @@
         n    (if (= n :last-frame)
                (dec (count frames))
                n)]
-    (log/warn :get-frame :n n :maxn maxn)
+    (log/error :get-frame :n n :maxn maxn)
     (if (> n maxn)
       (last frames)
       (nth frames n))))
@@ -509,7 +510,7 @@
 (defn show-leaf-counter
   []
   (let [counter (-> @sim/*leaf-counter)]
-    (ui/label (str counter))))
+    (ui/label (str "Leaf counter: " counter))))
 
 (comment
   (swap! sim/*leaf-counter inc)
@@ -596,7 +597,7 @@
     (ui/spacer 20 20)
     [
       (ui/vertical-layout
-        (ui/spacer 20 20)
+        (ui/spacer 20 40)
         (button-cmd-bar)
 
         (ui/horizontal-layout
@@ -711,35 +712,6 @@
   (def w2 (skia/run dev-app2))
   0)
 
-(comment
-  (swap! *app-state
-    assoc
-    :frame 0
-    :sim-state @*sim-state)
-
-  (swap! *app-state
-    update
-    :sim-state
-    #(subvec % 0 50))
-
-  (first
-    (for [x (range 1000)
-          y (range 1000)
-          :let [intents (seq (ui/mouse-down (dev-view)
-                                [x y]))]
-          :when intents]
-      intents))
-
-  (ui/mouse-down (basic/number-slider {:num 0
-                                       :min 0
-                                       :max 100
-                                       :integer? true})
-    [10 10])
-
-
-
-  0)
-
 
 
 (defn dev-view
@@ -752,6 +724,7 @@
     (show-leaf-counter)))
 
 (comment
+  ; to show leaf-counter
   (skia/run #'dev-view)
   ; adrian, wanna leave meeting and come back in?
   0)

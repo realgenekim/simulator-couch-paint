@@ -665,17 +665,18 @@
 (comment
   (reset! *leaf-counter 0)
   (create-state-cfg! {:rooms 4 :movers 2})
-  (time (do
-          ;(create-state-cfg! {:rooms 5 :movers 2})
-          (create-state-cfg! {:rooms 5 :movers 2})
-          ; don't reset leaf count, because if it's memoized, it won't get increment?
-          (reset! *leaf-counter 0)
-          (let [retval (simulate-find-min-memoized (-> @*state last))]
-            (def retval retval)
-            (reset! *state retval)
-            {:last-turn (-> retval last :turn)
-             :count (-> retval count)
-             :leaf-count @*leaf-counter})))
+  (time (def f (future
+                 (do
+                   ;(create-state-cfg! {:rooms 5 :movers 2})
+                   (create-state-cfg! {:rooms 7 :movers 2})
+                   ; don't reset leaf count, because if it's memoized, it won't get increment?
+                   (reset! *leaf-counter 0)
+                   (let [retval (simulate-find-min-memoized (-> @*state last))]
+                     (def retval retval)
+                     (reset! *state retval)
+                     {:last-turn  (-> retval last :turn)
+                      :count      (-> retval count)
+                      :leaf-count @*leaf-counter})))))
 
   ; rooms
   ; 3: 0.4 ms
