@@ -676,13 +676,18 @@
 
 (comment
   (reset! *leaf-counter 0)
-  (create-state-cfg! {:rooms 8 :movers 2})
+  (create-state-cfg! {:rooms 4 :movers 2})
   (time (do
+          (create-state-cfg! {:rooms 5 :movers 2})
+          (reset! *leaf-counter 0)
           (let [retval (simulate-find-min (-> @*state last))]
-            (-> retval last :turn))))
+            {:last-turn (-> retval last :turn)
+             :count (-> retval count)})))
 
   ; rooms
-  ; 5 - .1s
+  ; 4: "Elapsed time: 4208.9045 msecs"
+  ;=> {:last-turn 153, :count 154}
+  ; 5 - still not done after 6 hours
   ; 6 - 440 turns - .1s
   ; 7
   (-> runs count)
@@ -698,6 +703,8 @@
   (do
     (reset! *state (first runs))
     nil)
+
+  (time (swap! *leaf-counter inc))
 
   (init-state!)
   (reset! *state [default-start-state])
@@ -745,6 +752,9 @@
   (do
     (reset! *state runs)
     nil)
+  ; 38ns to swap! atom, according to Adrian
+  ;
+
   (count newstates)
 
   0)

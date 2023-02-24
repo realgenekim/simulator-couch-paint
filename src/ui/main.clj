@@ -2,6 +2,7 @@
   (:require
     [membrane.skia :as skia]
     [membrane.component :refer [defui defeffect make-app]]
+    [membrane.ui :as ui]
     [ui.gk-membrane-ui :as gm]))
 
 
@@ -13,6 +14,7 @@
   (gm/init-state! {:load-sim-state! true})
   (def dev-app2 (make-app #'gm/render-view gm/*app-state))
   (def w2 (skia/run dev-app2))
+
   0)
 
 (comment
@@ -35,9 +37,9 @@
           :when intents]
       intents))
 
-  (ui/mouse-down (basic/number-slider {:num 0
-                                       :min 0
-                                       :max 100
+  (ui/mouse-down (basic/number-slider {:num      0
+                                       :min      0
+                                       :max      100
                                        :integer? true})
     [10 10])
 

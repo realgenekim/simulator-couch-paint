@@ -37,10 +37,10 @@
     (do
       (sim/init-state!)
       (log/warn :init-state! :sim sim :opts opts)
-      #_(sim/simulate-until-done (-> @sim/*state last)
-          (merge {:maxturns 500} sim))
-      (sim/simulate-find-min (-> @sim/*state last)
+      (sim/simulate-until-done (-> @sim/*state last)
         (merge {:maxturns 500} sim))
+      #_(sim/simulate-find-min (-> @sim/*state last)
+          (merge {:maxturns 500} sim))
 
       (swap! *app-state
         assoc
@@ -633,13 +633,24 @@
 
   0)
 
+(defn show-leaf-counter
+  []
+  (let [counter (-> @sim/*leaf-counter)]
+    (ui/label (str counter))))
+
 (defn dev-view
   " helper: put anything you're working in here in dev
     (for prod app, it'll just be another view, composing all your components "
   []
   (let [states @*sim-state]
     ;(selector (-> @*app-state :frame) (count states))
-    (render-view @*sim-state *app-state)))
+    ;(render-view @*sim-state *app-state)
+    (show-leaf-counter)))
+
+(comment
+  (skia/run #'dev-view)
+  ; adrian, wanna leave meeting and come back in?
+  0)
 
 
 
