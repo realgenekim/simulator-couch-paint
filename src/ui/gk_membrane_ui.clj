@@ -505,6 +505,15 @@
                             :max (dec (count sim-state))
                             :integer? true}))))
 
+(defn show-leaf-counter
+  []
+  (let [counter (-> @sim/*leaf-counter)]
+    (ui/label (str counter))))
+
+(comment
+  (swap! sim/*leaf-counter inc)
+  (reset! sim/*leaf-counter 0))
+
 
 (defui outer-pane
   [{:keys [view]}]
@@ -512,6 +521,8 @@
     (ui/spacer 20 20)
     (ui/horizontal-layout
       (ui/horizontal-layout
+        (ui/spacer 20 20)
+        (show-leaf-counter)
         (ui/spacer 20 20)
         (basic/button {:text     "Load sim state"
                        :on-click #(do
@@ -633,10 +644,7 @@
 
   0)
 
-(defn show-leaf-counter
-  []
-  (let [counter (-> @sim/*leaf-counter)]
-    (ui/label (str counter))))
+
 
 (defn dev-view
   " helper: put anything you're working in here in dev

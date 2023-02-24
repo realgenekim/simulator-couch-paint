@@ -597,6 +597,10 @@
 
 (def *leaf-counter (atom 0))
 
+(declare simulate-find-min)
+
+(def simulate-find-min-memoized (memoize simulate-find-min))
+
 (>defn simulate-find-min
   " this is responsible for running the sim
     input: initial state
@@ -639,7 +643,7 @@
                              next-turn (simulate-turn state
                                          (merge opts {:schedule           {:rooms-needing-painting rp}
                                                       :update-state-atom? false}))]
-                         (simulate-find-min next-turn (conj states next-turn) opts)))
+                         (simulate-find-min-memoized next-turn (conj states next-turn) opts)))
              _       (def runs runs)
              _       (log/info :simulate-find-min :turn (-> state :turn) :type1 (type runs))
              _       (log/info :simulate-find-min :turn (-> state :turn) :type2 (type (first runs)))
@@ -647,25 +651,7 @@
                        (sort-by (fn [r]
                                   (count r)))
                        first)]
-
-         ;(log/info :simulate-find-min "******** SCORES " (count runs))
-         ;(doseq [r runs]
-         ;  (log/info :simulate-find-min :print-out-each-score (count r))
-         ;all-choices
-         ;(recur min-run (conj states min-run) opts)
-         min-run)))
-   #_(let [newstate (simulate-turn state opts)]
-       ; if done return, else recurse
-       (log/debug :simulate-find-min :turn (-> newstate :turn))
-       (if (or
-             (e/all-rooms-finished? state)
-             (and maxturns
-               (> (-> state :turn) maxturns)))
-         ;(> (-> state :turn) 200))
-         states
-
-         ; else
-         (recur newstate (conj states newstate) opts))))
+         min-run))))
   ; 2 arity: create new states
   ([state opts] [::e/s-state map? => ::e/s-states]
    (simulate-find-min state [state] opts))
@@ -674,20 +660,32 @@
 
 
 
+
+
 (comment
   (reset! *leaf-counter 0)
   (create-state-cfg! {:rooms 4 :movers 2})
   (time (do
-          (create-state-cfg! {:rooms 5 :movers 2})
+          ;(create-state-cfg! {:rooms 5 :movers 2})
+          (create-state-cfg! {:rooms 6 :movers 2})
           (reset! *leaf-counter 0)
-          (let [retval (simulate-find-min (-> @*state last))]
+          (let [retval (simulate-find-min-memoized (-> @*state last))]
+            (def retval retval)
+            (reset! *state retval)
             {:last-turn (-> retval last :turn)
-             :count (-> retval count)})))
+             :count (-> retval count)
+             :leaf-count @*leaf-counter})))
 
   ; rooms
+  ; 3: 0.4 ms
+  ; "Elapsed time: 0.395791 msecs"
+  ;=> {:last-turn 128, :count 129}
   ; 4: "Elapsed time: 4208.9045 msecs"
   ;=> {:last-turn 153, :count 154}
   ; 5 - still not done after 6 hours
+  ; 5 - 26 sec
+  ; "Elapsed time: 26015.585458 msecs"
+  ;=> {:last-turn 154, :count 155, :leaf-count 120}
   ; 6 - 440 turns - .1s
   ; 7
   (-> runs count)
