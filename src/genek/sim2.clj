@@ -667,7 +667,8 @@
   (create-state-cfg! {:rooms 4 :movers 2})
   (time (do
           ;(create-state-cfg! {:rooms 5 :movers 2})
-          (create-state-cfg! {:rooms 6 :movers 2})
+          (create-state-cfg! {:rooms 5 :movers 2})
+          ; don't reset leaf count, because if it's memoized, it won't get increment?
           (reset! *leaf-counter 0)
           (let [retval (simulate-find-min-memoized (-> @*state last))]
             (def retval retval)
@@ -681,15 +682,18 @@
   ; "Elapsed time: 0.395791 msecs"
   ;=> {:last-turn 128, :count 129}
   ; 4: "Elapsed time: 4208.9045 msecs"
-  ;=> {:last-turn 153, :count 154}
+  ;=> {:last-turn 153, :count 154, :leaf-count 24}
   ; 5 - still not done after 6 hours
   ; 5 - 26 sec
   ; "Elapsed time: 26015.585458 msecs"
   ;=> {:last-turn 154, :count 155, :leaf-count 120}
+  ; ^^^ WRONG: must be more than 154 --- no, it's correct?  how can it take the same # of turns?
+  ;     maybe a great place to show the trace, to actually understand.  later.
   ; 6 - 185 sec
   ; "Elapsed time: 184990.898084 msecs"
   ;=> {:last-turn 179, :count 180, :leaf-count 720}
   ; 7
+  (tap> retval)
   (-> runs count)
   (-> @*state count)
   (for [r runs]
