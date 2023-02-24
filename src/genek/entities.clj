@@ -79,8 +79,8 @@
 (>defn create-rooms
   "input: # of rooms"
   [n] [integer? => sequential?]
-  (for [r (range n)]
-    (create-room r)))
+  (vec (for [r (range n)]
+         (create-room r))))
 
 (>defn create-mover
   [id] [integer? => map?]
