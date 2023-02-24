@@ -33,7 +33,7 @@
 
 (defn collect-stats!
   []
-  (log/error :collect-stats! :running)
+  ;(log/error :collect-stats! :running)
   (let [g1old (jmx/mbean "java.lang:name=G1 Old Gen,type=MemoryPool")]
     (reset! *stats {:g1old g1old})))
 
@@ -83,6 +83,8 @@
                  (collect-stats!)
                  (Thread/sleep 1000)
                  0)))))
+
+  (future-cancel f)
 
   (for [n (range 5)]
     (apply str (repeat (* 100000 n) "*")))
