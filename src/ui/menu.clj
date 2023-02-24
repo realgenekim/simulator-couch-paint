@@ -31,7 +31,9 @@
                         :mouse-down
                         (fn [_]
                             (when on-click
-                                 (on-click)))
+                                 (do
+                                   (on-click)
+                                   nil)))
 
                         [(ui/spacer row-width row-height)
                          (cond
