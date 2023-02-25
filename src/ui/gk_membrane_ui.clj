@@ -462,7 +462,7 @@
                (dec (count frames))
                n)]
     (log/error :get-frame :n n :maxn maxn)
-    (if (> n maxn)
+    (if (>= n maxn)
       (last frames)
       (nth frames n))))
 
