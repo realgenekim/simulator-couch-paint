@@ -10,7 +10,8 @@
     [taoensso.timbre :as log]
     [ui.gk-membrane-helpers :as mh]
     [ui.monitoring :as mon]
-    [ui.menu :as menu]))
+    [ui.menu :as menu]
+    [ui.trace :as tr]))
 
 
 ; someday
@@ -535,13 +536,13 @@
 
 
 (defui outer-pane
-  [{:keys [view]}]
+  [{:keys [view *sim-state]}]
   (ui/vertical-layout
     (ui/spacer 20 20)
     [
       (ui/vertical-layout
         (ui/spacer 20 40)
-        (button-cmd-bar)
+        ;(button-cmd-bar)
 
         (ui/horizontal-layout
           ;[(ui/spacer 100)
@@ -644,7 +645,10 @@
                    (furniture-stats {:frame frame
                                      :sim-state   sim-state})
                    (ui/spacer 20 20)
-                   (rooms state))})))
+                   (rooms state)
+
+                   (ui/spacer 20 20)
+                   (tr/trace-explore {:states sim-state}))})))
 
 (comment
   ; this allows getting away from global state, which we used for dev-view
