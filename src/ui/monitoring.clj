@@ -26,6 +26,7 @@
   (jmx/mbean "java.lang:type=Threading")
   (jmx/mbean "java.lang:type=Compilation")
   (jmx/mbean "java.lang:name=G1 Old Gen,type=MemoryPool")
+  (jmx/mbean "java.lang:type=OperatingSystem")
 
   0)
 
@@ -34,8 +35,10 @@
 (defn collect-stats!
   []
   ;(log/error :collect-stats! :running)
-  (let [g1old (jmx/mbean "java.lang:name=G1 Old Gen,type=MemoryPool")]
-    (reset! *stats {:g1old g1old})))
+  (let [g1old (jmx/mbean "java.lang:name=G1 Old Gen,type=MemoryPool")
+        os    (jmx/mbean "java.lang:type=OperatingSystem")]
+    (reset! *stats {:g1old (-> g1old (select-keys [:PeakUsage :Usage]))
+                    :os    (-> os (select-keys [:CpuLoad :ProcessCpuLoad :SystemLoadAverage]))})))
 
 ; {:g1old {:CollectionUsageThresholdCount 0,
 ;         :UsageThresholdCount 0,
@@ -63,7 +66,7 @@
       (ui/spacer 20)
       (ui/label (str "G1 Old Usage:\n "
                   (with-out-str
-                    (clojure.pprint/pprint (-> @*stats :g1old :Usage))))))))
+                    (clojure.pprint/pprint (-> @*stats))))))))
 
 (comment
   (swap! sim/*leaf-counter inc)
@@ -81,7 +84,7 @@
              ;(repeatedly 5
               #(do
                  (collect-stats!)
-                 (Thread/sleep 1000)
+                 (Thread/sleep 2000)
                  0)))))
 
   (future-cancel f)
