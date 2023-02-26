@@ -2,10 +2,11 @@
   (:require
     [nextjournal.clerk :as clerk]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
-    [applied-science.darkstar :as darkstar]
+    [genek.my-darkstar :as darkstar]
     [clojure.data.json :as json]
     [clojure.java.shell :as shell]
     [genek.sim2 :as sim]))
+
 
 
 (-> @sim/*leaf-counter)

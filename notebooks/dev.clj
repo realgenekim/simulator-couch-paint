@@ -2,7 +2,8 @@
   (:require
     [nextjournal.clerk :as clerk]
     [flow-storm.api :as fs-api]
-    [portal.api :as p]))
+    [portal.api :as p]
+    [clojure.tools.namespace.repl :as repl]))
 ;[flow-storm.api :as fs-api]))
 
 ;; start Clerk's buit-in webserver on the default port 7777, opening the browser when done
@@ -47,3 +48,8 @@
 
   0)
 
+
+
+(comment
+  (repl/refresh-all)
+  0)
