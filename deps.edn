@@ -8,9 +8,14 @@
          org.clojure/math.combinatorics {:mvn/version "0.1.6"}
          com.taoensso/timbre            {:mvn/version "5.0.0"}
          org.clojure/java.jmx           {:mvn/version "1.0.0"}
+
+         ; for vega graphs
          applied-science/darkstar       {:git/url "https://github.com/applied-science/darkstar/"
                                          :sha     "541a3ff36065c59e92fe6aa61e41a4385ba6f893"}
-         org.clojure/data.json               {:mvn/version "2.4.0"}
+         org.clojure/data.json          {:mvn/version "2.4.0"}
+
+         ; svg to png
+         batik-rasterize                {:mvn/version "0.1.2"}
 
 
          io.github.humbleui/humbleui    {:git/sha "c3eb2ec04fcccb40cc4a3da44ccda0ef3ccacc01"}}

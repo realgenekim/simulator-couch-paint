@@ -1,5 +1,6 @@
 (ns s03-vega-graphs
   (:require
+    [batik.rasterize :as b]
     [nextjournal.clerk :as clerk]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
     [genek.my-darkstar :as darkstar]
@@ -142,3 +143,10 @@
           0)))))
 
 (convert-svg-to-png)
+
+; ## to PNG
+
+;(b/parse-svg-string vg-svg)
+;(b/render-svg-string vg-svg nil {:type :png})
+;(b/parse-svg-string vg-svg "furniture.png")
+;(b/render-svg-uri "furniture.svg" "furniture.png")
