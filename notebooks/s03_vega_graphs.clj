@@ -60,6 +60,7 @@
 (defn points
   [states]
   (->> states
+    ;identity
      (map (fn [s]
             {:turn                (-> s :turn)
              :furnture-in-storage (or
