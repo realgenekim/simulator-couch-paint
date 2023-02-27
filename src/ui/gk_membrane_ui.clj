@@ -694,5 +694,6 @@
 
 
 (comment
+  ;(ui/image)
   genek.sim2/*state
   (skia/run (fn [] (ui/label "hi"))))

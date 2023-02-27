@@ -16,6 +16,7 @@
 
          ; svg to png
          batik-rasterize                {:mvn/version "0.1.2"}
+         com.formdev/svgSalamander      {:mvn/version "1.1.4"}
 
 
          io.github.humbleui/humbleui    {:git/sha "c3eb2ec04fcccb40cc4a3da44ccda0ef3ccacc01"}}

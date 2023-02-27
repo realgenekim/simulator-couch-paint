@@ -1,4 +1,4 @@
-(ns s03-vega-graphs
+(ns s04-svgsalamander
   (:require
     [batik.rasterize :as b]
     [nextjournal.clerk :as clerk]
@@ -6,7 +6,16 @@
     [genek.my-darkstar :as darkstar]
     [clojure.data.json :as json]
     [clojure.java.shell :as shell]
-    [genek.sim2 :as sim]))
+    [genek.sim2 :as sim])
+  (:import
+    (com.kitfox.svg SVGUniverse)
+    (java.awt Graphics2D RenderingHints)
+    (java.awt.image BufferedImage)
+    (java.io File)
+    (javax.imageio ImageIO)))
+
+
+
 
 
 
@@ -62,11 +71,11 @@
   [states]
   (->> states
     ;identity
-     (map (fn [s]
-            {:turn                (-> s :turn)
-             :furnture-in-storage (or
-                                    (-> s :furniture :in-storage)
-                                    0)}))))
+    (map (fn [s]
+           {:turn                (-> s :turn)
+            :furnture-in-storage (or
+                                   (-> s :furniture :in-storage)
+                                   0)}))))
 
 (points @sim/*state)
 
@@ -81,7 +90,7 @@
 (def vg-json
   (->> vg
     (json/write-str)))
-    ;darkstar/vega-spec->svg))
+;darkstar/vega-spec->svg))
 
 (->> vg-json
   (spit "furniture.json"))
@@ -147,6 +156,24 @@
 ; ## to PNG
 
 ;(b/parse-svg-string vg-svg)
-(b/render-svg-string vg-svg nil {:type :png})
+;(b/render-svg-string vg-svg nil {:type :png})
 ;(b/parse-svg-string vg-svg "furniture.png")
 ;(b/render-svg-uri "furniture.svg" "furniture.png")
+
+(comment
+  (def svgu (SVGUniverse.))
+  (def svgd (.getDiagram svgu (.toURI (File. "furniture.svg"))))
+  ;(.loadSVG svgu (clojure.java.io/input-stream "furniture.svg"))
+
+  (def bi (BufferedImage. 1200 240 BufferedImage/TYPE_INT_ARGB))
+  ; https://stackoverflow.com/questions/46793769/bufferedimage-causes-a-program-freeze-on-macos-but-not-on-windows
+  (def g2d (.createGraphics bi))
+  ; ^^^ hangs
+  (type g2d)
+  (.setRenderingHint g2d RenderingHints/KEY_ANTIALIASING, RenderingHints/VALUE_ANTIALIAS_ON)
+
+  (type svgd)
+  (.render svgd g2d)
+  (ImageIO/write bi "PNG" (File. "furniture.png"))
+
+  0)
