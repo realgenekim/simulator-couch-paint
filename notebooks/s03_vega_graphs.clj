@@ -185,6 +185,17 @@
 (comment
   ;(def w2 (skia/run dev-view))
   (def w (skia/run #'dev-view))
+
+  (time
+    (def retval
+      (doall
+        (for [r (range 100)]
+          (->> (merge {:width  400
+                       :height 100}
+                 (vega-plot1 (points @sim/*state)))
+
+            (json/write-str)
+            darkstar/vega-lite-spec->svg)))))
   ;(b/parse-svg-string vg-svg)
   ;(b/render-svg-string vg-svg nil {:type :png})
   ;(b/parse-svg-string vg-svg "furniture.png")
