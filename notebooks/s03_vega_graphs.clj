@@ -6,6 +6,7 @@
     [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
     [genek.my-darkstar :as darkstar]
     [genek.sim2 :as sim]
+    [genek.vega :as gv]
     [membrane.skia :as skia]
     [membrane.ui :as ui]
     [nextjournal.clerk :as clerk])
@@ -30,15 +31,7 @@
 ;  }
 ;  }
 ;}
-(defn vega-plot1
-  [vs]
-  {"$schema" "https://vega.github.io/schema/vega-lite/v5.json"
-   :data {:values vs}
-   :mark {:type :line}
-   :encoding {:x {:field :turn
-                  :type :quantitative}
-              :y {:field :furnture-in-storage
-                  :type :quantitative}}})
+
 
 (defn histogram
   [data]
@@ -61,23 +54,24 @@
 (-> @sim/*state second :furniture :in-storage)
 
 
-(defn points
-  [states]
-  (->> states
-    ;identity
-     (map (fn [s]
-            {:turn                (-> s :turn)
-             :furnture-in-storage (or
-                                    (-> s :furniture :in-storage)
-                                    0)}))))
 
-(points @sim/*state)
 
-(vega-plot1 (points @sim/*state))
+(gv/points @sim/*state)
 
-(def vg (merge {:width 400
-                :height 100}
-          (vega-plot1  (points @sim/*state))))
+(gv/vega-plot-furniture-vs-time (gv/points @sim/*state))
+
+(def vg (gv/states>furniture-plot @sim/*state))
+
+
+(def vg-svg2 (->> (gv/vega-plot-furniture-vs-time (gv/points @sim/*state))
+               (json/write-str)
+               darkstar/vega-lite-spec->svg))
+
+(clerk/html vg-svg2)
+
+(def vg-svg3 (->> (gv/vega-plot-furniture-vs-time (gv/points @sim/*state))
+               (json/write-str)
+               darkstar/vega-lite-spec->svg))
 
 (clerk/vl vg)
 
@@ -100,19 +94,7 @@
 
 (comment
 
-  (def vg-svg2 (->> (merge {:width  400
-                            :height 100}
-                      (vega-plot1 (points @sim/*state)))
 
-                 (json/write-str)
-                 darkstar/vega-lite-spec->svg))
-
-  (def vg-svg3 (->> (merge {:width  400
-                            :height 100}
-                      (vega-plot1 (points @sim/*state)))
-
-                 (json/write-str)
-                 darkstar/vega-lite-spec->svg))
 
   0)
 
@@ -192,7 +174,7 @@
         (for [r (range 100)]
           (->> (merge {:width  400
                        :height 100}
-                 (vega-plot1 (points @sim/*state)))
+                 (gv/vega-plot-furniture-vs-time (gv/points @sim/*state)))
 
             (json/write-str)
             darkstar/vega-lite-spec->svg)))))
