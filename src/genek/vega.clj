@@ -1,4 +1,7 @@
-(ns genek.vega)
+(ns genek.vega
+  (:require
+    [clojure.data.json :as json]
+    [genek.my-darkstar :as darkstar]))
 
 (defn points
   " given states, generate data points suitable to feed into vega-lite"
@@ -13,6 +16,8 @@
 
 
 (defn vega-plot-furniture-vs-time
+  " input: data in [{:x :y} ...]
+    output: vega "
   [vs]
   {"$schema" "https://vega.github.io/schema/vega-lite/v5.json"
    :data {:values vs}
@@ -23,7 +28,15 @@
                   :type :quantitative}}})
 
 (defn states>furniture-plot
+  " input: states
+    output: vega furniture plot"
   [states]
   (merge {:width 400
           :height 100}
     (vega-plot-furniture-vs-time states)))
+
+(defn vega>svg
+  [v]
+  (->> v
+    (json/write-str)
+    darkstar/vega-lite-spec->svg))

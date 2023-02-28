@@ -64,8 +64,7 @@
 
 
 (def vg-svg2 (->> (gv/vega-plot-furniture-vs-time (gv/points @sim/*state))
-               (json/write-str)
-               darkstar/vega-lite-spec->svg))
+               (gv/vega>svg)))
 
 (clerk/html vg-svg2)
 
