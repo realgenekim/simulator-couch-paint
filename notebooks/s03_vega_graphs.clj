@@ -39,6 +39,13 @@
 
 (clerk/html vg-svg2)
 
+; ## with color highlight
+(clerk/vl
+  (->>
+    (gv/points @sim/*state)
+    (take 10)
+    (gv/vega-plot-furniture-vs-time-highlight-turn 2)))
+
 (def vg-svg3 (->> (gv/vega-plot-furniture-vs-time (gv/points @sim/*state))
                (json/write-str)
                darkstar/vega-lite-spec->svg))
@@ -89,6 +96,12 @@
     (ui/label "Adrian, here are 3 SVG graphs from vega-lite!")
     #_(ui/image
         (get-image-bytes bi))
+    (skia/svg
+      (->>
+        (gv/points @sim/*state)
+        (take 10)
+        (gv/vega-plot-furniture-vs-time-highlight-turn 10)
+        (gv/vega>svg)))
     (skia/svg vg-svg)
     (skia/svg vg-svg2)
     (skia/svg vg-svg3)
@@ -103,16 +116,18 @@
   ;(def w2 (skia/run dev-view))
   (def w (skia/run #'dev-view))
 
+  (->>
+    (gv/points @sim/*state)
+    (take 10)
+    (gv/vega-plot-furniture-vs-time-highlight-turn 10))
+    ;(gv/vega>svg))
+
   (time
     (def retval
       (doall
         (for [r (range 100)]
-          (->> (merge {:width  400
-                       :height 100}
-                 (gv/vega-plot-furniture-vs-time (gv/points @sim/*state)))
-
-            (json/write-str)
-            darkstar/vega-lite-spec->svg)))))
+          (->> (gv/states>furniture-plot @sim/*state)
+            (gv/vega>svg))))))
   ;(b/parse-svg-string vg-svg)
   ;(b/render-svg-string vg-svg nil {:type :png})
   ;(b/parse-svg-string vg-svg "furniture.png")
