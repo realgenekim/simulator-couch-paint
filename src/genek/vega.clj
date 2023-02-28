@@ -41,16 +41,7 @@
               :y {:field :furnture-in-storage
                   :type :quantitative}}})
 
-(defn vega-plot-furniture-vs-time-highlight-turn
-  " input: data in [{:x :y} ...]
-    output: vega "
-  [turn vs]
-  (let [vega (vega-plot-furniture-vs-time vs)]
-    (-> vega
-      (assoc-in [:encoding :color]
-        {:value "red"})
-      (assoc-in [:mark :point]
-        "true"))))
+
 
 
 

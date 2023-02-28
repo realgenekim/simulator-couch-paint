@@ -39,12 +39,26 @@
 
 (clerk/html vg-svg2)
 
+(defn vega-plot-furniture-vs-time-highlight-turn
+  " input: data in [{:x :y} ...]
+    output: vega "
+  [turn vs]
+  (let [vega (gv/vega-plot-furniture-vs-time vs)]
+    (-> vega
+      (assoc-in [:encoding :color]
+        {:value "black"
+         :condition [{:test {:field :turn
+                             :equal 5}
+                      :value "red"}]})
+      (assoc-in [:mark :point]
+        "true"))))
+
 ; ## with color highlight
 (clerk/vl
   (->>
     (gv/points @sim/*state)
     (take 10)
-    (gv/vega-plot-furniture-vs-time-highlight-turn 2)))
+    (vega-plot-furniture-vs-time-highlight-turn 5)))
 
 (def vg-svg3 (->> (gv/vega-plot-furniture-vs-time (gv/points @sim/*state))
                (json/write-str)
