@@ -3,6 +3,20 @@
     [clojure.data.json :as json]
     [genek.my-darkstar :as darkstar]))
 
+; {
+;  "data": {"url": "data/stocks.csv"},
+;            "values": [
+;                       {"x": 0, "y": 28, "c":0}, {"x": 0, "y": 20, "c":1},
+;  "transform": [{"filter": "datum.symbol==='GOOG'"}],
+;  "mark": "line",
+;  "encoding": {
+;    "x": {"field": "date", "type": "temporal"},
+;    "y": {"field": "price", "type": "quantitative"}
+;  }
+;  }
+;}
+
+
 (defn points
   " given states, generate data points suitable to feed into vega-lite"
   [states]
@@ -40,3 +54,22 @@
   (->> v
     (json/write-str)
     darkstar/vega-lite-spec->svg))
+
+;
+; leftover
+;
+
+(defn histogram
+  [data]
+  {:data     {:values data}
+   ;:width    500
+   :mark     "bar"
+   :encoding {:x {:bin   true
+                  ;:field "timestamp-added"
+                  :field :vg-textchars}
+              ;:type "temporal",
+              ;:timeUnit "yearweek"
+              ; https://vega.github.io/vega-lite/docs/timeunit.html
+              ;:timeUnit "yearmonth"
+              ;:timeUnit "yearmonthdate"}
+              :y {:aggregate "count"}}}):1
