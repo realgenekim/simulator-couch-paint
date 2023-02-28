@@ -34,6 +34,8 @@
     output: vega "
   [vs]
   {"$schema" "https://vega.github.io/schema/vega-lite/v5.json"
+   :width 700
+   :height 80
    :data {:values vs}
    :mark {:type :line}
    :encoding {:x {:field :turn
@@ -49,15 +51,18 @@
   " input: states
     output: vega furniture plot"
   [states]
-  (merge {:width 400
+  (merge {:width  700
           :height 100}
     (vega-plot-furniture-vs-time states)))
 
+
+(def lock (Object.))
 (defn vega>svg
   [v]
-  (->> v
-    (json/write-str)
-    darkstar/vega-lite-spec->svg))
+  (locking lock
+    (->> v
+      (json/write-str)
+      darkstar/vega-lite-spec->svg)))
 
 
 (defn deep-merge [v & vs]
@@ -73,14 +78,16 @@
   " input: data in [{:x :y} ...]
     output: vega "
   [turn vs]
-  (let [vega (gv/vega-plot-furniture-vs-time vs)]
+  (let [vega (vega-plot-furniture-vs-time vs)]
     (-> vega
       ;(deep-merge {:encoding {:color {:value "black"}}})
       (deep-merge {:mark {:type :bar}})
       (deep-merge {:encoding
                    {:color {;:value "blue"
-                            :condition [{:test  {:field :turn
-                                                 :range [100 110]}
+                            :condition [{:test
+                                         {:field :turn
+                                          :range [(- turn 3)
+                                                  (+ turn 3)]}
                                          :value "red"}]}}}))))
 
 ;

@@ -2,6 +2,7 @@
   (:require
     [genek.entities :as e]
     [genek.sim2 :as sim]
+    [genek.vega :as gv]
     [membrane.basic-components :as basic]
     [membrane.component :refer [defui defeffect make-app]]
     [membrane.ui :as ui]
@@ -622,6 +623,25 @@
             ;(ui/label (format "Furniture in storage (%3d, max %3d): " nf maxnf))
             (furniture-bar nf)))))))
 
+(defui furniture-vega-graph
+  [{:keys [frame sim-state]}]
+  (let [svg (->>
+              sim-state
+              gv/points
+              ;gv/states>furniture-plot
+              ;gv/vega-plot-furniture-vs-time
+              ;(take 10)
+              (gv/vega-plot-furniture-vs-time-highlight-turn frame)
+              (gv/vega>svg))]
+    (def svg svg)
+    (def retval (->>
+                  sim-state
+                  gv/points
+                  (take 10)
+                  gv/vega-plot-furniture-vs-time))
+                  ;gv/states>furniture-plot))
+    (skia/svg svg)))
+
 
 
 (defui render-view
@@ -642,6 +662,8 @@
                    (ui/spacer 20 20)
                    (workers-status-row {:frame        frame
                                         :sim-state sim-state})
+                   (furniture-vega-graph {:frame frame
+                                          :sim-state   sim-state})
                    (furniture-stats {:frame frame
                                      :sim-state   sim-state})
                    (ui/spacer 20 20)

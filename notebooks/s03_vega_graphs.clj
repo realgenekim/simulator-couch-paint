@@ -135,7 +135,7 @@
   (time
     (def retval
       (doall
-        (for [r (range 100)]
+        (for [r (range 1)]
           (->> (gv/states>furniture-plot @sim/*state)
             (gv/vega>svg))))))
   ;(b/parse-svg-string vg-svg)
