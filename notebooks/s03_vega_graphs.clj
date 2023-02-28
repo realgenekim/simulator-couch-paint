@@ -1,13 +1,16 @@
 (ns s03-vega-graphs
   (:require
     [batik.rasterize :as b]
-    [nextjournal.clerk :as clerk]
-    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
-    [genek.my-darkstar :as darkstar]
     [clojure.data.json :as json]
     [clojure.java.shell :as shell]
-    [genek.sim2 :as sim]))
-
+    [com.fulcrologic.guardrails.core :refer [>defn >defn- >def | ? =>]]
+    [genek.my-darkstar :as darkstar]
+    [genek.sim2 :as sim]
+    [membrane.skia :as skia]
+    [membrane.ui :as ui]
+    [nextjournal.clerk :as clerk])
+  (:import
+    (java.io File)))
 
 
 (-> @sim/*leaf-counter)
@@ -95,6 +98,24 @@
 
 ; convert to png
 
+(comment
+
+  (def vg-svg2 (->> (merge {:width  400
+                            :height 100}
+                      (vega-plot1 (points @sim/*state)))
+
+                 (json/write-str)
+                 darkstar/vega-lite-spec->svg))
+
+  (def vg-svg3 (->> (merge {:width  400
+                            :height 100}
+                      (vega-plot1 (points @sim/*state)))
+
+                 (json/write-str)
+                 darkstar/vega-lite-spec->svg))
+
+  0)
+
 
 
 
@@ -102,6 +123,7 @@
 
 
 (comment
+  (clojure.java.io/input-stream)
   (->> (slurp "vega-example.json")
     darkstar/vega-spec->svg
     (spit "vg-example.svg")))
@@ -142,11 +164,32 @@
 
           0)))))
 
+(defn dev-view
+  []
+  (ui/vertical-layout
+    (ui/label "Adrian, here are 3 SVG graphs from vega-lite!")
+    #_(ui/image
+        (get-image-bytes bi))
+    (skia/svg vg-svg)
+    (skia/svg vg-svg2)
+    (skia/svg vg-svg3)
+
+    ;(skia/svg (slurp (File. "furniture.svg")))
+    #_(ui/image  "furniture.png" [nil 120])))
+
+
 (convert-svg-to-png)
 
 ; ## to PNG
 
-;(b/parse-svg-string vg-svg)
-(b/render-svg-string vg-svg nil {:type :png})
-;(b/parse-svg-string vg-svg "furniture.png")
-;(b/render-svg-uri "furniture.svg" "furniture.png")
+(comment
+  ;(def w2 (skia/run dev-view))
+  (def w (skia/run #'dev-view))
+  ;(b/parse-svg-string vg-svg)
+  ;(b/render-svg-string vg-svg nil {:type :png})
+  ;(b/parse-svg-string vg-svg "furniture.png")
+  ;(b/render-svg-uri "furniture.svg" "furniture.png")
+  ; Adrian, 14m: I've been struggling to get the dev-view app to refresh;
+  ; how do I get it to load without restarting REPL?
+
+  0)
