@@ -58,8 +58,8 @@
       (deep-merge {:mark {:type :bar}})
       (deep-merge {:encoding {
                               :color {;:value "blue"
-                                      :condition [{:test {:field :turn
-                                                          :equal turn}
+                                      :condition [{:test  {:field :turn
+                                                           :range [100 110]}
                                                    :value "red"}]}}})
       ;(deep-merge {:mark {:point "true"}})
                           ;:color "yellow"}})
