@@ -625,7 +625,10 @@
 
 (defui furniture-vega-graph
   [{:keys [frame sim-state]}]
-  (let [svg (->>
+  (let [frame (if (keyword? frame)
+                (dec (count sim-state))
+                frame)
+        svg (->>
               sim-state
               gv/points
               ;gv/states>furniture-plot
