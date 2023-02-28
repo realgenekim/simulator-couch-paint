@@ -191,5 +191,6 @@
   ;(b/render-svg-uri "furniture.svg" "furniture.png")
   ; Adrian, 14m: I've been struggling to get the dev-view app to refresh;
   ; how do I get it to load without restarting REPL?
+  ; Adrian, got it working at about 18m mark!
 
   0)
