@@ -56,22 +56,13 @@
     (-> vega
       ;(deep-merge {:encoding {:color {:value "black"}}})
       (deep-merge {:mark {:type :bar}})
-      (deep-merge {:encoding {
-                              :color {;:value "blue"
-                                      :condition [{:test  {:field :turn
-                                                           :range [100 110]}
-                                                   :value "red"}]}}})
+      (deep-merge {:encoding
+                   {:color {;:value "blue"
+                            :condition [{:test  {:field :turn
+                                                 :range [100 110]}
+                                         :value "red"}]}}}))))
       ;(deep-merge {:mark {:point "true"}})
                           ;:color "yellow"}})
-      #_(assoc-in [:mark :point]
-          "true")
-      #_(assoc-in [:encoding :color]
-          {:value "black"
-           :condition [{:test {:field :turn
-                               :equal 5}
-                        :value "red"}]})
-      #_(assoc-in [:mark :point]
-          "true"))))
 
 (comment
   (->>
@@ -140,8 +131,8 @@
     (skia/svg
       (->>
         (gv/points @sim/*state)
-        (take 10)
-        (gv/vega-plot-furniture-vs-time-highlight-turn 10)
+        ;(take 10)
+        (vega-plot-furniture-vs-time-highlight-turn 10)
         (gv/vega>svg)))
     (skia/svg vg-svg)
     (skia/svg vg-svg2)
