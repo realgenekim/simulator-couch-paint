@@ -29,20 +29,34 @@
     (ImageIO/write ^BufferedImage img "png" baos)
     (.toByteArray baos)))
 
-(def bi (BufferedImage. 100 100 BufferedImage/TYPE_INT_ARGB))
-
-(System/setProperty "java.awt.headless" "true")
-(def g (.createGraphics bi))
-(.setColor g Color/BLACK)
-(.drawString g "hello" 0 20)
-
-(skia/run (constantly
-            (ui/vertical-layout
-              (ui/image
-                 (get-image-bytes bi))
-              (ui/image "furniture.png"))))
 
 (comment
+  0
+  (def bi (BufferedImage. 100 100 BufferedImage/TYPE_INT_ARGB))
+  (System/setProperty "java.awt.headless" "true")
+  (def g (.createGraphics bi))
+  (.setColor g Color/BLACK)
+  (.drawString g "hello" 0 50))
+
+; Adrian, got it working at 6m!
+(skia/run (constantly
+            (ui/vertical-layout
+              (ui/label "hello")
+              #_(ui/image
+                   (get-image-bytes bi))
+              (skia/svg
+                (slurp (File. "furniture.svg")))
+              #_(ui/image  "furniture.png" [nil 120]))))
+
+(comment
+
+  (skia/run
+    (constantly
+      (skia/svg
+        (slurp "https://www1.plurib.us/1shot/2007/spring_tree/spring_tree_final.svg"))))
+
+  ; get rid of all this below
+
   (def svgu (SVGUniverse.))
   (def svgd (.getDiagram svgu (.toURI (File. "furniture.svg"))))
   ;(.loadSVG svgu (clojure.java.io/input-stream "furniture.svg"))
