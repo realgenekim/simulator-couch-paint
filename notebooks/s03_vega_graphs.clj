@@ -39,26 +39,53 @@
 
 (clerk/html vg-svg2)
 
+(defn deep-merge [v & vs]
+  (letfn [(rec-merge [v1 v2]
+            (if (and (map? v1) (map? v2))
+              (merge-with deep-merge v1 v2)
+              v2))]
+    (if (some identity vs)
+      (reduce #(rec-merge %1 %2) v vs)
+      (last vs))))
+
 (defn vega-plot-furniture-vs-time-highlight-turn
   " input: data in [{:x :y} ...]
     output: vega "
   [turn vs]
   (let [vega (gv/vega-plot-furniture-vs-time vs)]
     (-> vega
-      (assoc-in [:encoding :color]
-        {:value "black"
-         :condition [{:test {:field :turn
-                             :equal 5}
-                      :value "red"}]})
-      (assoc-in [:mark :point]
-        "true"))))
+      ;(deep-merge {:encoding {:color {:value "black"}}})
+      (deep-merge {:mark {:type :bar}})
+      (deep-merge {:encoding {
+                              :color {;:value "blue"
+                                      :condition [{:test {:field :turn
+                                                          :equal turn}
+                                                   :value "red"}]}}})
+      ;(deep-merge {:mark {:point "true"}})
+                          ;:color "yellow"}})
+      #_(assoc-in [:mark :point]
+          "true")
+      #_(assoc-in [:encoding :color]
+          {:value "black"
+           :condition [{:test {:field :turn
+                               :equal 5}
+                        :value "red"}]})
+      #_(assoc-in [:mark :point]
+          "true"))))
 
-; ## with color highlight
-(clerk/vl
+(comment
   (->>
     (gv/points @sim/*state)
     (take 10)
-    (vega-plot-furniture-vs-time-highlight-turn 5)))
+    (vega-plot-furniture-vs-time-highlight-turn 5))
+  0)
+
+; ## with color highlight 2
+(clerk/vl
+  (->>
+    (gv/points @sim/*state)
+    ;(take 10)
+    (vega-plot-furniture-vs-time-highlight-turn 7)))
 
 (def vg-svg3 (->> (gv/vega-plot-furniture-vs-time (gv/points @sim/*state))
                (json/write-str)
